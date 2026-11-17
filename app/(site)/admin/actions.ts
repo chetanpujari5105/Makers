@@ -6,7 +6,9 @@ import { z } from "zod";
 import { audit, ownerOnly, type ActionResult } from "@/lib/admin/guard";
 import { readProductForm } from "@/lib/admin/product-form";
 import { addLinkFile, removeFile, saveProduct, setProductStatus } from "@/lib/admin/products";
+import { createCoupon, setCouponActive } from "@/lib/admin/coupons";
 import { getOrder } from "@/lib/admin/records";
+import { couponCodeSchema } from "@/lib/payments/coupons";
 import { sendReceipt } from "@/lib/payments/orders";
 
 /*
@@ -98,5 +100,58 @@ export async function resendReceiptAction(form: FormData): Promise<ActionResult>
     return sent
       ? { ok: true, message: `Receipt sent again to ${order.email}. No new charge was made.` }
       : { ok: false, message: "The email couldn’t be sent. Please try again later." };
+  });
+}
+
+const couponSchema = z
+  .object({
+    code: couponCodeSchema,
+    discountType: z.enum(["percent", "fixed"]),
+    value: z.coerce.number().int("Use a whole number.").positive("Enter a discount."),
+    maxUses: z
+      .string()
+      .trim()
+      .regex(/^(\d{1,6})?$/, "Uses must be a whole number.")
+      .transform((v) => (v ? Number(v) : null))
+      .refine((v) => v === null || v > 0, "Uses must be at least 1."),
+    expires: z
+      .string()
+      .trim()
+      .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Pick a date.")
+      // The end of that day in India.
+      .transform((v) => (v ? new Date(`${v}T23:59:59+05:30`) : null)),
+  })
+  .refine((c) => c.discountType === "fixed" || c.value <= 90, {
+    message: "A percentage coupon can take off at most 90%.",
+  });
+
+export async function createCouponAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const input = couponSchema.safeParse(Object.fromEntries(form));
+    if (!input.success) return { ok: false, message: input.error.issues[0]!.message };
+    const couponId = await createCoupon({ ...input.data, expiresAt: input.data.expires });
+    if (!couponId) return { ok: false, message: "A coupon with that code already exists." };
+    await audit("coupon_create", "coupon", couponId, {
+      code: input.data.code,
+      type: input.data.discountType,
+      value: input.data.value,
+    });
+    return { ok: true, message: `Coupon ${input.data.code} created.` };
+  });
+}
+
+export async function setCouponActiveAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const input = z
+      .object({ id, active: z.enum(["true", "false"]) })
+      .safeParse(Object.fromEntries(form));
+    if (!input.success) return { ok: false, message: "Unknown coupon." };
+    const active = input.data.active === "true";
+    const code = await setCouponActive(input.data.id, active);
+    if (!code) return { ok: false, message: "Unknown coupon." };
+    await audit(active ? "coupon_activate" : "coupon_deactivate", "coupon", input.data.id, {
+      code,
+    });
+    return { ok: true, message: `${code} ${active ? "turned on" : "turned off"}.` };
   });
 }
