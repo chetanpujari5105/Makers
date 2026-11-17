@@ -60,7 +60,7 @@ If `npm run check` fails, the first error it prints is usually the one to fix. C
 
 - `.env.example` lists every setting **by name only**. It is safe to share.
 - `.env.local` is your private copy with real values. It is **never** saved to Git (the `.gitignore` file blocks it).
-- Phase 0 needs no secrets. Later phases will tell you exactly which values to add and where to find them.
+- Phase 1 needs `DATABASE_URL`, `DATABASE_URL_UNPOOLED` and `SEED_SAMPLE_PRODUCTS` (see section 6). Later phases will tell you exactly which values to add and where to find them.
 - Never put a secret in a variable that starts with `NEXT_PUBLIC_` — those are visible to everyone.
 
 ## 5. Deploying: GitHub → Vercel
@@ -81,15 +81,40 @@ You only need to do this when you want the site online. Nothing here is set up y
    - Every other branch or pull request gets its own **preview** link, so you can check work before it goes live.
 5. Add environment variables in **Vercel → your project → Settings → Environment Variables**. Keep **Preview** and **Production** values separate (test keys for Preview).
 
-## 6. Connecting the database (Neon) — Phase 1, not yet
+## 6. Database (Neon Postgres)
 
-The database will be **Neon Postgres**, added through Vercel so the connection details are filled in for you:
+### Pooled vs direct — two connection strings
 
-1. In Vercel, open your project → **Storage** (or **Marketplace**) → **Neon** → create a database and connect it to the project.
-2. Vercel adds `DATABASE_URL` (pooled — used by the running site) and an unpooled/direct URL (used only for running migrations, which set up the tables).
-3. Copy those values into `.env.local` for local development.
+| Variable                | What it is                                          | Used by                        |
+| ----------------------- | --------------------------------------------------- | ------------------------------ |
+| `DATABASE_URL`          | **Pooled** connection (host contains `-pooler`)     | The running website            |
+| `DATABASE_URL_UNPOOLED` | **Direct** connection (same host without `-pooler`) | Migrations only (`db:migrate`) |
 
-Phase 1 will add the exact commands (`db:migrate`, `db:seed`) and explain pooled vs direct connections in more detail.
+The pooled one shares a small set of connections between many short website requests. Migrations hold one connection open and change table structure, which a pooler can interrupt — so they use the direct one. **Both must come from the same Neon branch**; the scripts refuse to run if they don't.
+
+### Use the `development` branch locally — never production
+
+In the Neon console, the `main` branch holds live data. Create a branch called `development` and copy **its** two connection strings into `.env.local`. Every database command first prints `Database target: Neon endpoint ep-…`. Compare that ID with **Neon → Branches → development → Computes** before continuing.
+
+### Commands
+
+```bash
+npm run db:migrate     # create/update tables (shows the target first)
+npm run db:seed        # categories always; 6 sample DRAFT products only if SEED_SAMPLE_PRODUCTS=true
+npm run db:seed        # safe to run again: nothing is duplicated, existing products are never overwritten
+npm run db:studio      # browse the data in your web browser
+npm run db:generate    # only after changing db/schema.ts: writes a new migration file
+```
+
+### Publishing a product (until the admin dashboard exists)
+
+```bash
+npm run db:publish -- freelance-project-tracker               # make it public (checks required fields first)
+npm run db:publish -- freelance-project-tracker --unpublish   # back to draft
+npm run db:publish -- freelance-project-tracker --archive     # hide it permanently, keep its history
+```
+
+Sample products say “Sample content” on their page until you replace them. Their files are placeholders: nothing is uploaded until Phase 2.
 
 ## 7. Where things live
 

@@ -36,6 +36,13 @@
   --palette-accent-600: oklch(0.43 0.15 263); /* #2049a1 white text 8.3:1 */
   --palette-accent-700: oklch(0.37 0.14 263); /* #143888 */
 
+  /* Product cover fields — quiet, low-chroma tints (one per goal). They are
+     surfaces, not accents: the accent stays the only strong colour. */
+  --palette-cover-create: oklch(0.935 0.03 40);
+  --palette-cover-learn: oklch(0.935 0.028 250);
+  --palette-cover-work: oklch(0.935 0.03 165);
+  --palette-cover-build: oklch(0.94 0.035 85);
+
   /* Status (always paired with a text label — never colour alone) */
   --palette-success-50: oklch(0.955 0.035 155);
   --palette-success-700: oklch(0.44 0.1 155);
@@ -79,6 +86,10 @@
   --input: var(--palette-neutral-400);
   --ring: var(--palette-accent-600);
   --overlay: oklch(0.2 0.02 262 / 0.45);
+  --cover-create: var(--palette-cover-create);
+  --cover-learn: var(--palette-cover-learn);
+  --cover-work: var(--palette-cover-work);
+  --cover-build: var(--palette-cover-build);
 
   /* Radius: cards 16px, inputs 12px, buttons and badges are pills */
   --radius: 0.75rem;
@@ -136,6 +147,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-overlay: var(--overlay);
+  --color-cover-create: var(--cover-create);
+  --color-cover-learn: var(--cover-learn);
+  --color-cover-work: var(--cover-work);
+  --color-cover-build: var(--cover-build);
 
   /* Type scale — fluid, mobile-first. Body never goes below 16px.
      Ratio ≈1.2 on phones, ≈1.333 on wide screens. */
@@ -200,6 +215,8 @@
     text-size-adjust: 100%;
     /* Keeps focused/anchored elements clear of the sticky header */
     scroll-padding-top: 5.5rem;
+    /* Keeps focused elements clear of the fixed mobile buy bar */
+    scroll-padding-bottom: 6rem;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -259,6 +276,26 @@
     touch-action: manipulation;
   }
 
+  /* Lets <details> animate to its natural height (progressive enhancement) */
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  /* Disclosure (FAQ, common problems): native <details>, height eases open */
+  .disclosure::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition:
+      block-size var(--duration-base) var(--motion-ease-out),
+      content-visibility var(--duration-base) allow-discrete;
+  }
+  .disclosure[open]::details-content {
+    block-size: auto;
+  }
+  .disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+
   /* Prices and counts line up */
   .tabular {
     font-variant-numeric: tabular-nums;
@@ -279,6 +316,10 @@
     --tw-exit-translate-x: 0 !important;
     --tw-exit-translate-y: 0 !important;
     scroll-behavior: auto !important;
+  }
+
+  .disclosure::details-content {
+    transition: none;
   }
 
   /* Tailwind v4 scale-* and translate-* utilities use the separate
