@@ -13,6 +13,7 @@ const limits = {
   magicLink: { tokens: 3, window: "15 m" },
   download: { tokens: 30, window: "60 m" },
   adminLogin: { tokens: 5, window: "15 m" },
+  order: { tokens: 10, window: "10 m" },
 } as const;
 
 export type LimitName = keyof typeof limits;

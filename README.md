@@ -158,6 +158,18 @@ _Alternative, Cloudflare R2:_ turning on R2 requires an "R2 subscription" with a
 
 **Upstash Redis (rate limits).** Vercel → Storage → Create → Upstash for Redis → Free plan → connect to the `makers` project. It adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically; the code reads either name.
 
+### Razorpay payments (Phase 3, TEST MODE only)
+
+1. Sign up at razorpay.com (your phone code). Switch the dashboard to **Test Mode** (top bar). Test mode works before KYC.
+2. **Account & Settings → API Keys → Generate Test Key.** Copy the Key ID (`rzp_test_…`) and Key Secret (shown once).
+3. **Account & Settings → Webhooks → Add New Webhook** (test mode). URL: `https://<site>/api/webhooks/razorpay`. Secret: a long random string (`openssl rand -hex 32`). Active events: `payment.captured`, `payment.failed`, `order.paid`, `refund.processed`.
+4. Put the three values in Vercel for **Preview only** and in `.env.local` (never Production while they are test keys):
+   `vercel env add RAZORPAY_KEY_ID preview`, `vercel env add RAZORPAY_KEY_SECRET preview --sensitive`, `vercel env add RAZORPAY_WEBHOOK_SECRET preview --sensitive`.
+5. Checkout opens only when all three are set, the key starts with `rzp_test_`, and the site is not Vercel Production. Anywhere else, paid products show "Opens soon".
+6. Test card: use one of Razorpay's published test cards or test UPI IDs from the Razorpay docs (“Test card details”). No real money moves in test mode.
+
+Live mode is a separate, owner-approved step later (KYC, website review, live keys, Production settings, one change in `lib/payments/razorpay.ts`).
+
 ## 9. Project documents
 
 - `PROJECT_SPEC.md` — what the store must do (the source of truth)

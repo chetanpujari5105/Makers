@@ -52,3 +52,13 @@ export const safeNextPath = z
   .regex(/^\/(?![/\\])[\w\-/]*$/)
   .optional()
   .catch(undefined);
+
+/** Paid checkout: the buyer form plus a per-dialog key so double submits reuse one order. No amount — prices come from the database. */
+export const orderRequestSchema = buyerFormSchema.extend({ idempotencyKey: z.uuid() });
+
+/** What Razorpay Checkout hands the browser after a payment attempt. */
+export const paymentVerifySchema = z.object({
+  razorpay_order_id: z.string().regex(/^order_[A-Za-z0-9]{6,40}$/),
+  razorpay_payment_id: z.string().regex(/^pay_[A-Za-z0-9]{6,40}$/),
+  razorpay_signature: z.string().regex(/^[a-f0-9]{64}$/),
+});

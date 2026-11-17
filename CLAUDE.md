@@ -2,7 +2,7 @@
 
 ## Project state (keep this section current and under ~40 lines)
 
-- **Current phase:** Phase 2 — free claims, magic-link My Library, protected downloads, minimal admin. **Status:** complete, owner-approved and merged into `main` (2026-11-17); live at https://makers-alpha.vercel.app (catalogue still empty: no products published yet). Next is Phase 3 (Razorpay) — **not started**; only planning in `docs/PHASE3_READINESS.md`.
+- **Current phase:** Phase 2 — free claims, magic-link My Library, protected downloads, minimal admin. **Status:** complete, owner-approved and merged into `main` (2026-11-17); live at https://makers-alpha.vercel.app (catalogue still empty: no products published yet). **Phase 3** (Razorpay TEST mode) is being built on branch `phase-3-razorpay` (not merged) — see `docs/HANDOFF.md` §10.
 - **Branches:** `main` = production (Phases 0–2). Phase branches merge only after owner approval.
 - **Services:** GitHub `chetanpujari5105/Makers` → Vercel project `makers` (https://makers-alpha.vercel.app, production branch `main`, functions in `sin1`) → Neon `makers-db` (Singapore, Free plan). Neon branches: `main` = production (endpoint `ep-silent-fog-azl3md5w`, migrated 2026-11-17, **tables only — no products or categories**), `development` = local work (`ep-small-water-azp0874c`, migrated + seeded, one sample published). `.env.local` points at `development` only.
 - **Database migrations on `main`:** run once per schema change, owner-approved, tables only (never `db:seed`). Vercel Preview and Production both read Neon `main`, so previews show an empty catalogue until real products are published. A Preview-only override to `development` did not save in Vercel (the `DATABASE_*` variables are owned by the Neon integration).
