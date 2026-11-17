@@ -378,7 +378,11 @@ export const reviews = pgTable(
     status: reviewStatus("status").notNull().default("pending"),
     ...timestamps,
   },
-  (t) => [check("reviews_rating_check", sql`${t.rating} between 1 and 5`)],
+  (t) => [
+    check("reviews_rating_check", sql`${t.rating} between 1 and 5`),
+    // One review per buyer per product.
+    uniqueIndex("reviews_product_customer_uq").on(t.productId, t.customerId),
+  ],
 );
 
 export const magicTokens = pgTable(
@@ -396,4 +400,21 @@ export const magicTokens = pgTable(
     index("magic_tokens_hash_expires_idx").on(t.tokenHash, t.expiresAt),
     check("magic_tokens_email_normalised_check", sql`${t.email} = lower(btrim(${t.email}))`),
   ],
+);
+
+/**
+ * Sensitive owner actions (publish, archive, price change, coupon, resend,
+ * review moderation, update notices). Never passwords, secrets or card data.
+ */
+export const adminAuditLogs = pgTable(
+  "admin_audit_logs",
+  {
+    id,
+    action: varchar("action", { length: 60 }).notNull(),
+    targetType: varchar("target_type", { length: 40 }).notNull(),
+    targetId: uuid("target_id"),
+    details: jsonb("details").notNull().default({}),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("admin_audit_logs_created_idx").on(t.createdAt)],
 );

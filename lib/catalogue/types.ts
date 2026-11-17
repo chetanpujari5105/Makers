@@ -1,3 +1,5 @@
+import type { PublicReview } from "@/lib/library/reviews";
+
 import type { GalleryImage, ProductContent, ProductTypeKey, Requirement } from "./content-schema";
 
 /*
@@ -35,4 +37,6 @@ export type ProductDetail = ProductSummary & {
   gallery: GalleryImage[];
   content: ProductContent;
   files: PublicFile[];
+  /** Owner-approved reviews only. */
+  reviews?: PublicReview[];
 };

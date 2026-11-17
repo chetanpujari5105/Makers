@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
@@ -93,5 +94,14 @@ export async function objectSize(key: string) {
     return head.ContentLength ?? null;
   } catch {
     return null;
+  }
+}
+
+/** Removes a file from the bucket. Failures are logged: the database row is already gone. */
+export async function deleteObject(key: string) {
+  try {
+    await storage().send(new DeleteObjectCommand({ Bucket: bucket(), Key: key }));
+  } catch (error) {
+    console.error("storage delete failed", error instanceof Error ? error.name : error);
   }
 }

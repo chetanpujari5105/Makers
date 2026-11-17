@@ -29,7 +29,7 @@ import { TypeDetailsSection } from "./type-details";
 /*
  * The "Grow With It" product page (PROJECT_SPEC §4.1, section order kept).
  * Sections with no real content are left out rather than padded.
- * Reviews are omitted until real, moderated reviews exist.
+ * Reviews: only owner-approved ones; the section is left out when there are none.
  * Buying opens in Phase 2/3; until then the button is honestly disabled.
  */
 export function ProductPage({
@@ -40,6 +40,7 @@ export function ProductPage({
   related: ProductSummary[];
 }) {
   const { content } = product;
+  const reviews = product.reviews ?? [];
   const ctaLabel = product.isFree ? "Download free" : "Get this";
   const preview =
     content.typeDetails.kind === "text_resource" ? content.typeDetails.samplePreview : null;
@@ -55,6 +56,7 @@ export function ProductPage({
     { id: "results", label: "Results to work towards" },
     { id: "needs", label: "What you need" },
     ...(content.problems.length > 0 ? [{ id: "problems", label: "Common problems" }] : []),
+    ...(reviews.length > 0 ? [{ id: "reviews", label: "Reviews" }] : []),
     { id: "license", label: "License and support" },
     ...(content.faq.length > 0 ? [{ id: "faq", label: "Questions" }] : []),
   ];
@@ -298,6 +300,34 @@ export function ProductPage({
                 <DisclosureList
                   items={content.problems.map((p) => ({ title: p.problem, body: p.fix }))}
                 />
+              </Section>
+            ) : null}
+
+            {reviews.length > 0 ? (
+              <Section id="reviews" title="Reviews">
+                <p className="text-foreground/85">
+                  {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} out
+                  of 5 from {reviews.length} {reviews.length === 1 ? "review" : "reviews"}. Every
+                  review is checked by us before it appears.
+                </p>
+                <ul className="flex flex-col gap-5">
+                  {reviews.map((review) => (
+                    <li key={review.id} className="flex flex-col gap-1.5">
+                      <p className="font-medium">
+                        <span aria-label={`${review.rating} out of 5`}>
+                          {"★".repeat(review.rating)}
+                          {"☆".repeat(5 - review.rating)}
+                        </span>{" "}
+                        {review.title}
+                      </p>
+                      <p className="text-foreground/85">{review.body}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {review.verifiedPurchase ? "Verified purchase" : "Has this resource"}
+                        {review.useCase ? ` · Used it for: ${review.useCase}` : ""}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
               </Section>
             ) : null}
 

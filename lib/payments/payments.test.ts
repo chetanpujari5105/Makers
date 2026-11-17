@@ -139,6 +139,7 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
       await db.delete(s.entitlements).where(inArray(s.entitlements.customerId, custIds));
       await db.delete(s.orders).where(inArray(s.orders.customerId, custIds));
     }
+    await db.delete(s.coupons).where(like(s.coupons.code, `${run.toUpperCase()}%`));
     await db.delete(s.webhookEvents).where(like(s.webhookEvents.eventId, `${run}%`));
     await db.delete(s.customers).where(like(s.customers.email, `${run}%`));
     await db.delete(s.leads).where(like(s.leads.email, `${run}%`));
@@ -373,5 +374,101 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
         reason: "not_found",
       },
     );
+  });
+
+  const salesCount = async () =>
+    (
+      await db
+        .select({ n: s.products.salesCount })
+        .from(s.products)
+        .where(eq(s.products.id, ids.paid))
+    )[0]!.n;
+  const usedCount = async (code: string) =>
+    (
+      await db.select({ n: s.coupons.usedCount }).from(s.coupons).where(eq(s.coupons.code, code))
+    )[0]!.n;
+
+  it("a coupon lowers the database price; its use and the sale count only after payment", async () => {
+    const code = `${run.toUpperCase()}-TEN`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "percent", percentOff: 10, maxUses: 1 });
+    const sales = await salesCount();
+
+    const { res, body } = await startOrder(buyer("coupon"), {
+      couponCode: ` ${code.toLowerCase()} `,
+      amount: 1,
+    });
+    expect(res.status).toBe(200);
+    const discounted = PRICE - Math.floor(PRICE / 10);
+    expect((await orderRow(body.orderId!)).amount).toBe(discounted);
+    expect(rzpOrders.get(body.razorpayOrderId!)).toEqual({ amount: discounted, currency: "INR" });
+    expect(await usedCount(code)).toBe(0);
+
+    // Paying the full price on a discounted order is refused (amount mismatch); the right amount works.
+    expect((await verify(pay(body.razorpayOrderId!, "captured", PRICE))).status).toBe(400);
+    expect((await verify(pay(body.razorpayOrderId!, "captured", discounted))).status).toBe(200);
+    expect(await usedCount(code)).toBe(1);
+    expect(await salesCount()).toBe(sales + 1);
+
+    // maxUses 1 is now used up.
+    const second = await startOrder(buyer("coupon-2"), { couponCode: code });
+    expect(second.res.status).toBe(400);
+    expect(second.body.message).toMatch(/used up/);
+  });
+
+  it("an open, unpaid checkout holds a single-use coupon", async () => {
+    const code = `${run.toUpperCase()}-ONCE`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "percent", percentOff: 10, maxUses: 1 });
+    expect((await startOrder(buyer("hold-1"), { couponCode: code })).res.status).toBe(200);
+    const second = await startOrder(buyer("hold-2"), { couponCode: code });
+    expect(second.res.status).toBe(400);
+    expect(second.body.message).toMatch(/used up/);
+  });
+
+  it("refuses unknown coupons, and a changed coupon with the same key is not a repeat", async () => {
+    expect((await startOrder(buyer("badcode"), { couponCode: "NOPE-NOT-REAL" })).res.status).toBe(
+      400,
+    );
+    const code = `${run.toUpperCase()}-FIFTY`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "fixed", amountOff: 5000, currency: "INR" });
+    const email = buyer("switch");
+    const first = await startOrder(email);
+    const again = await ordersRoute.POST(
+      post("/api/orders", {
+        productSlug: `${run}-paid`,
+        name: "Test Buyer",
+        email,
+        idempotencyKey: first.key,
+        couponCode: code,
+      }),
+    );
+    expect(again.status).toBe(409);
+  });
+
+  it("a full refund takes the paid sale and the coupon use back", async () => {
+    const code = `${run.toUpperCase()}-REFUND`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "percent", percentOff: 20, maxUses: 5 });
+    const { body } = await startOrder(buyer("refund-count"), { couponCode: code });
+    const amount = PRICE - Math.floor(PRICE / 5);
+    const result = pay(body.razorpayOrderId!, "captured", amount);
+    expect((await verify(result)).status).toBe(200);
+    const sales = await salesCount();
+    expect(await usedCount(code)).toBe(1);
+    const payment = rzpPayments.get(result.razorpay_payment_id)!;
+    payment.amount_refunded = amount;
+    await webhook("refund.processed", {
+      id: "rfnd_3",
+      payment_id: result.razorpay_payment_id,
+      amount,
+    });
+    expect(await salesCount()).toBe(sales - 1);
+    expect(await usedCount(code)).toBe(0);
   });
 });

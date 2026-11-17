@@ -1,6 +1,8 @@
 .next
 node_modules
 coverage
+# Tool folders (e.g. other git worktrees in .claude/worktrees)
+.claude
 package-lock.json
 next-env.d.ts
 # Owner-supplied brief documents: keep their original formatting

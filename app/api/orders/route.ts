@@ -5,6 +5,7 @@ import {
   ownsProduct,
   setProviderOrderId,
 } from "@/lib/payments/orders";
+import { couponCodeSchema, findCoupon, priceAfterCoupon } from "@/lib/payments/coupons";
 import { isCheckoutOpen, razorpay } from "@/lib/payments/razorpay";
 import { hashIp } from "@/lib/security/crypto";
 import { guardPublicPost, jsonError } from "@/lib/security/request";
@@ -14,6 +15,7 @@ import { orderRequestSchema } from "@/lib/validators";
  * POST /api/orders — starts a paid checkout.
  * 1. Save the lead first, so a cancelled checkout keeps it.
  * 2. Price and currency come from the database; any amount the browser sends is ignored.
+ *    An optional coupon code is checked here and can only lower that price.
  * 3. Create (or reuse, for a double submit) the local order, then the Razorpay order.
  * Returns only what Checkout needs: the public key ID and Razorpay order ID.
  */
@@ -46,11 +48,26 @@ export async function POST(request: Request) {
     );
   }
 
+  // A coupon can only lower the database price; its rules are checked here, never in the browser.
+  let amount = product.priceInr;
+  let couponId: string | null = null;
+  if (input.couponCode) {
+    const code = couponCodeSchema.safeParse(input.couponCode);
+    const coupon = code.success ? await findCoupon(code.data) : null;
+    if (!coupon) return jsonError(400, "That coupon code isn’t valid.");
+    const priced = priceAfterCoupon(product.priceInr, coupon);
+    if (!priced.ok) return jsonError(400, priced.message);
+    amount = priced.amount;
+    couponId = coupon.id;
+  }
+
   const order = await createLocalOrder({
     name: input.name,
     email: input.email,
     productId: product.id,
-    amount: product.priceInr,
+    amount,
+    listPrice: product.priceInr,
+    couponId,
     idempotencyKey: input.idempotencyKey,
   });
   if (!order) return jsonError(409, "Please close this window and try again.");
@@ -63,7 +80,7 @@ export async function POST(request: Request) {
   if (!providerOrderId) {
     try {
       ({ providerOrderId } = await provider.createOrder({
-        amount: product.priceInr,
+        amount,
         currency: "INR",
         receipt: order.id,
       }));
@@ -79,7 +96,7 @@ export async function POST(request: Request) {
     orderId: order.id,
     keyId: provider.publicKeyId,
     razorpayOrderId: providerOrderId,
-    amount: product.priceInr,
+    amount,
     currency: "INR",
   });
 }

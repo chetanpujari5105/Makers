@@ -1,5 +1,6 @@
 import {
   detailsKindFor,
+  galleryImageSchema,
   productContentSchema,
   requirementSchema,
   type ProductTypeKey,
@@ -20,6 +21,7 @@ export type PublishCandidate = {
   licenseText: string | null;
   requirements: unknown;
   contentJson: unknown;
+  gallery?: unknown;
   deliveryCount: number;
 };
 
@@ -43,13 +45,47 @@ export function publishProblems(p: PublishCandidate): string[] {
     );
   }
 
+  if (
+    p.gallery !== undefined &&
+    (!Array.isArray(p.gallery) || !p.gallery.every((g) => galleryImageSchema.safeParse(g).success))
+  ) {
+    problems.push(
+      "Fix the gallery — each image needs a link, a description, a width and a height.",
+    );
+  }
+
   const content = productContentSchema.safeParse(p.contentJson);
   if (!content.success) {
-    problems.push(
-      "Some product-page sections are missing or incomplete (benefit, audience, first win, 3–5 setup steps, results or type details).",
-    );
+    const seen = new Set<string>();
+    for (const issue of content.error.issues) {
+      const key = String(issue.path[0] ?? "");
+      const label = sectionLabels[key] ?? key;
+      if (seen.has(label)) continue;
+      seen.add(label);
+      const detail = key === "typeDetails" && issue.path[1] ? ` (${String(issue.path[1])})` : "";
+      problems.push(`Complete “${label}”${detail}${sizeHint(key, issue)}.`);
+    }
   } else if (content.data.typeDetails.kind !== detailsKindFor[p.productType]) {
     problems.push("The type-specific details don’t match the product type.");
   }
   return problems;
+}
+
+const sectionLabels: Record<string, string> = {
+  benefit: "What this does for you",
+  audience: "Who it’s for",
+  notFor: "Who it’s not for",
+  firstWin: "Your first win (title, description and minutes)",
+  steps: "Setup steps",
+  results: "Results to work towards",
+  problems: "Common problems",
+  faq: "Questions",
+  support: "Help note",
+  typeDetails: "Type-specific details",
+};
+
+function sizeHint(key: string, issue: { code: string; path: PropertyKey[] }) {
+  if (key === "steps" && issue.path.length === 1) return " — it needs 3 to 5 steps";
+  if (issue.code === "too_small" && issue.path.length <= 2) return " — add at least one item";
+  return "";
 }

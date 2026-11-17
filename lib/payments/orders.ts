@@ -1,7 +1,7 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/db";
-import { customers, entitlements, orderItems, orders, products } from "@/db/schema";
+import { coupons, customers, entitlements, orderItems, orders, products } from "@/db/schema";
 import { createMagicLink } from "@/lib/auth/magic-link";
 import { sendLinkEmail } from "@/lib/email/send";
 import { formatInr } from "@/lib/money";
@@ -59,13 +59,17 @@ type LocalOrder = {
 /**
  * Creates the customer (if new), the order and its single item in one
  * statement. A repeated submit with the same idempotency key returns the
- * existing order instead, but only for the same buyer and product.
+ * existing order instead, but only for the same buyer, product, price and coupon.
  */
 export async function createLocalOrder(input: {
   name: string;
   email: string;
   productId: string;
+  /** What the buyer pays (after any coupon). */
   amount: number;
+  /** The product's own price, kept on the order line. */
+  listPrice: number;
+  couponId: string | null;
   idempotencyKey: string;
 }): Promise<LocalOrder | null> {
   const db = getDb();
@@ -75,13 +79,13 @@ export async function createLocalOrder(input: {
       on conflict (email) do update set updated_at = now()
       returning id
     ), o as (
-      insert into ${orders} (customer_id, amount, currency, idempotency_key)
-      select c.id, ${input.amount}, 'INR', ${input.idempotencyKey} from c
+      insert into ${orders} (customer_id, amount, currency, coupon_id, idempotency_key)
+      select c.id, ${input.amount}, 'INR', ${input.couponId}, ${input.idempotencyKey} from c
       on conflict (idempotency_key) do nothing
       returning id
     ), i as (
       insert into ${orderItems} (order_id, product_id, unit_amount, currency)
-      select o.id, ${input.productId}, ${input.amount}, 'INR' from o
+      select o.id, ${input.productId}, ${input.listPrice}, 'INR' from o
       returning order_id
     )
     select (select order_id from i) as id`);
@@ -98,6 +102,9 @@ export async function createLocalOrder(input: {
         eq(orders.idempotencyKey, input.idempotencyKey),
         eq(customers.email, input.email),
         eq(orderItems.productId, input.productId),
+        // A changed coupon or price is a different order, not a repeat.
+        eq(orders.amount, input.amount),
+        input.couponId ? eq(orders.couponId, input.couponId) : isNull(orders.couponId),
       ),
     )
     .limit(1);
@@ -130,7 +137,8 @@ export async function findOrderByProviderId(providerOrderId: string) {
  * "created" or "failed" (Razorpay allows another attempt on the same order).
  * Only the call that actually changes the order returns it, so the browser
  * callback and the webhook can arrive in any order without double access
- * or a second receipt. The amount and currency must match the order.
+ * or a second receipt. The amount and currency must match the order. The same
+ * statement counts the coupon use and the product's paid sale.
  */
 export async function fulfilPaidOrder(payment: {
   providerOrderId: string;
@@ -145,13 +153,23 @@ export async function fulfilPaidOrder(payment: {
       where razorpay_order_id = ${payment.providerOrderId}
         and status in ('created', 'failed')
         and amount = ${payment.amount} and currency = ${payment.currency}
-      returning id, customer_id
+      returning id, customer_id, coupon_id
     ), g as (
       insert into ${entitlements} (customer_id, product_id, order_id)
       select o.customer_id, oi.product_id, o.id
       from o join ${orderItems} oi on oi.order_id = o.id
       on conflict do nothing
       returning id
+    ), s as (
+      update ${products} set sales_count = sales_count + 1
+      where id in (select oi.product_id from o join ${orderItems} oi on oi.order_id = o.id)
+    ), u as (
+      -- shortcut: a checkout paid more than an hour after it opened keeps its coupon even if
+      -- the coupon has since run out or been turned off (the buyer has paid); the counter
+      -- stops at the limit instead of blocking their access.
+      update ${coupons} set used_count = used_count + 1, updated_at = now()
+      where id = (select coupon_id from o)
+        and (max_uses is null or used_count < max_uses)
     )
     select o.id, (select count(*) from g)::int as granted from o`);
   return (result.rows[0] as { id: string; granted: number } | undefined) ?? null;
@@ -174,11 +192,19 @@ export async function refundOrder(paymentId: string) {
     with o as (
       update ${orders} set status = 'refunded', updated_at = now()
       where razorpay_payment_id = ${paymentId} and status = 'paid'
-      returning id
+      returning id, coupon_id
     ), r as (
       update ${entitlements} set revoked_at = now()
       where order_id in (select id from o) and revoked_at is null
       returning id
+    ), s as (
+      update ${products} set sales_count = sales_count - 1
+      where sales_count > 0
+        and id in (select oi.product_id from ${orderItems} oi where oi.order_id in (select id from o))
+    ), u as (
+      -- A refunded order gives its coupon use back.
+      update ${coupons} set used_count = used_count - 1, updated_at = now()
+      where used_count > 0 and id in (select coupon_id from o)
     )
     select (select count(*) from o)::int as orders, (select count(*) from r)::int as revoked`);
   return result.rows[0] as { orders: number; revoked: number };
@@ -201,7 +227,7 @@ export async function getOrderSummary(orderId: string) {
  * the order paid. A failure is logged, not thrown: access is already granted
  * and the buyer can request a new link from My Library.
  */
-export async function sendReceipt(orderId: string) {
+export async function sendReceipt(orderId: string): Promise<boolean> {
   try {
     const [row] = await getDb()
       .select({
@@ -216,7 +242,7 @@ export async function sendReceipt(orderId: string) {
       .innerJoin(products, eq(products.id, orderItems.productId))
       .where(eq(orders.id, orderId))
       .limit(1);
-    if (!row) return;
+    if (!row) return false;
     const link = await createMagicLink(row.email, `/library/${row.slug}`);
     await sendLinkEmail({
       to: row.email,
@@ -226,7 +252,9 @@ export async function sendReceipt(orderId: string) {
       linkLabel: "Open my library",
       link,
     });
+    return true;
   } catch (error) {
     console.error("receipt email failed", error);
+    return false;
   }
 }

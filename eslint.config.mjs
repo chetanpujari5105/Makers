@@ -30,6 +30,7 @@ const eslintConfig = defineConfig([
   prettier,
   // Local AI-tool skill folders (git-ignored) are not project code.
   globalIgnores([
+    ".claude/**",
     ".next/**",
     "out/**",
     "build/**",

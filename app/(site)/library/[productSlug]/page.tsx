@@ -7,7 +7,9 @@ import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { getCustomerEmail } from "@/lib/auth/session";
 import { licenseLabel } from "@/lib/catalogue/labels";
+import { ReviewForm } from "@/components/library/review-form";
 import { getLibraryProduct } from "@/lib/library/access";
+import { getMyReview } from "@/lib/library/reviews";
 import { productSlugSchema } from "@/lib/validators";
 
 export const metadata: Metadata = { title: "Start here", robots: { index: false } };
@@ -46,6 +48,7 @@ async function StartHere({ params }: Pick<PageProps<"/library/[productSlug]">, "
   const slug = productSlugSchema.safeParse(productSlug);
   const product = slug.success ? await getLibraryProduct(email, slug.data) : null;
   if (!product) return <Missing signedIn />;
+  const myReview = await getMyReview(email, product.slug);
 
   const { content } = product;
   const remaining = Math.max(product.downloadLimit - product.downloadCount, 0);
@@ -140,6 +143,43 @@ async function StartHere({ params }: Pick<PageProps<"/library/[productSlug]">, "
           ) : null}
         </>
       ) : null}
+
+      {product.updates.length > 0 ? (
+        <section aria-labelledby="updates-title" className="flex flex-col gap-4">
+          <h2 id="updates-title" className="text-h2">
+            Updates
+          </h2>
+          <ul className="flex flex-col gap-4">
+            {product.updates.map((update) => (
+              <li key={`${update.version}-${update.createdAt.toISOString()}`}>
+                <p className="text-base font-medium">
+                  Version {update.version} · {update.createdAt.toISOString().slice(0, 10)}
+                </p>
+                <p className="text-base whitespace-pre-line text-muted-foreground">
+                  {update.notes}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section aria-labelledby="review-title" className="flex flex-col gap-4">
+        <h2 id="review-title" className="text-h2">
+          Review this resource
+        </h2>
+        {myReview ? (
+          <p className="text-base">
+            {myReview.status === "approved"
+              ? "Thank you — your review is published on the product page."
+              : myReview.status === "pending"
+                ? "Thank you — your review is waiting to be checked."
+                : "Thank you for your review."}
+          </p>
+        ) : (
+          <ReviewForm productSlug={product.slug} />
+        )}
+      </section>
 
       <section aria-labelledby="license-title" className="flex flex-col gap-3">
         <h2 id="license-title" className="text-h2">
