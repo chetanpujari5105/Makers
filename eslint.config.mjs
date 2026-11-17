@@ -28,7 +28,17 @@ const eslintConfig = defineConfig([
   },
   // Turn off style rules that Prettier handles (must come last).
   prettier,
-  globalIgnores([".next/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
+  // Local AI-tool skill folders (git-ignored) are not project code.
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "coverage/**",
+    "next-env.d.ts",
+    ".agents/**",
+    "skills/**",
+    "data/**",
+  ]),
 ]);
 
 export default eslintConfig;
