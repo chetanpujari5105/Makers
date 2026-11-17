@@ -35,7 +35,10 @@ export const allowedUploadTypes: Record<string, string> = {
 export function isStorageConfigured() {
   const e = process.env;
   return Boolean(
-    e.R2_ACCOUNT_ID && e.R2_ACCESS_KEY_ID && e.R2_SECRET_ACCESS_KEY && e.R2_BUCKET_PRIVATE,
+    e.STORAGE_ENDPOINT &&
+    e.STORAGE_ACCESS_KEY_ID &&
+    e.STORAGE_SECRET_ACCESS_KEY &&
+    e.STORAGE_BUCKET,
   );
 }
 
