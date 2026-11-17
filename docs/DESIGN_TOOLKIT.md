@@ -32,6 +32,7 @@ Every skill, plugin and MCP tool on this computer that relates to design, UI, UX
 ## designer-skills plugins
 
 **ui-design**
+
 - ✅ `ui-design:type-system`: type scale, weights, line heights and measure.
 - ✅ `ui-design:color-palette` / `ui-design:color-system`: palette tiers and contrast.
 - ✅ `ui-design:spacing-system`: section rhythm.
@@ -52,6 +53,7 @@ Every skill, plugin and MCP tool on this computer that relates to design, UI, UX
 - `ui-design:von-restorff-effect`: making one thing stand out (the CTA).
 
 **interaction-design**
+
 - ✅ `interaction-design:animation-principles`: timing and easing rules.
 - ✅ `interaction-design:loading-states`: skeletons that match the layout (fixes the layout-shift bug).
 - ✅ `interaction-design:micro-interaction-spec`: button press and filter feedback.
@@ -64,29 +66,35 @@ Every skill, plugin and MCP tool on this computer that relates to design, UI, UX
 - `interaction-design:doherty-threshold`, `fitts-law`, `hicks-law`, `jakobs-law`, `millers-law`, `peak-end-rule`, `serial-position-effect`, `teslers-law`, `zeigarnik-effect`: UX laws (reference).
 
 **visual-critique**
+
 - ✅ `visual-critique:critique-screen`: screen-level critique for the audit.
 - `visual-critique:critique-ux`, `critique-affordance`, `critique-brand-consistency`, `critique-color`, `critique-composition`, `critique-information-density`, `critique-typography`, `critique-visual-hierarchy`.
 
 **design-systems**
+
 - ✅ `design-systems:design-token`: palette tier edit.
 - ✅ `design-systems:motion-system`: motion tokens and the motion guide in `DESIGN.md`.
 - ✅ `design-systems:accessibility-audit`: QA accessibility pass.
 - `design-systems:audit-system`, `create-component`, `component-spec`, `tokenize`, `pattern-library`, `documentation-template`, `icon-system`, `localization-design`, `naming-convention`, `theming-system`, `design-system-governance`.
 
 **designer-toolkit**
+
 - ✅ `designer-toolkit:ux-writing`: empty states and microcopy.
 - `designer-toolkit:design-token-audit`, `design-rationale`, `write-rationale`, `case-study`, `write-case-study`, `presentation-deck`, `build-presentation`, `design-negotiation`, `design-system-adoption`, `start-here`.
 
 **ux-strategy**
+
 - ✅ `ux-strategy:design-principles`: the MAKERS principles in `INSPIRATION.md`.
 - `ux-strategy:competitive-analysis` / `benchmark`: (done by hand in `INSPIRATION.md`).
 - `ux-strategy:frame-problem`, `strategize`, `design-brief`, `north-star-vision`, `experience-map`, `information-architecture`, `content-strategy`, `metrics-definition`, `opportunity-framework`, `service-blueprint`, `stakeholder-alignment`, `business-design`.
 
 **prototyping-testing**
+
 - ✅ `prototyping-testing:explore-options` / `parallel-concepts`: three directions, not one.
 - `prototyping-testing:concept-selection`, `heuristic-evaluation`, `accessibility-test-plan`, `evaluate`, `experiment`, `prototype-plan`, `prototype-strategy`, `test-plan`, `test-scenario`, `a-b-test-design`, `click-test-plan`, `user-flow-diagram`, `wireframe-spec`.
 
 **design-research / design-ops**
+
 - `design-research:*` (discover, interview, synthesize, personas, journey maps, surveys…): user research (no users yet).
 - `design-ops:design-qa-checklist`: ✅ merge checklist.
 - `design-ops:handoff`, `handoff-spec`, `design-critique`, `design-debt-audit`, `design-review-process`, `design-sprint-plan`, `plan-sprint`, `setup-workflow`, `team-workflow`, `version-control-strategy`, `design-impact-reporting`.
