@@ -134,9 +134,9 @@ export async function listCustomers() {
       name: customers.name,
       email: customers.email,
       createdAt: customers.createdAt,
-      products: sql<number>`(select count(*)::int from ${entitlements} e where e.customer_id = ${customers.id} and e.revoked_at is null)`,
-      paidOrders: sql<number>`(select count(*)::int from ${orders} o where o.customer_id = ${customers.id} and o.status = 'paid')`,
-      spentPaise: sql<number>`(select coalesce(sum(o.amount), 0)::int from ${orders} o where o.customer_id = ${customers.id} and o.status = 'paid')`,
+      products: sql<number>`(select count(*)::int from ${entitlements} e where e.customer_id = ${customers}.id and e.revoked_at is null)`,
+      paidOrders: sql<number>`(select count(*)::int from ${orders} o where o.customer_id = ${customers}.id and o.status = 'paid')`,
+      spentPaise: sql<number>`(select coalesce(sum(o.amount), 0)::int from ${orders} o where o.customer_id = ${customers}.id and o.status = 'paid')`,
     })
     .from(customers)
     .orderBy(desc(customers.createdAt))

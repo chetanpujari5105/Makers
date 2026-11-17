@@ -27,25 +27,6 @@ export default function EditProductPage({ params }: PageProps<"/admin/products/[
   );
 }
 
-function StatusButton({
-  id,
-  status,
-  label,
-  variant,
-}: {
-  id: string;
-  status: string;
-  label: string;
-  variant?: "outline";
-}) {
-  return (
-    <ActionForm action={setProductStatusAction} submitLabel={label} variant={variant}>
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="status" value={status} />
-    </ActionForm>
-  );
-}
-
 async function EditProduct({ params }: Pick<PageProps<"/admin/products/[id]">, "params">) {
   await requireAdminPage();
   const id = z.uuid().safeParse((await params).id);
@@ -78,21 +59,37 @@ async function EditProduct({ params }: Pick<PageProps<"/admin/products/[id]">, "
               <Link href={`/products/${product.slug}`}>View live page</Link>
             </Button>
           ) : null}
-          {product.status !== "published" ? (
-            <StatusButton id={product.id} status="published" label="Publish" />
-          ) : null}
-          {product.status === "published" ? (
-            <StatusButton
-              id={product.id}
-              status="archived"
-              label="Archive (stop selling)"
-              variant="outline"
-            />
-          ) : null}
-          {product.status !== "draft" ? (
-            <StatusButton id={product.id} status="draft" label="Back to draft" variant="outline" />
-          ) : null}
         </div>
+        <ActionForm
+          action={setProductStatusAction}
+          choices={[
+            ...(product.status !== "published"
+              ? [{ name: "status", value: "published", label: "Publish" }]
+              : []),
+            ...(product.status === "published"
+              ? [
+                  {
+                    name: "status",
+                    value: "archived",
+                    label: "Archive (stop selling)",
+                    variant: "outline" as const,
+                  },
+                ]
+              : []),
+            ...(product.status !== "draft"
+              ? [
+                  {
+                    name: "status",
+                    value: "draft",
+                    label: "Back to draft",
+                    variant: "outline" as const,
+                  },
+                ]
+              : []),
+          ]}
+        >
+          <input type="hidden" name="id" value={product.id} />
+        </ActionForm>
         {product.status !== "published" && problems.length > 0 ? (
           <div role="status" className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-h3">Before you can publish</h2>

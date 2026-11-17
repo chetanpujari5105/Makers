@@ -73,7 +73,7 @@ export async function findCoupon(code: string): Promise<Coupon | null> {
       maxUses: coupons.maxUses,
       usedCount: coupons.usedCount,
       heldCount: sql<number>`(select count(*)::int from ${orders} o
-        where o.coupon_id = ${coupons.id} and o.status in ('created', 'failed')
+        where o.coupon_id = ${coupons}.id and o.status in ('created', 'failed')
           and o.created_at > now() - interval '1 hour')`,
       expiresAt: coupons.expiresAt,
       active: coupons.active,

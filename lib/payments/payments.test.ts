@@ -417,6 +417,17 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
     expect(second.body.message).toMatch(/used up/);
   });
 
+  it("an open, unpaid checkout holds a single-use coupon", async () => {
+    const code = `${run.toUpperCase()}-ONCE`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "percent", percentOff: 10, maxUses: 1 });
+    expect((await startOrder(buyer("hold-1"), { couponCode: code })).res.status).toBe(200);
+    const second = await startOrder(buyer("hold-2"), { couponCode: code });
+    expect(second.res.status).toBe(400);
+    expect(second.body.message).toMatch(/used up/);
+  });
+
   it("refuses unknown coupons, and a changed coupon with the same key is not a repeat", async () => {
     expect((await startOrder(buyer("badcode"), { couponCode: "NOPE-NOT-REAL" })).res.status).toBe(
       400,

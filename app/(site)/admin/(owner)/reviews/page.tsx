@@ -15,15 +15,6 @@ export default function ReviewsPage() {
   );
 }
 
-function StatusForm({ id, status, label }: { id: string; status: string; label: string }) {
-  return (
-    <ActionForm action={moderateReviewAction} submitLabel={label} variant="outline">
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="status" value={status} />
-    </ActionForm>
-  );
-}
-
 async function Reviews() {
   await requireAdminPage();
   const rows = await listReviewsForOwner();
@@ -55,14 +46,20 @@ async function Reviews() {
                 {r.verifiedPurchase ? "verified purchase" : "free claim (not a purchase)"}
                 {r.useCase ? ` · used for: ${r.useCase}` : ""}
               </p>
-              <div className="flex flex-wrap gap-3">
-                {r.status !== "approved" ? (
-                  <StatusForm id={r.id} status="approved" label="Approve" />
-                ) : null}
-                {r.status !== "rejected" ? (
-                  <StatusForm id={r.id} status="rejected" label="Reject" />
-                ) : null}
-              </div>
+              <ActionForm
+                action={moderateReviewAction}
+                variant="outline"
+                choices={[
+                  ...(r.status !== "approved"
+                    ? [{ name: "status", value: "approved", label: "Approve" }]
+                    : []),
+                  ...(r.status !== "rejected"
+                    ? [{ name: "status", value: "rejected", label: "Reject" }]
+                    : []),
+                ]}
+              >
+                <input type="hidden" name="id" value={r.id} />
+              </ActionForm>
             </li>
           ))}
         </ul>

@@ -294,6 +294,11 @@ describe.skipIf(!hasDb)("owner flows (development database)", () => {
     expect(await queries.getProduct(slug)).toBeNull();
     const { listLibrary } = await import("@/lib/library/access");
     expect((await listLibrary(emails.paid)).map((p) => p.slug)).toContain(slug);
+
+    // Customer list counts (regression: the subqueries once compared the wrong id).
+    const { listCustomers } = await import("./records");
+    const paidRow = (await listCustomers()).find((c) => c.email === emails.paid);
+    expect(paidRow).toMatchObject({ products: 1, paidOrders: 1, spentPaise: 24900 });
   });
 
   it("reviews: only buyers can write one; verified purchase comes from a paid order, never the form", async () => {

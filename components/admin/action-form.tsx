@@ -15,13 +15,19 @@ export function ActionForm({
   action,
   children,
   submitLabel,
+  choices,
   variant = "default",
   className,
   confirm,
 }: {
   action: (form: FormData) => Promise<ActionResult & { problems?: string[] }>;
   children?: ReactNode;
-  submitLabel: string;
+  submitLabel?: string;
+  /**
+   * Several buttons sharing one form, each sending its own value (e.g. Publish /
+   * Archive). The form and its message stay on screen when the buttons change.
+   */
+  choices?: { name: string; value: string; label: string; variant?: "default" | "outline" }[];
   variant?: "default" | "outline";
   className?: string;
   /** Text of a tick-box the owner must tick first, for actions that email people or remove things. */
@@ -36,7 +42,8 @@ export function ActionForm({
       className={cn("flex flex-col gap-4", className)}
       onSubmit={(event) => {
         event.preventDefault();
-        const form = new FormData(event.currentTarget);
+        // Include the clicked button's name and value (used by `choices`).
+        const form = new FormData(event.currentTarget, event.nativeEvent.submitter);
         startTransition(async () => {
           const outcome = await action(form);
           setResult(outcome);
@@ -53,9 +60,24 @@ export function ActionForm({
         </label>
       ) : null}
       <div className="flex flex-wrap items-center gap-4">
-        <Button type="submit" variant={variant} disabled={pending}>
-          {pending ? "Working…" : submitLabel}
-        </Button>
+        {choices ? (
+          choices.map((choice) => (
+            <Button
+              key={choice.value}
+              type="submit"
+              name={choice.name}
+              value={choice.value}
+              variant={choice.variant ?? variant}
+              disabled={pending}
+            >
+              {choice.label}
+            </Button>
+          ))
+        ) : (
+          <Button type="submit" variant={variant} disabled={pending}>
+            {pending ? "Working…" : submitLabel}
+          </Button>
+        )}
         {result ? (
           <p
             role={result.ok ? "status" : "alert"}
