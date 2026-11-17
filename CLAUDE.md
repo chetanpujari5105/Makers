@@ -2,7 +2,7 @@
 
 ## Project state (keep this section current and under ~40 lines)
 
-- **Current phase:** Phase 1 — Neon database and public catalogue, on branch `phase-1-catalogue`. **Status:** built and checked locally; **waiting for owner review** before merging to `main`. Phase 2 not started.
+- **Current phase:** Phase 1 — Neon database and public catalogue. **Status:** complete, owner-approved and merged into `main` (2026-11-17); live at https://makers-alpha.vercel.app with an honest empty catalogue. Phase 2 starts on branch `phase-2-free-flow`.
 - **Branches:** `main` = production (Phase 0 + tool setup). Phase branches merge only after owner approval.
 - **Services:** GitHub `chetanpujari5105/Makers` → Vercel project `makers` (https://makers-alpha.vercel.app, production branch `main`, functions in `sin1`) → Neon `makers-db` (Singapore, Free plan). Neon branches: `main` = production (endpoint `ep-silent-fog-azl3md5w`, migrated 2026-11-17, **tables only — no products or categories**), `development` = local work (`ep-small-water-azp0874c`, migrated + seeded, one sample published). `.env.local` points at `development` only.
 - **Database migrations on `main`:** run once per schema change, owner-approved, tables only (never `db:seed`). Vercel Preview and Production both read Neon `main`, so previews show an empty catalogue until real products are published. A Preview-only override to `development` did not save in Vercel (the `DATABASE_*` variables are owned by the Neon integration).
