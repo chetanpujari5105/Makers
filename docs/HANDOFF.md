@@ -1,6 +1,6 @@
 # Handoff — MAKERS
 
-Last updated: 2026-11-17, Phase 1 built on `phase-1-catalogue` (waiting for owner review). Phase 0 is in `main`. Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
+Last updated: 2026-11-17. Phases 0–1 are in `main`; Phase 2 is built on `phase-2-free-flow` (waiting for owner review and service setup). Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
 
 ## 1. What exists
 
@@ -127,3 +127,13 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 4. **Explore:** a plain GET form (`components/catalogue/explore-filters.tsx`), so filters live in the URL and work without JavaScript. Parsing/validation in `lib/catalogue/filters.ts` (invalid values are ignored). Empty fields appear in the URL after submitting (harmless).
 5. **Tests:** `lib/catalogue/queries.test.ts` creates `zz-test-*` products on the development branch, checks drafts/archived are hidden, no private keys, filters, sorting, pagination and proxy 404s, then deletes them. Skipped when no `DATABASE_URL`.
 6. **Next:** owner says “merge” → merge to `main` → Phase 2 (only when the owner says so).
+
+## 9. Phase 2 — where it stands
+
+1. **Built:** buyer-details dialog for free products (`components/product/claim-dialog.tsx`); `POST /api/leads`, `/api/free-claim`, `/api/library/link`, `/api/library/continue`, `/api/library/sign-out`, `/api/download/[fileId]`; `/library`, `/library/continue`, `/library/[productSlug]` (Start Here); owner `/admin` + `/admin/login` with R2 upload (`/api/admin/uploads` → browser PUT → `/api/admin/files` confirms with a HEAD request).
+2. **Where the rules live:** `lib/library/access.ts` (all reads and writes; one SQL statement per multi-step write, because the neon-http driver has no transactions), `lib/auth/*` (signed cookies, magic links), `lib/security/*` (crypto, same-site check using `Sec-Fetch-Site`, rate limits), `lib/storage/r2.ts`, `lib/email/send.tsx` + `emails/link-email.tsx`.
+3. **Key behaviours:** a free claim saves the lead first, then grants the entitlement. It never signs the browser in: access comes only through the emailed one-time link. Opening that link spends nothing; the token is used only by the Continue POST. Downloads use POST, check the session email → active entitlement → limit, and write the log in the same statement as the count.
+4. **No schema change** in Phase 2, so no migration on Neon `main` is needed to merge.
+5. **Without services:** development prints email links to the terminal (`[dev email — not sent]`) and limits in memory. Production returns 503 (no Upstash), a 502 "couldn't send" error (no Resend), or "Downloads aren't available" (no R2), with no download counted.
+6. **Tests:** `lib/library/access.test.ts` (development DB: claims, duplicates, consent, paid/draft refused, honeypot, cross-site, magic link once/replay/altered/expired, entitled/non-entitled/other-product downloads, 8 parallel downloads against a limit of 3, revoked) and `lib/auth/auth.test.ts`.
+7. **Known gaps:** buyer sessions last 30 days and can't be revoked server-side (sign-out deletes the cookie only); external-link files don't count against the download limit; owner can't add external links or publish from `/admin` yet (Phase 4; use `npm run db:publish`). The Vercel preview reads Neon `main`, so test claims and downloads locally, not on the preview.

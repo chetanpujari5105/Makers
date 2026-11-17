@@ -129,7 +129,34 @@ Sample products say “Sample content” on their page until you replace them. T
 | `db/`, `lib/payments/`, `lib/storage/`, … | Empty for now; each has a README saying which phase fills it                   |
 | `docs/`                                   | Handoff notes, decisions log, acceptance tests, tools guide                    |
 
-## 8. Project documents
+## 8. Phase 2 services: files, email, rate limits and owner login
+
+The site runs locally without these: sign-in links are printed in the terminal, rate limits are kept in memory, and uploads/downloads say "not set up yet". A deployed site **refuses** those requests until the services are set up. It never pretends they worked.
+
+Never paste a key into chat or a committed file. Put values in `.env.local` (local) and in Vercel → Project → Settings → Environment Variables (Preview and Production).
+
+**Owner login (`/admin`)**
+
+1. `openssl rand -base64 48`: run it twice, for `SESSION_SECRET` and `MAGIC_LINK_SECRET` (use different values).
+2. `npm run admin:hash`: type your admin password (hidden, 12+ characters) and copy the printed line into `ADMIN_PASSWORD_HASH`.
+3. Set `ADMIN_EMAIL` to your email.
+
+**Cloudflare R2 (private product files).** Turning on R2 asks you to add an "R2 subscription", which is free within 10 GB a month but billed to a payment method above that. That is your decision.
+
+1. R2 → Create bucket → name e.g. `makers-files`. Keep **public access off**.
+2. Bucket → Settings → CORS policy: allow `PUT` and `GET` from `http://localhost:3000` and `https://makers-alpha.vercel.app`, header `Content-Type`.
+3. R2 → Manage API tokens → Create token → **Object Read & Write**, only this bucket.
+4. Fill `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_BUCKET_PRIVATE`.
+
+**Resend (email)**
+
+1. Sign up on the free plan and create an API key with "Sending access" → `RESEND_API_KEY`.
+2. Until you verify a domain, use `EMAIL_FROM="MAKERS <onboarding@resend.dev>"`. It only delivers to your own Resend email.
+3. To email real buyers: Domains → add your domain → add the DNS records it shows → use an address on that domain.
+
+**Upstash Redis (rate limits).** Vercel → Storage → Create → Upstash for Redis → Free plan → connect to the `makers` project. It adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically; the code reads either name.
+
+## 9. Project documents
 
 - `PROJECT_SPEC.md` — what the store must do (the source of truth)
 - `BUILD_PLAN.md` — the phases, in order
