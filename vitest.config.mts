@@ -12,6 +12,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
+    // Database tests talk to Neon, which can take several seconds to wake from idle.
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
     include: ["**/*.test.{ts,tsx}"],
     exclude: ["node_modules/**", ".next/**", ".agents/**", ".claude/**", "skills/**", "data/**"],
   },

@@ -351,4 +351,27 @@ describe.skipIf(!hasDb)("owner flows (development database)", () => {
     const library = await getLibraryProduct(emails.free, slug);
     expect(library?.updates[0]).toMatchObject({ version: "1.1", notes: "Added a new chapter." });
   });
+
+  it("over the email cap, an update is saved but nobody is emailed", async () => {
+    const extra = await db
+      .insert(s.customers)
+      .values(
+        Array.from({ length: 80 }, (_, i) => ({
+          name: "Cap",
+          email: `${run}-cap${i}@example.test`,
+        })),
+      )
+      .returning({ id: s.customers.id });
+    await db.insert(s.entitlements).values(extra.map((c) => ({ customerId: c.id, productId })));
+    const warn = vi.mocked(console.warn);
+    warn.mockClear();
+    const result = await actions.publishUpdateAction(
+      fd({ productId, version: "1.2", notes: "Another chapter.", notify: "on" }),
+    );
+    expect(result.ok).toBe(true);
+    expect(result.message).toMatch(/no emails were sent: 82 buyers is more than the 80/);
+    expect(
+      warn.mock.calls.filter((c) => String(c[0]).includes("Updated: Admin test guide")),
+    ).toHaveLength(0);
+  });
 });
