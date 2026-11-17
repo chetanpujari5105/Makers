@@ -1,0 +1,51 @@
+# --- Secrets and environment files: NEVER commit these ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.keystore
+
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+
+# --- Next.js / build output ---
+.next/
+out/
+build/
+dist/
+next-env.d.ts
+*.tsbuildinfo
+
+# --- Testing ---
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# --- Vercel ---
+.vercel
+
+# --- Logs and debug ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# --- OS / editor files ---
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# --- Customer data exports (never commit) ---
+*.csv
+exports/
+
+# --- Local design-review screenshots (regenerated on demand) ---
+.impeccable/review/
