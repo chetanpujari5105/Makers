@@ -28,7 +28,7 @@ Visitors browse by goal, read the full product page, then click `Get this` (paid
 
 ## Capabilities and Constraints
 
-- Fixed stack: Next.js, Tailwind + shadcn/ui, Vercel, Neon, Drizzle, Razorpay, Cloudflare R2, Resend, Upstash.
+- Fixed stack: Next.js, Tailwind + shadcn/ui, Vercel, Neon, Drizzle, Razorpay, private S3-compatible storage (Backblaze B2 now; R2 alternative), Resend, Upstash.
 - Single owner only — no seller registration, dashboards or payouts.
 - INR first; USD off until Razorpay eligibility is confirmed.
 - Buyers never create passwords. Marketing consent is optional and unchecked by default.

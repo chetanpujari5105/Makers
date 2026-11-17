@@ -53,7 +53,7 @@ Do not replace these choices without first explaining a concrete blocker and ask
 | ORM / migrations | Drizzle ORM + drizzle-kit, using `@neondatabase/serverless` |
 | Payments | Razorpay Orders API + Checkout.js + webhooks |
 | Payment architecture | Provider interface so another provider can be added later without rewriting store logic |
-| Private file storage | Cloudflare R2 private bucket, S3-compatible API and short-lived presigned URLs |
+| Private file storage | Private S3-compatible bucket (currently Backblaze B2; Cloudflare R2 as alternative — see `docs/DECISIONS.md`), S3-compatible API and short-lived presigned URLs |
 | Transactional email | Resend + React Email |
 | Product guide content | MDX in `content/products/`; structured product-page content can also be stored in Postgres for owner-friendly editing |
 | Input validation | Zod on every API input |
@@ -69,7 +69,7 @@ Use compatible stable package versions available when implementation begins. Com
 
 - **Vercel** runs and deploys the Next.js website and server-side routes.
 - **Neon** stores structured data: products, categories, customers, leads, orders, entitlements, reviews and settings.
-- **Cloudflare R2** stores downloadable product files privately. Do not store large binary files in Postgres.
+- **Private storage (Backblaze B2 now; Cloudflare R2 possible)** stores downloadable product files privately. Do not store large binary files in Postgres.
 - **GitHub** stores the source code and MDX guides, and triggers deployments through Vercel.
 
 Neon is the database, not the file-download service.
@@ -445,7 +445,9 @@ Route: `POST /api/webhooks/razorpay`.
 
 ## 6. Secure file delivery and storage
 
-### 6.1 Cloudflare R2
+### 6.1 Private storage (Backblaze B2; Cloudflare R2 alternative)
+
+> Owner decision 2026-11-17: Backblaze B2 instead of R2 (R2 needed a billing subscription). The code is provider-neutral (`lib/storage/files.ts`, `STORAGE_*` settings). "R2" below means this private bucket.
 
 - Product download files live in a private R2 bucket.
 - Use an S3-compatible SDK on the server.
@@ -1040,10 +1042,11 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
 NEXT_PUBLIC_ENABLE_USD=false
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET_PRIVATE=
+STORAGE_ENDPOINT=
+STORAGE_REGION=
+STORAGE_ACCESS_KEY_ID=
+STORAGE_SECRET_ACCESS_KEY=
+STORAGE_BUCKET=
 R2_PUBLIC_BASE_URL=
 RESEND_API_KEY=
 EMAIL_FROM=

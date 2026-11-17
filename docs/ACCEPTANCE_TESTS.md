@@ -62,7 +62,7 @@ Use this checklist throughout development. Claude Code should automate these che
 
 ## E. Secure downloads
 
-- [ ] Paid product original files are in private R2 storage.
+- [ ] Paid product original files are in private storage (Backblaze B2 now; "R2" in this file means that bucket).
 - [ ] Direct access to the R2 object without a signed URL is denied.
 - [ ] Non-entitled buyer cannot download by guessing a file ID.
 - [ ] Entitled buyer can download the correct file.

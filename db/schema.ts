@@ -134,7 +134,7 @@ export const productFiles = pgTable(
       .references(() => products.id, { onDelete: "cascade" }),
     label: text("label").notNull(),
     deliveryType: deliveryType("delivery_type").notNull(),
-    /** Private R2 object key. Never sent to the browser. */
+    /** Private storage object key (B2/R2). Never sent to the browser. */
     fileKey: text("file_key"),
     /** Private link, exposed only after an entitlement check (Phase 2). */
     externalUrl: text("external_url"),

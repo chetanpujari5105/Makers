@@ -2,13 +2,13 @@
 
 ## Project state (keep this section current and under ~40 lines)
 
-- **Current phase:** Phase 1 — Neon database and public catalogue. **Status:** complete, owner-approved and merged into `main` (2026-11-17); live at https://makers-alpha.vercel.app with an honest empty catalogue. Phase 2 starts on branch `phase-2-free-flow`.
-- **Branches:** `main` = production (Phase 0 + tool setup). Phase branches merge only after owner approval.
+- **Current phase:** Phase 2 — free claims, magic-link My Library, protected downloads, minimal admin. **Status:** complete, owner-approved and merged into `main` (2026-11-17); live at https://makers-alpha.vercel.app (catalogue still empty: no products published yet). Next is Phase 3 (Razorpay) — **not started**; only planning in `docs/PHASE3_READINESS.md`.
+- **Branches:** `main` = production (Phases 0–2). Phase branches merge only after owner approval.
 - **Services:** GitHub `chetanpujari5105/Makers` → Vercel project `makers` (https://makers-alpha.vercel.app, production branch `main`, functions in `sin1`) → Neon `makers-db` (Singapore, Free plan). Neon branches: `main` = production (endpoint `ep-silent-fog-azl3md5w`, migrated 2026-11-17, **tables only — no products or categories**), `development` = local work (`ep-small-water-azp0874c`, migrated + seeded, one sample published). `.env.local` points at `development` only.
 - **Database migrations on `main`:** run once per schema change, owner-approved, tables only (never `db:seed`). Vercel Preview and Production both read Neon `main`, so previews show an empty catalogue until real products are published. A Preview-only override to `development` did not save in Vercel (the `DATABASE_*` variables are owned by the Neon integration).
 - **Done in Phase 1:** schema + migration, idempotent seed (6 sample drafts), `db:publish`, endpoint check; query layer `lib/catalogue/queries.ts` (published only, explicit columns, no file keys/private links) with cached wrappers `catalogue.ts`; URL filters `filters.ts`; real Home, `/explore`, `/category/[slug]`, `/products/[slug]`, `/free`, `sitemap.xml`, `robots.txt`; real 404s via `proxy.ts`; JSON-LD + OG. 50 tests (6 run against the development DB).
 - **Not done yet in Phase 1:** MDX loader + safe MDX components (BUILD_PLAN task); not needed by the current pages.
-- **Phase 2** (branch `phase-2-free-flow`, not merged): free claim + leads, magic-link My Library, Start Here, protected downloads, minimal owner admin, Resend emails, Upstash limits. Code done and tested on the development DB; Vercel secrets + Upstash done; Backblaze B2 storage (instead of R2, owner choice) and Resend being set up (README §8). See `docs/HANDOFF.md` §9.
+- **Phase 2** (merged 2026-11-17): free claim + leads, magic-link My Library, Start Here, protected downloads, minimal owner admin, Resend emails (test sender `onboarding@resend.dev` until a domain is verified — see `docs/DOMAIN_AND_EMAIL.md`), Upstash limits, private Backblaze B2 storage via `STORAGE_*` settings (owner choice instead of R2; R2 works by changing settings). Full preview test passed and test data was deleted. See `docs/HANDOFF.md` §9.
 - **Not built (by design):** payments, newsletter, full admin editing.
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).
@@ -47,7 +47,7 @@ You are building a production-minded, single-owner digital product storefront ca
 - Neon Postgres through Vercel Marketplace integration.
 - Drizzle ORM and drizzle-kit, using `@neondatabase/serverless`.
 - Razorpay Orders API, Checkout.js and webhooks; payment provider interface required.
-- Cloudflare R2 private bucket for product files, using S3-compatible SDK and short-lived presigned URLs.
+- Private S3-compatible bucket for product files (currently Backblaze B2; Cloudflare R2 is the documented alternative), configured through `STORAGE_*` settings, using the S3-compatible SDK and short-lived presigned URLs.
 - Resend with React Email for transactional mail.
 - Product guide content uses MDX in `content/products/`, with DB-backed structured content where necessary for owner-friendly product editing.
 - Zod validation for every API input.
@@ -61,14 +61,14 @@ Use compatible stable package versions at implementation time and commit the loc
 
 - Use server components by default. Add client components only where interaction requires them.
 - Keep secrets and privileged SDKs on the server. Never prefix secrets with `NEXT_PUBLIC_`.
-- Never expose Razorpay secret, R2 secret, Resend key, admin password hash, magic-link secret or session secret to the browser.
+- Never expose Razorpay secret, storage (`STORAGE_SECRET_ACCESS_KEY`) secret, Resend key, admin password hash, magic-link secret or session secret to the browser.
 - Validate all external input with Zod, including query strings, route params and webhook payloads.
 - Use integer minor units for money (paise/cents), never floating point.
 - Never trust a product price, currency, discount, order status or product entitlement supplied by the browser. Read commercial values from the database on the server.
 - Use database transactions and unique constraints for payment fulfillment, webhook deduplication and entitlement creation.
 - Verify Razorpay payment signatures with HMAC SHA-256 and timing-safe comparison. Verify webhook signatures against the unmodified raw request body. Make all webhook handlers idempotent.
 - The browser payment callback is a fast UX path, not the sole source of truth. Confirm payment status server-side; webhooks are authoritative. Do not grant paid access for a merely created or failed payment.
-- Paid files must stay in a private R2 bucket and only be exposed through entitlement-checked, short-lived signed downloads.
+- Paid files must stay in the private storage bucket and only be exposed through entitlement-checked, short-lived signed downloads.
 - Enforce download limits atomically and log each successful download.
 - Store only a salted/hash form of IP data where needed for abuse prevention. Do not store full IP addresses unless there is a justified, documented requirement.
 - Normalize buyer email to lowercase and trim whitespace.
@@ -121,7 +121,7 @@ Use `content/products/_template.mdx` for guide structure. Product-specific block
 - Keep `.env.example` current whenever an environment variable is added or renamed.
 - Never overwrite a real `.env.local` file.
 - Never commit `.env`, `.env.local`, API keys, webhook secrets, tokens or customer data.
-- Add clear setup instructions for GitHub, Vercel, Neon, Razorpay, Cloudflare R2, Resend and Upstash.
+- Add clear setup instructions for GitHub, Vercel, Neon, Razorpay, Backblaze B2 (or Cloudflare R2), Resend and Upstash.
 - Treat Vercel preview and production environments separately. Do not use production payment secrets or production files in previews.
 - Use Razorpay test mode until the owner explicitly approves the live-mode checklist.
 

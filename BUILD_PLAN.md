@@ -97,6 +97,8 @@ Build the real catalogue and product experience using Neon and seeded sample con
 
 ## Phase 2 — Lead capture, free resources, R2 delivery and My Library
 
+> Done 2026-11-17. "R2" in this plan means the private S3-compatible bucket; the owner chose Backblaze B2 (`STORAGE_*` settings, see `docs/DECISIONS.md`).
+
 ### Goal
 
 Implement the full free-product journey and secure file access. Paid checkout is still not enabled in this phase.
