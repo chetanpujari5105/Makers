@@ -73,14 +73,27 @@ Parts of our site: **H** Home hero · **G** goal cards · **C** product cards ·
 
 Also opened, not cited: Vercel, Arc, Readymag, Creative Market, Envato (mostly anti-pattern evidence below), Pinterest, Mobbin, Page Flows and Refero (blocked or landing page only).
 
+### Layout, spacing rhythm and scroll (full-page study of the six showcased references, 1440 wide)
+
+| Reference            | Page length  | Layout and rhythm                                                                                                                                                                                             | Scroll behaviour                                   | Applies to                                              |
+| -------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| Making Software      | ~7,100 px    | One narrow reading column alternating with wide figures. A numbered table of contents with dot leaders. Sections are separated by white space, never boxes.                                                   | Plain scroll                                       | **P** (guide sections, contents list), **E**            |
+| Every                | ~8,100 px    | The same section header row repeats ("SECTION →" + a 4-column grid). Very regular, newspaper-like rhythm.                                                                                                     | Plain scroll                                       | **C** grids, section headers                            |
+| Craft                | ~11,000 px   | Big rounded colour panels, each a different soft tint, then lots of air, then a short italic quote. A clear "panel / air / quote" beat.                                                                       | Plain scroll; product images sit inside the panels | **H**, Home section rhythm                              |
+| Notion templates     | ~5,400 px    | Heading + "Browse all →" + a 4-across grid, repeated for each collection. Quiet, predictable.                                                                                                                 | Plain scroll                                       | **G, C, F**                                             |
+| Gumroad home         | (one screen) | The page scrolls inside its own container, so only the first screen could be captured.                                                                                                                        | Not studied                                        | —                                                       |
+| Apple – Buy iPad Air | ~16,100 px   | Two columns: the product picture stays **fixed** on the left while the right column steps through the choices (Model → Finish → Storage → …), each a numbered-feeling step with a bold label and a grey hint. | Sticky media column                                | **P** (sticky cover beside the guide on desktop), **D** |
+
+Not covered: scroll-linked animations (none were watched playing, see method notes).
+
 ### Motion worth copying, in principle
 
-| Technique                         | Seen in (measured)                                                   | Our use                                                                                                              |
-| --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| One house curve for everything    | Godly (`0.2,0,0,1` everywhere), Framer (`0.4,0,0.2,1` ×232)          | Keep our single strong ease-out `cubic-bezier(0.23,1,0.32,1)` (the same family as Every and Are.na's `0.16,1,0.3,1`) |
-| Two speeds: feedback vs. panels   | Linear 0.1 / 0.16 s; Apple 0.24 / 0.32 s                             | Hover/press 120–160 ms; dialogs, sheets and the buy bar 220–280 ms                                                   |
-| Short scroll reveals              | Linear and Arc use about 0.7 s, Mobbin 1 s: too slow for a store     | Reveal once, 8–12 px rise + fade, ≤ 300 ms, ≤ 40 ms stagger, off with reduced motion                                 |
-| Shared element (thumbnail → hero) | Next.js docs (React `<ViewTransition>`); not observed on these sites | Card cover → product cover, ~250 ms; normal navigation where unsupported                                             |
+| Technique                         | Seen in (measured)                                                                     | Our use                                                                                                              |
+| --------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| One house curve for everything    | Godly (`0.2,0,0,1` everywhere), Framer (`0.4,0,0.2,1` ×232)                            | Keep our single strong ease-out `cubic-bezier(0.23,1,0.32,1)` (the same family as Every and Are.na's `0.16,1,0.3,1`) |
+| Two speeds: feedback vs. panels   | Linear 0.1 / 0.16 s; Apple 0.24 / 0.32 s                                               | Hover/press 120–160 ms; dialogs, sheets and the buy bar 220–280 ms                                                   |
+| Short scroll reveals              | Linear and Arc use about 0.7 s, Mobbin’s public landing page 1 s: too slow for a store | Reveal once, 8–12 px rise + fade, ≤ 300 ms, ≤ 40 ms stagger, off with reduced motion                                 |
+| Shared element (thumbnail → hero) | Next.js docs (React `<ViewTransition>`); not observed on these sites                   | Card cover → product cover, ~250 ms; normal navigation where unsupported                                             |
 
 ## Ten ideas, ranked by impact versus effort
 
@@ -105,7 +118,7 @@ Also opened, not cited: Vercel, Arc, Readymag, Creative Market, Envato (mostly a
 - **Star ratings, sales counts and scarcity tags** ("12 left", "Limited time!") on Gumroad Discover cards. We have no such data and won't invent it.
 - **Stock-photo models and 3D renders** as product imagery (Behance results, Creative Market, Envato).
 - **Promo and cookie banners covering content** (Creative Market, Envato, Land-book, Lapa Ninja). We have no non-essential cookies, so we show no banner.
-- **Slow reveals** (Linear and Arc ~0.7 s, Mobbin 1 s, Stripe 0.8 s). Fine for a brand film, sluggish in a store.
+- **Slow reveals** (Linear and Arc ~0.7 s, Mobbin’s landing page 1 s, Stripe 0.8 s). Fine for a brand film, sluggish in a store.
 - **Scattered floating images** (Cosmos) and **full-bleed saturated backgrounds for long reading** (Lemon Squeezy).
 
 ## Six references to react to

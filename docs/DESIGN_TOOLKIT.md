@@ -12,6 +12,7 @@ Every skill, plugin and MCP tool on this computer that relates to design, UI, UX
 - ✅ `vercel-react-best-practices`: keeps framer-motion and fonts from slowing the site.
 - ✅ `vercel-composition-patterns`: component structure for the cover system.
 - `review-animations`: critiques motion that already exists (use after build, in QA).
+- `ux-heuristics`: usability heuristics review (reference for the product page and dialogs).
 - `improve-animations`: audits a codebase's motion and writes a plan (not needed: little motion exists yet).
 - `find-animation-opportunities`: lists places that should animate (covered by the task's own list).
 - `animation-vocabulary`: names motion effects (reference only).

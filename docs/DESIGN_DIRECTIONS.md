@@ -2,7 +2,13 @@
 
 Built 2026-11-18 from [`UI_AUDIT.md`](UI_AUDIT.md) and [`INSPIRATION.md`](INSPIRATION.md).
 
-**See them live:** run `npm run dev`, then open `/design-preview/directions/a`, `/b` and `/c`. Each page shows:
+**How to see them** (pick whichever is easiest):
+
+1. **On your phone or any browser, no setup:** this file on GitHub (branch `phase-ui-polish`) shows the screenshots below: https://github.com/chetanpujari5105/Makers/blob/phase-ui-polish/docs/DESIGN_DIRECTIONS.md
+2. **Vercel preview** (needs you logged in to Vercel): https://makers-git-phase-ui-polish-chetanpujari5105s-projects.vercel.app/design-preview/directions/a (then `/b`, `/c`).
+3. **On this Mac:** http://localhost:3100/design-preview/directions/a, while the UI-polish dev server is running. To start it yourself later: `cd ~/Documents/MAKERS/.claude/worktrees/ui-polish && npm run dev -- -p 3100`. Don't switch branches in the main `MAKERS` folder; Phase 4 work lives there.
+
+Each page shows:
 
 - a hero
 - goals
@@ -20,7 +26,7 @@ The pages use sample (seed) content, are hidden from search engines and return *
 - 16px+ body text, AA contrast (all pairs below were measured), keyboard access and focus rings.
 - Reduced-motion support, and UI motion of 300 ms or less.
 - No layout shift (layout-matching skeletons are in every option).
-- Fonts are free (SIL Open Font License via `next/font`) and much lighter than today's.
+- Fonts are free and much lighter than today’s. Licences checked in the Google Fonts repository (`google/fonts`, `ofl/` folder, METADATA `license: "OFL"`) on 2026-11-18: Newsreader, Schibsted Grotesk, Bricolage Grotesque, Atkinson Hyperlegible Next, Hanken Grotesk (and today’s Fraunces and Geist), all SIL Open Font License 1.1. Every candidate font contains the ₹ sign (checked in the browser).
 
 |                             | Today                             | **A: Field Notes**                                                                                     | **B: Bright Workshop**                                                                                                                                                                           | **C: Clear Shelf**                                                      |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
