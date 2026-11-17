@@ -15,8 +15,8 @@ import { seedProducts } from "@/db/seed-data";
 if (!process.env.VERCEL && existsSync(".env.local")) process.loadEnvFile(".env.local");
 const hasDb = Boolean(process.env.DATABASE_URL && process.env.MAGIC_LINK_SECRET);
 
-const KEY_SECRET = "test-key-secret-0123456789";
-const WEBHOOK_SECRET = "test-webhook-secret-0123456789";
+const KEY_SECRET = "test-key-secret-0123456789"; // gitleaks:allow (fake test value)
+const WEBHOOK_SECRET = "test-webhook-secret-0123456789"; // gitleaks:allow (fake test value)
 const run = `zz-pay-${Date.now().toString(36)}`;
 const PRICE = 49900;
 const sample = seedProducts.find((p) => p.content.typeDetails.kind === "reading")!;
