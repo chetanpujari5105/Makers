@@ -439,17 +439,25 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
     expect(again.status).toBe(409);
   });
 
-  it("a full refund takes the paid sale back off the count", async () => {
-    const { body } = await startOrder(buyer("refund-count"));
-    const result = pay(body.razorpayOrderId!);
-    await verify(result);
+  it("a full refund takes the paid sale and the coupon use back", async () => {
+    const code = `${run.toUpperCase()}-REFUND`;
+    await db
+      .insert(s.coupons)
+      .values({ code, discountType: "percent", percentOff: 20, maxUses: 5 });
+    const { body } = await startOrder(buyer("refund-count"), { couponCode: code });
+    const amount = PRICE - Math.floor(PRICE / 5);
+    const result = pay(body.razorpayOrderId!, "captured", amount);
+    expect((await verify(result)).status).toBe(200);
     const sales = await salesCount();
-    rzpPayments.get(result.razorpay_payment_id)!.amount_refunded = PRICE;
+    expect(await usedCount(code)).toBe(1);
+    const payment = rzpPayments.get(result.razorpay_payment_id)!;
+    payment.amount_refunded = amount;
     await webhook("refund.processed", {
       id: "rfnd_3",
       payment_id: result.razorpay_payment_id,
-      amount: PRICE,
+      amount,
     });
     expect(await salesCount()).toBe(sales - 1);
+    expect(await usedCount(code)).toBe(0);
   });
 });

@@ -1,13 +1,14 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDb } from "@/db";
-import { coupons } from "@/db/schema";
+import { coupons, orders } from "@/db/schema";
 
 /*
  * Store-wide coupons for paid INR checkout. All maths is in whole paise.
- * A use is counted when the payment is confirmed (fulfilPaidOrder), so an
- * abandoned checkout never burns a use.
+ * A use is counted when the payment is confirmed (fulfilPaidOrder). An
+ * unpaid checkout holds its use for an hour, so one single-use code can't be
+ * opened on many products at once; after that, an abandoned checkout frees it.
  */
 
 /** Codes are stored upper-case and trimmed (the database refuses anything else). */
@@ -25,6 +26,8 @@ export type Coupon = {
   currency: string | null;
   maxUses: number | null;
   usedCount: number;
+  /** Checkouts with this coupon opened in the last hour and not yet paid: held uses. */
+  heldCount?: number;
   expiresAt: Date | null;
   active: boolean;
 };
@@ -40,7 +43,7 @@ export function priceAfterCoupon(
   if (!coupon.active) return { ok: false, message: "This coupon isn’t active." };
   if (coupon.expiresAt && coupon.expiresAt <= now)
     return { ok: false, message: "This coupon has expired." };
-  if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses)
+  if (coupon.maxUses !== null && coupon.usedCount + (coupon.heldCount ?? 0) >= coupon.maxUses)
     return { ok: false, message: "This coupon has been used up." };
   let amount: number;
   if (coupon.discountType === "percent") {
@@ -69,6 +72,9 @@ export async function findCoupon(code: string): Promise<Coupon | null> {
       currency: coupons.currency,
       maxUses: coupons.maxUses,
       usedCount: coupons.usedCount,
+      heldCount: sql<number>`(select count(*)::int from ${orders} o
+        where o.coupon_id = ${coupons.id} and o.status in ('created', 'failed')
+          and o.created_at > now() - interval '1 hour')`,
       expiresAt: coupons.expiresAt,
       active: coupons.active,
     })

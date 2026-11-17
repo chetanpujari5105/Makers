@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ne } from "drizzle-orm";
+import { asc, count, desc, eq } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import { categories, entitlements, productFiles, products } from "@/db/schema";
@@ -174,14 +174,12 @@ export async function setProductStatus(
 ): Promise<{ ok: true } | { ok: false; message: string; problems?: string[] }> {
   const product = await getAdminProduct(id);
   if (!product) return { ok: false, message: "That product no longer exists." };
+  if (product.status === status) return { ok: true };
   if (status === "published") {
     const problems = publishProblems({ ...product, deliveryCount: product.files.length });
     if (problems.length) return { ok: false, message: "Not published yet.", problems };
   }
-  await getDb()
-    .update(products)
-    .set({ status, updatedAt: new Date() })
-    .where(and(eq(products.id, id), ne(products.status, status)));
+  await getDb().update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
   await audit(
     `product_${status === "published" ? "publish" : status === "archived" ? "archive" : "unpublish"}`,
     "product",

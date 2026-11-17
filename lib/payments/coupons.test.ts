@@ -56,6 +56,10 @@ describe("priceAfterCoupon", () => {
     );
     expect(priceAfterCoupon(9900, { ...base, maxUses: 2, usedCount: 2 }).ok).toBe(false);
     expect(priceAfterCoupon(9900, { ...base, maxUses: 2, usedCount: 1 }).ok).toBe(true);
+    // An open checkout from the last hour holds a use.
+    expect(priceAfterCoupon(9900, { ...base, maxUses: 2, usedCount: 1, heldCount: 1 }).ok).toBe(
+      false,
+    );
   });
   it("normalises codes", () => {
     expect(couponCodeSchema.parse("  launch-10 ")).toBe("LAUNCH-10");

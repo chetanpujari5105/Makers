@@ -164,8 +164,9 @@ export async function fulfilPaidOrder(payment: {
       update ${products} set sales_count = sales_count + 1
       where id in (select oi.product_id from o join ${orderItems} oi on oi.order_id = o.id)
     ), u as (
-      -- shortcut: buyers who started checkout just before a coupon ran out still get it,
-      -- and the counter stops at the limit instead of blocking their access.
+      -- shortcut: a checkout paid more than an hour after it opened keeps its coupon even if
+      -- the coupon has since run out or been turned off (the buyer has paid); the counter
+      -- stops at the limit instead of blocking their access.
       update ${coupons} set used_count = used_count + 1, updated_at = now()
       where id = (select coupon_id from o)
         and (max_uses is null or used_count < max_uses)
@@ -191,7 +192,7 @@ export async function refundOrder(paymentId: string) {
     with o as (
       update ${orders} set status = 'refunded', updated_at = now()
       where razorpay_payment_id = ${paymentId} and status = 'paid'
-      returning id
+      returning id, coupon_id
     ), r as (
       update ${entitlements} set revoked_at = now()
       where order_id in (select id from o) and revoked_at is null
@@ -200,6 +201,10 @@ export async function refundOrder(paymentId: string) {
       update ${products} set sales_count = sales_count - 1
       where sales_count > 0
         and id in (select oi.product_id from ${orderItems} oi where oi.order_id in (select id from o))
+    ), u as (
+      -- A refunded order gives its coupon use back.
+      update ${coupons} set used_count = used_count - 1, updated_at = now()
+      where used_count > 0 and id in (select coupon_id from o)
     )
     select (select count(*) from o)::int as orders, (select count(*) from r)::int as revoked`);
   return result.rows[0] as { orders: number; revoked: number };

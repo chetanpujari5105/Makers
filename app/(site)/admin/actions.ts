@@ -121,10 +121,14 @@ const couponSchema = z
       .trim()
       .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Pick a date.")
       // The end of that day in India.
-      .transform((v) => (v ? new Date(`${v}T23:59:59+05:30`) : null)),
+      .transform((v) => (v ? new Date(`${v}T23:59:59+05:30`) : null))
+      .refine((d) => d === null || !Number.isNaN(d.getTime()), "That date doesn’t exist."),
   })
   .refine((c) => c.discountType === "fixed" || c.value <= 90, {
     message: "A percentage coupon can take off at most 90%.",
+  })
+  .refine((c) => c.discountType === "percent" || c.value <= 100000, {
+    message: "A rupee coupon can take off at most ₹1,00,000.",
   });
 
 export async function createCouponAction(form: FormData): Promise<ActionResult> {
