@@ -146,7 +146,19 @@ export async function listPublishedSlugs() {
 const requirementsSchema = z.array(requirementSchema);
 const gallerySchema = z.array(galleryImageSchema);
 
-export async function getProduct(slug: string): Promise<ProductDetail | null> {
+export function getProduct(slug: string): Promise<ProductDetail | null> {
+  return loadProduct(and(isPublished, eq(products.slug, slug))!);
+}
+
+/**
+ * Owner preview (admin only — the caller checks): any status, by id. Throws
+ * if the page content is incomplete; the preview shows what is missing.
+ */
+export function getProductPreview(id: string): Promise<ProductDetail | null> {
+  return loadProduct(eq(products.id, id));
+}
+
+async function loadProduct(where: SQL): Promise<ProductDetail | null> {
   const db = getDb();
   const [row] = await db
     .select({
@@ -161,7 +173,7 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
     })
     .from(products)
     .innerJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(isPublished, eq(products.slug, slug)))
+    .where(where)
     .limit(1);
   if (!row) return null;
 

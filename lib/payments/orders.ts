@@ -201,7 +201,7 @@ export async function getOrderSummary(orderId: string) {
  * the order paid. A failure is logged, not thrown: access is already granted
  * and the buyer can request a new link from My Library.
  */
-export async function sendReceipt(orderId: string) {
+export async function sendReceipt(orderId: string): Promise<boolean> {
   try {
     const [row] = await getDb()
       .select({
@@ -216,7 +216,7 @@ export async function sendReceipt(orderId: string) {
       .innerJoin(products, eq(products.id, orderItems.productId))
       .where(eq(orders.id, orderId))
       .limit(1);
-    if (!row) return;
+    if (!row) return false;
     const link = await createMagicLink(row.email, `/library/${row.slug}`);
     await sendLinkEmail({
       to: row.email,
@@ -226,7 +226,9 @@ export async function sendReceipt(orderId: string) {
       linkLabel: "Open my library",
       link,
     });
+    return true;
   } catch (error) {
     console.error("receipt email failed", error);
+    return false;
   }
 }

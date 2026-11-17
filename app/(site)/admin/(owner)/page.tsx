@@ -1,160 +1,116 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Suspense } from "react";
-import { asc, count, desc, eq } from "drizzle-orm";
 
-import { UploadForm } from "@/components/admin/upload-form";
-import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { getDb } from "@/db";
-import { leads, productFiles, products } from "@/db/schema";
-import { isAdmin } from "@/lib/auth/session";
-import { isStorageConfigured } from "@/lib/storage/files";
+import { when } from "@/lib/admin/format";
+import { requireAdminPage } from "@/lib/admin/guard";
+import { getMetrics } from "@/lib/admin/records";
+import { formatInr } from "@/lib/money";
 
-export const metadata: Metadata = { title: "Owner admin", robots: { index: false } };
-
-/* Minimal owner-only admin: product files and recent leads. Fuller editing comes in Phase 4. */
-export default function AdminPage() {
+/* Owner dashboard: real numbers from the database only. Nothing is estimated. */
+export default function DashboardPage() {
   return (
-    <Container className="flex flex-col gap-10 py-section">
-      <Suspense fallback={<p className="text-lead text-muted-foreground">Loading…</p>}>
-        <AdminContent />
-      </Suspense>
-    </Container>
+    <Suspense fallback={<p className="text-lead text-muted-foreground">Loading dashboard…</p>}>
+      <Dashboard />
+    </Suspense>
   );
 }
 
-async function AdminContent() {
-  if (!(await isAdmin())) redirect("/admin/login");
-  const db = getDb();
-  const [productRows, fileRows, recentLeads, [leadTotal]] = await Promise.all([
-    db
-      .select({
-        id: products.id,
-        title: products.title,
-        slug: products.slug,
-        status: products.status,
-        isFree: products.isFree,
-      })
-      .from(products)
-      .orderBy(asc(products.title)),
-    db
-      .select({
-        productId: productFiles.productId,
-        label: productFiles.label,
-        fileName: productFiles.fileName,
-        deliveryType: productFiles.deliveryType,
-      })
-      .from(productFiles)
-      .orderBy(asc(productFiles.sortOrder)),
-    db
-      .select({
-        name: leads.name,
-        email: leads.email,
-        source: leads.source,
-        optIn: leads.marketingOptIn,
-        createdAt: leads.createdAt,
-        product: products.title,
-      })
-      .from(leads)
-      .leftJoin(products, eq(products.id, leads.productId))
-      .orderBy(desc(leads.createdAt))
-      .limit(20),
-    db.select({ total: count() }).from(leads),
-  ]);
-  const storageReady = isStorageConfigured();
-
+function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-h1">Owner admin</h1>
-        <form action="/api/admin/logout" method="post">
-          <Button type="submit" variant="outline">
-            Sign out
-          </Button>
-        </form>
+    <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-5">
+      <span className="text-base text-muted-foreground">{label}</span>
+      <span className="text-h2">{value}</span>
+      {note ? <span className="text-sm text-muted-foreground">{note}</span> : null}
+    </div>
+  );
+}
+
+async function Dashboard() {
+  await requireAdminPage();
+  const m = await getMetrics();
+  return (
+    <div className="flex flex-col gap-10">
+      <h1 className="text-h1">Dashboard</h1>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat
+          label="Paid revenue (gross)"
+          value={formatInr(m.grossPaise)}
+          note="Before Razorpay fees and tax. Refunded orders are not included."
+        />
+        <Stat
+          label="Paid orders"
+          value={String(m.paidOrders)}
+          note={`${m.refundedOrders} refunded`}
+        />
+        <Stat
+          label="New leads (30 days)"
+          value={String(m.leads30)}
+          note={`${m.leadsTotal} in total`}
+        />
+        <Stat
+          label="Downloads (30 days)"
+          value={String(m.downloads30)}
+          note={`${m.downloadsTotal} in total`}
+        />
       </div>
 
-      <section aria-labelledby="products-title" className="flex flex-col gap-6">
-        <h2 id="products-title" className="text-h2">
-          Products and files
+      <section aria-labelledby="top-title" className="flex flex-col gap-4">
+        <h2 id="top-title" className="text-h2">
+          Top products by paid sales
         </h2>
-        {!storageReady ? (
-          <p role="status" className="rounded-lg border border-border bg-card p-4 text-base">
-            File storage isn’t set up yet, so uploads are switched off.
-          </p>
-        ) : null}
-        {productRows.length === 0 ? (
-          <p className="text-base text-muted-foreground">No products yet.</p>
+        {m.top.length === 0 ? (
+          <p className="text-base text-muted-foreground">No paid sales yet.</p>
         ) : (
-          <ul className="flex flex-col gap-6">
-            {productRows.map((product) => {
-              const files = fileRows.filter((file) => file.productId === product.id);
-              return (
-                <li
-                  key={product.id}
-                  className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-h3">{product.title}</h3>
-                    <Badge variant="outline">{product.status}</Badge>
-                    <Badge variant="outline">{product.isFree ? "free" : "paid"}</Badge>
-                  </div>
-                  <ul className="text-base text-muted-foreground">
-                    {files.length === 0 ? <li>No files yet.</li> : null}
-                    {files.map((file, index) => (
-                      <li key={`${file.label}-${index}`}>
-                        {file.label} — {file.fileName ?? file.deliveryType}
-                      </li>
-                    ))}
-                  </ul>
-                  {storageReady ? <UploadForm productId={product.id} /> : null}
-                </li>
-              );
-            })}
+          <ol className="list-decimal pl-6 text-base">
+            {m.top.map((p) => (
+              <li key={p.title}>
+                {p.title} — {p.sales} {p.sales === 1 ? "sale" : "sales"}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      <section aria-labelledby="recent-title" className="flex flex-col gap-4">
+        <h2 id="recent-title" className="text-h2">
+          Recent orders
+        </h2>
+        {m.recent.length === 0 ? (
+          <p className="text-base text-muted-foreground">No orders yet.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-base">
+            {m.recent.map((o) => (
+              <li key={o.id} className="flex flex-wrap items-center gap-3">
+                <Link href={`/admin/orders/${o.id}`}>{when(o.createdAt)}</Link>
+                <span>{o.title}</span>
+                <span>{formatInr(o.amount)}</span>
+                <Badge variant={o.status === "paid" ? "default" : "outline"}>{o.status}</Badge>
+              </li>
+            ))}
           </ul>
         )}
       </section>
 
-      <section aria-labelledby="leads-title" className="flex flex-col gap-4">
-        <h2 id="leads-title" className="text-h2">
-          Recent leads ({leadTotal?.total ?? 0} in total)
+      <section aria-labelledby="activity-title" className="flex flex-col gap-4">
+        <h2 id="activity-title" className="text-h2">
+          Your recent admin actions
         </h2>
-        {recentLeads.length === 0 ? (
-          <p className="text-base text-muted-foreground">No leads yet.</p>
+        {m.activity.length === 0 ? (
+          <p className="text-base text-muted-foreground">Nothing recorded yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-base">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="py-2 pr-4">When</th>
-                  <th className="py-2 pr-4">Name</th>
-                  <th className="py-2 pr-4">Email</th>
-                  <th className="py-2 pr-4">Product</th>
-                  <th className="py-2">Marketing</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentLeads.map((lead) => (
-                  <tr
-                    key={`${lead.email}-${lead.createdAt.toISOString()}`}
-                    className="border-b border-border"
-                  >
-                    <td className="py-2 pr-4">
-                      {lead.createdAt.toISOString().slice(0, 16).replace("T", " ")}
-                    </td>
-                    <td className="py-2 pr-4">{lead.name}</td>
-                    <td className="py-2 pr-4">{lead.email}</td>
-                    <td className="py-2 pr-4">{lead.product ?? "—"}</td>
-                    <td className="py-2">{lead.optIn ? "Yes" : "No"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="flex flex-col gap-1 text-base">
+            {m.activity.map((a, index) => (
+              <li key={index}>
+                {when(a.createdAt)} — {a.action.replace(/_/g, " ")}
+                {typeof (a.details as { title?: string }).title === "string"
+                  ? `: ${(a.details as { title: string }).title}`
+                  : ""}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
-    </>
+    </div>
   );
 }

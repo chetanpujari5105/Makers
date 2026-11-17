@@ -3,9 +3,11 @@
 import { updateTag } from "next/cache";
 import { z } from "zod";
 
-import { ownerOnly, type ActionResult } from "@/lib/admin/guard";
+import { audit, ownerOnly, type ActionResult } from "@/lib/admin/guard";
 import { readProductForm } from "@/lib/admin/product-form";
 import { addLinkFile, removeFile, saveProduct, setProductStatus } from "@/lib/admin/products";
+import { getOrder } from "@/lib/admin/records";
+import { sendReceipt } from "@/lib/payments/orders";
 
 /*
  * Owner server actions. Each one is a public POST endpoint, so each checks
@@ -80,5 +82,21 @@ export async function removeFileAction(form: FormData): Promise<ActionResult> {
     if (!result.ok) return result;
     updateTag("catalogue");
     return { ok: true, message: "Removed." };
+  });
+}
+
+export async function resendReceiptAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const orderId = id.safeParse(form.get("orderId"));
+    if (!orderId.success) return { ok: false, message: "Unknown order." };
+    const order = await getOrder(orderId.data);
+    if (order?.status !== "paid")
+      return { ok: false, message: "Only paid orders have a receipt to resend." };
+    // Email only: nothing is charged and no new access is created.
+    const sent = await sendReceipt(order.id);
+    await audit("receipt_resend", "order", order.id, { sent });
+    return sent
+      ? { ok: true, message: `Receipt sent again to ${order.email}. No new charge was made.` }
+      : { ok: false, message: "The email couldn’t be sent. Please try again later." };
   });
 }
