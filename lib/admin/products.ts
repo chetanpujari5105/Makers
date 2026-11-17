@@ -177,7 +177,12 @@ export async function setProductStatus(
   if (product.status === status) return { ok: true };
   if (status === "published") {
     const problems = publishProblems({ ...product, deliveryCount: product.files.length });
-    if (problems.length) return { ok: false, message: "Not published yet.", problems };
+    if (problems.length)
+      return {
+        ok: false,
+        message: "Not published yet — fill in the items under “Before you can publish”.",
+        problems,
+      };
   }
   await getDb().update(products).set({ status, updatedAt: new Date() }).where(eq(products.id, id));
   await audit(

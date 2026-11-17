@@ -20,7 +20,7 @@ export function ActionForm({
   className,
   confirm,
 }: {
-  action: (form: FormData) => Promise<ActionResult & { problems?: string[] }>;
+  action: (form: FormData) => Promise<ActionResult>;
   children?: ReactNode;
   submitLabel?: string;
   /**
@@ -35,7 +35,7 @@ export function ActionForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [result, setResult] = useState<(ActionResult & { problems?: string[] }) | null>(null);
+  const [result, setResult] = useState<ActionResult | null>(null);
 
   return (
     <form
@@ -87,13 +87,6 @@ export function ActionForm({
           </p>
         ) : null}
       </div>
-      {result?.problems?.length ? (
-        <ul className="list-disc pl-6 text-base text-destructive">
-          {result.problems.map((problem) => (
-            <li key={problem}>{problem}</li>
-          ))}
-        </ul>
-      ) : null}
     </form>
   );
 }

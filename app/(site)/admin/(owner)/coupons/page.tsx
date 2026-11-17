@@ -54,7 +54,7 @@ async function Coupons() {
                       : `${formatInr(c.amountOff ?? 0)} off`}{" "}
                     · used {c.usedCount}
                     {c.maxUses ? ` of ${c.maxUses}` : ""} ·{" "}
-                    {c.expiresAt ? `ends ${when(c.expiresAt)} UTC` : "no end date"}
+                    {c.expiresAt ? `ends ${when(c.expiresAt)} India time` : "no end date"}
                   </span>
                 </div>
                 <ActionForm
