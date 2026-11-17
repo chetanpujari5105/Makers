@@ -33,7 +33,9 @@ async function main() {
     console.error("Too short. Use at least 12 characters.");
     process.exit(1);
   }
-  stdout.write(`\nADMIN_PASSWORD_HASH=${await hashPassword(password)}\n`);
+  stdout.write(
+    `\nCopy the next line into Vercel as the value of ADMIN_PASSWORD_HASH:\n${await hashPassword(password)}\n`,
+  );
   process.exit(0);
 }
 

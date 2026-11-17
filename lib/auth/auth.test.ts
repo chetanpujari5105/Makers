@@ -37,6 +37,13 @@ describe("admin password hash", () => {
     expect(await verifyPassword("correct horse battery", stored)).toBe(true);
     expect(await verifyPassword("wrong horse battery", stored)).toBe(false);
     expect(await verifyPassword("x", undefined)).toBe(false);
+    // Pasted with its name from `npm run admin:hash` output.
+    expect(await verifyPassword("correct horse battery", `ADMIN_PASSWORD_HASH=${stored}\n`)).toBe(
+      true,
+    );
+    expect(await verifyPassword("wrong horse battery", `ADMIN_PASSWORD_HASH=${stored}`)).toBe(
+      false,
+    );
   });
 });
 
