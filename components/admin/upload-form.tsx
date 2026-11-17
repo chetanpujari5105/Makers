@@ -44,7 +44,8 @@ export function UploadForm({ productId }: { productId: string }) {
         headers: { "Content-Type": contentType! },
         body: file,
       });
-      if (!put.ok) throw new Error("The upload to storage failed. Check the bucket’s CORS settings.");
+      if (!put.ok)
+        throw new Error("The upload to storage failed. Check the bucket’s CORS settings.");
       await post("/api/admin/files", {
         productId,
         key,
