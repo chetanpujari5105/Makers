@@ -1,0 +1,292 @@
+/*
+ * MAKERS design tokens — the ONLY place colours, type, spacing, radius,
+ * shadow and motion values are defined.
+ *
+ * Three tiers (see docs/HANDOFF.md → "Design tokens"):
+ *   1. Global palette   --palette-*        raw values, never used in components
+ *   2. Semantic aliases --background etc.  what components and Tailwind use
+ *   3. Tailwind @theme  bg-primary, text-h1 utilities generated from tier 2
+ *
+ * To change the brand accent, edit the --palette-accent-* values only.
+ * The accent is TEMPORARY (owner decision pending — see docs/DECISIONS.md).
+ * Every text/background pair below was checked for WCAG AA contrast.
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ---------------------------------------------------------------------------
+ * Tier 1 — global palette (light theme only; the spec asks for light/bright)
+ * ------------------------------------------------------------------------- */
+:root {
+  /* Neutrals: very slightly cool, so white surfaces feel bright, not grey */
+  --palette-paper: oklch(
+    0.988 0.004 250
+  ); /* #f9fbfe page background — also themeColor in app/layout.tsx */
+  --palette-white: oklch(1 0 0);
+  --palette-neutral-100: oklch(0.965 0.006 255); /* #f1f4f7 */
+  --palette-neutral-200: oklch(0.915 0.008 255); /* #dfe3e8 hairlines */
+  --palette-neutral-400: oklch(0.64 0.012 255); /* #878d94 input borders 3.4:1 */
+  --palette-neutral-600: oklch(0.5 0.015 258); /* #5e646c secondary text 5.8:1 */
+  --palette-ink: oklch(0.2 0.02 262); /* #11161f body text 17.5:1 */
+
+  /* Accent: temporary deep ink-blue */
+  --palette-accent-50: oklch(0.955 0.025 263); /* #e7f1ff */
+  --palette-accent-600: oklch(0.43 0.15 263); /* #2049a1 white text 8.3:1 */
+  --palette-accent-700: oklch(0.37 0.14 263); /* #143888 */
+
+  /* Status (always paired with a text label — never colour alone) */
+  --palette-success-50: oklch(0.955 0.035 155);
+  --palette-success-700: oklch(0.44 0.1 155);
+  --palette-warning-50: oklch(0.96 0.05 85);
+  --palette-warning-700: oklch(0.47 0.1 65);
+  --palette-danger-50: oklch(0.96 0.025 27);
+  --palette-danger-600: oklch(0.5 0.19 27);
+}
+
+/* ---------------------------------------------------------------------------
+ * Tier 2 — semantic aliases (shadcn/ui variable names + MAKERS additions)
+ * Note: in shadcn naming, --primary is the brand accent and --accent is the
+ * subtle hover tint. That is shadcn's convention, kept so generated
+ * components work without edits.
+ * ------------------------------------------------------------------------- */
+:root {
+  --background: var(--palette-paper);
+  --foreground: var(--palette-ink);
+  --card: var(--palette-white);
+  --card-foreground: var(--palette-ink);
+  --popover: var(--palette-white);
+  --popover-foreground: var(--palette-ink);
+  --primary: var(--palette-accent-600);
+  --primary-hover: var(--palette-accent-700);
+  --primary-foreground: var(--palette-white);
+  --primary-soft: var(--palette-accent-50);
+  --primary-soft-foreground: var(--palette-accent-700);
+  --secondary: var(--palette-neutral-100);
+  --secondary-foreground: var(--palette-ink);
+  --muted: var(--palette-neutral-100);
+  --muted-foreground: var(--palette-neutral-600);
+  --accent: var(--palette-neutral-100);
+  --accent-foreground: var(--palette-ink);
+  --destructive: var(--palette-danger-600);
+  --destructive-soft: var(--palette-danger-50);
+  --success: var(--palette-success-700);
+  --success-soft: var(--palette-success-50);
+  --warning: var(--palette-warning-700);
+  --warning-soft: var(--palette-warning-50);
+  --border: var(--palette-neutral-200);
+  --input: var(--palette-neutral-400);
+  --ring: var(--palette-accent-600);
+  --overlay: oklch(0.2 0.02 262 / 0.45);
+
+  /* Radius: cards 16px, inputs 12px, buttons and badges are pills */
+  --radius: 0.75rem;
+
+  /* Elevation — each surface uses a shadow OR a border, never both */
+  --elevation-card:
+    0 1px 2px oklch(0.2 0.02 262 / 0.05), 0 8px 24px -12px oklch(0.2 0.02 262 / 0.14);
+  --elevation-raised:
+    0 2px 4px oklch(0.2 0.02 262 / 0.06), 0 18px 40px -16px oklch(0.2 0.02 262 / 0.22);
+  --elevation-dialog: 0 24px 64px -16px oklch(0.2 0.03 262 / 0.32);
+
+  /* Motion — strong ease-out; UI motion stays at or under 300ms */
+  --motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tier 3 — Tailwind theme (generates utilities such as bg-primary,
+ * text-h1, font-display, py-section, max-w-page, shadow-card)
+ * ------------------------------------------------------------------------- */
+@theme inline {
+  /* Fonts — loaded with next/font in app/layout.tsx */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-heading: var(--font-display);
+
+  /* Colours */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+
+  /* Type scale — fluid, mobile-first. Body never goes below 16px.
+     Ratio ≈1.2 on phones, ≈1.333 on wide screens. */
+  --text-sm: 0.9375rem; /* 15px — labels, helper text (never smaller) */
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem; /* 16px body on phones */
+  --text-base--line-height: 1.6;
+  --text-body: clamp(1rem, 0.96rem + 0.18vw, 1.0625rem); /* 16→17px */
+  --text-body--line-height: 1.65;
+  --text-lead: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem); /* 18→21px */
+  --text-lead--line-height: 1.55;
+  --text-h3: clamp(1.375rem, 1.27rem + 0.5vw, 1.75rem); /* 22→28px */
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h2: clamp(1.75rem, 1.5rem + 1.2vw, 2.625rem); /* 28→42px */
+  --text-h2--line-height: 1.12;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h1: clamp(2.25rem, 1.75rem + 2.4vw, 3.75rem); /* 36→60px */
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.025em;
+  --text-display: clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem); /* 44→88px */
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.03em;
+
+  /* Spacing — Tailwind's 4px base (p-4 = 16px) plus layout rhythm */
+  --spacing-gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  --spacing-section: clamp(4rem, 2.8rem + 5vw, 8rem);
+
+  /* Layout widths */
+  --container-page: 76rem; /* 1216px */
+  --container-prose: 42rem; /* ≈68 characters of body text */
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) * 0.5); /* 6px */
+  --radius-md: calc(var(--radius) * 0.75); /* 9px */
+  --radius-lg: var(--radius); /* 12px — inputs */
+  --radius-xl: calc(var(--radius) * 1.3333); /* 16px — cards */
+  --radius-2xl: calc(var(--radius) * 1.6667); /* 20px — dialogs */
+  --radius-3xl: calc(var(--radius) * 2);
+  --radius-4xl: calc(var(--radius) * 2.6667);
+
+  /* Shadows */
+  --shadow-card: var(--elevation-card);
+  --shadow-raised: var(--elevation-raised);
+  --shadow-dialog: var(--elevation-dialog);
+
+  /* Motion */
+  --ease-out: var(--motion-ease-out);
+  --ease-in-out: var(--motion-ease-in-out);
+}
+
+/* ---------------------------------------------------------------------------
+ * Base styles
+ * ------------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply bg-background font-sans text-foreground antialiased;
+    text-size-adjust: 100%;
+    /* Keeps focused/anchored elements clear of the sticky header */
+    scroll-padding-top: 5.5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply text-body;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-balance;
+    font-optical-sizing: auto;
+    font-weight: 420;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  /* One visible, consistent focus ring everywhere (keyboard only) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--primary-soft);
+    color: var(--primary-soft-foreground);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--primary);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Removes the double-tap zoom delay on tappable elements */
+  a,
+  button,
+  input,
+  label,
+  select,
+  textarea,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Prices and counts line up */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion: keep gentle fades (they aid comprehension), remove movement.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    --tw-enter-scale: 1 !important;
+    --tw-exit-scale: 1 !important;
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important;
+    --tw-exit-translate-y: 0 !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Tailwind v4 scale-* and translate-* utilities use the separate
+     `scale` and `translate` CSS properties, not `transform`. */
+  .motion-lift,
+  .motion-press,
+  .motion-nudge {
+    scale: none !important;
+    translate: none !important;
+  }
+}
