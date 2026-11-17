@@ -2,10 +2,12 @@
 
 ## Project state (keep this section current and under ~40 lines)
 
-- **Current phase:** Phase 1 — Neon database and public catalogue, on branch `phase-1-catalogue`. **Status:** Step 1 (schema, migration, seeds, publish script) and the layout drafts (`/design-preview/home`, `/design-preview/product`) are done. **Waiting for owner approval of the drafts** before building the real Home, Explore, Category and Product pages.
+- **Current phase:** Phase 1 — Neon database and public catalogue, on branch `phase-1-catalogue`. **Status:** built and checked locally; **waiting for owner review** before merging to `main`. Phase 2 not started.
 - **Branches:** `main` = production (Phase 0 + tool setup). Phase branches merge only after owner approval.
-- **Blocked:** the GitHub repo isn't created yet and no Neon database exists yet, so migrations and seeds have **not** run against a real database. The owner must create the repo (see `docs/HANDOFF.md`), then Vercel → Neon.
-- **Done in Phase 1 so far:** `db/schema.ts` (all §9 tables, checks, indexes), `db/migrations/0000_init.sql`, idempotent `db/seed.ts` (6 sample drafts), `db/publish.ts`, endpoint check (`db/target.ts`), content Zod schemas (`lib/catalogue/`), money formatting, product components (`components/product/`), home view (`components/home/`). 38 tests.
+- **Services:** GitHub `chetanpujari5105/Makers` → Vercel project `makers` (https://makers-alpha.vercel.app, production branch `main`, functions in `sin1`) → Neon `makers-db` (Singapore, Free plan). Neon branches: `main` = production (endpoint `ep-silent-fog-azl3md5w`, **no tables yet**), `development` = local work (`ep-small-water-azp0874c`, migrated + seeded, one sample published). `.env.local` points at `development` only.
+- **Open owner decision:** Vercel Preview/Production use Neon `main`, which has no tables, so a Vercel build of this branch fails until either `main` is migrated (production action, needs owner OK) or Preview gets the development strings. See `docs/HANDOFF.md` §7.
+- **Done in Phase 1:** schema + migration, idempotent seed (6 sample drafts), `db:publish`, endpoint check; query layer `lib/catalogue/queries.ts` (published only, explicit columns, no file keys/private links) with cached wrappers `catalogue.ts`; URL filters `filters.ts`; real Home, `/explore`, `/category/[slug]`, `/products/[slug]`, `/free`, `sitemap.xml`, `robots.txt`; real 404s via `proxy.ts`; JSON-LD + OG. 50 tests (6 run against the development DB).
+- **Not done yet in Phase 1:** MDX loader + safe MDX components (BUILD_PLAN task); not needed by the current pages.
 - **Not built (by design):** payments, real downloads, buyer login, admin, newsletter.
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).

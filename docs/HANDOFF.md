@@ -1,6 +1,6 @@
 # Handoff — MAKERS
 
-Last updated: 2026-11-17, end of Phase 0 (approved and merged into `main`). Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
+Last updated: 2026-11-17, Phase 1 built on `phase-1-catalogue` (waiting for owner review). Phase 0 is in `main`. Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
 
 ## 1. What exists
 
@@ -13,7 +13,7 @@ A runnable Next.js storefront shell with a finished design foundation and real q
 | Components     | shadcn/ui CLI v4, style `radix-nova` (Radix primitives), restyled for MAKERS                                                                 |
 | Icons / motion | `lucide-react`; `framer-motion` installed but not used yet                                                                                   |
 | Pages          | Home (placeholder), `/design-preview`, honest "being built" pages for every nav/footer link, `not-found`, `loading`, `error`, `global-error` |
-| Tests          | Vitest 5 + Testing Library + jsdom — 6 files, 17 tests                                                                                       |
+| Tests          | Vitest 5 + Testing Library + jsdom — 13 files, 50 tests                                                                                      |
 | Security       | Baseline headers in `next.config.ts` (no full CSP yet — see Known issues)                                                                    |
 
 ## 2. Folder map
@@ -111,7 +111,7 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 
 ## 7. Known issues
 
-1. **Unknown `/category/<slug>` returns HTTP 200** (shows the correct "We couldn’t find that page" UI with `noindex`). Cause: with Cache Components, a param not listed in `generateStaticParams` streams, so the status is sent before `notFound()` runs. Unknown top-level URLs correctly return 404. Phase 1 replaces this page — verify real 404 status there (e.g. check the slug before any streaming boundary, or follow the Next 16 docs on `notFound` with Cache Components).
+1. **Vercel builds need a migrated database.** Home, categories, Free and the sitemap are prerendered at build time from Neon (refreshed every minute after). Vercel Preview and Production currently get Neon `main`, which has **no tables**, so a Vercel build of `phase-1-catalogue` fails (“relation … does not exist”). Fix (owner decision): either run `db:migrate` against Neon `main` (production; tables only, no samples), or set Preview-only `DATABASE_URL`/`DATABASE_URL_UNPOOLED` for this branch to the `development` strings in Vercel → Settings → Environment Variables. `main` must be migrated before merging.
 2. **ESLint 9** shows a "no longer supported" npm warning. ESLint 10 was tried and rejected: `eslint-plugin-react`, `eslint-plugin-jsx-a11y` and `eslint-plugin-import` (used by `eslint-config-next`) don't support it yet. Revisit when they do.
 3. **4 moderate `npm audit` findings**, all inside the `shadcn` CLI's dependency chain (`ts-morph` → `minimatch`). `shadcn` is a dev dependency (only its `tailwind.css` is imported at build time); nothing ships to browsers. The CLI also bundles its own private copy of the `cn` package — that is expected and not used by our code. Do not run `npm audit fix --force` (breaking). Re-check when shadcn updates.
 4. **No full Content-Security-Policy yet** — only `frame-ancestors 'none'`. Phase 3 must add a CSP that allows Razorpay Checkout (scripts + frames) and test checkout with it.
@@ -121,6 +121,9 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 
 ## 8. Phase 1 — where it stands
 
-1. **Done:** branch `phase-1-catalogue`; Drizzle + Neon driver; `db/schema.ts` with every §9 table (except optional audit logs); first migration `db/migrations/0000_init.sql`; idempotent seed (4 categories + 6 sample drafts behind `SEED_SAMPLE_PRODUCTS=true`); `db:publish`; endpoint safety check; content schemas and publish checks in `lib/catalogue/`; layout drafts at `/design-preview/home` and `/design-preview/product/[slug]` built from reusable `components/home` and `components/product`.
-2. **Not yet run:** migrations and seeds against a real Neon database (no GitHub repo / Vercel / Neon yet).
-3. **Next, after owner approves the drafts:** server-only query layer (published only, no file keys selected); real Home, `/explore` (search, filters, sort, pagination in the URL), `/category/[slug]`, `/products/[slug]` with real 404s via Proxy; loading/empty/error states; metadata, Open Graph, JSON-LD, `sitemap.ts`, `robots.ts`; MDX loader + safe components (`Steps`, `Step`, `Callout`, `Result`, `Faq`, `Requirements`, `PrintSettings`) with a sample guide shown only on `/design-preview`.
+1. **Done:** everything in BUILD_PLAN Phase 1 except the MDX loader/components. Neon `makers-db` (Singapore) connected to Vercel (Production, Preview, Development; variables `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, not marked Sensitive because Vercel doesn't allow Sensitive variables in Development). Neon branch `development` (auto-delete: never) is migrated, seeded twice (no duplicates) and has `freelance-project-tracker` published.
+2. **How pages get data:** `lib/catalogue/queries.ts` (plain queries, tested) → `lib/catalogue/catalogue.ts` (`"use cache"` + `cacheLife("minutes")`) → pages. Only `status = 'published'`; `product_files.file_key` and `external_url` are never selected.
+3. **404s:** `proxy.ts` checks `/products/:slug` (published-slug lookup) and `/category/:slug` (four goal slugs) and rewrites to `/_not-found` with status 404. Needed because Cache Components start streaming (200) before a page can call `notFound()`.
+4. **Explore:** a plain GET form (`components/catalogue/explore-filters.tsx`), so filters live in the URL and work without JavaScript. Parsing/validation in `lib/catalogue/filters.ts` (invalid values are ignored). Empty fields appear in the URL after submitting (harmless).
+5. **Tests:** `lib/catalogue/queries.test.ts` creates `zz-test-*` products on the development branch, checks drafts/archived are hidden, no private keys, filters, sorting, pagination and proxy 404s, then deletes them. Skipped when no `DATABASE_URL`.
+6. **Next:** owner review → resolve Known issue 1 → merge → Phase 2 (only when the owner says so).
