@@ -1,7 +1,7 @@
 # lib/payments/
 
-Payment provider interface and Razorpay adapter.
+Phase 3, Razorpay **test mode**. Server only. Never trust browser-supplied prices.
 
-**Built in:** Phase 3. Empty in Phase 0 on purpose — see `BUILD_PLAN.md`.
-
-provider.ts (PaymentProvider interface) and razorpay.ts. Server-only. Never trust browser-supplied prices.
+- `provider.ts` — the `PaymentProvider` interface.
+- `razorpay.ts` — Razorpay adapter and `isCheckoutOpen()` (test keys only, never on Vercel Production).
+- `orders.ts` — order creation, fulfilment, failure, refund and receipt; one SQL statement per multi-step write.

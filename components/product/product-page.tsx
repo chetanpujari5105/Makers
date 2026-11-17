@@ -15,6 +15,8 @@ import {
 } from "@/lib/catalogue/labels";
 import type { ProductDetail, ProductSummary } from "@/lib/catalogue/types";
 
+import { isCheckoutOpen } from "@/lib/payments/razorpay";
+
 import { ClaimDialog } from "./claim-dialog";
 import { DisclosureList } from "./disclosure-list";
 import { PriceTag } from "./price-tag";
@@ -370,27 +372,30 @@ function BuyBlock({
       <p id={noteId} className="text-sm text-muted-foreground">
         {product.isFree
           ? "Free. We’ll email you a one-time link to your library."
-          : "Opens soon — paid checkout is still being set up."}
+          : isCheckoutOpen()
+            ? "Secure payment by Razorpay (test mode — no real money). Your library link arrives by email."
+            : "Opens soon — paid checkout is still being set up."}
       </p>
     </div>
   );
 }
 
-/* Free products open the buyer-details dialog; paid checkout arrives in Phase 3. */
+/* Free and paid products open the buyer-details dialog; paid checkout only when Razorpay test mode is set up. */
 function ProductCta({
   product,
   ctaLabel,
   noteId,
 }: {
-  product: Pick<ProductDetail, "slug" | "title" | "isFree">;
+  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
   ctaLabel: string;
   noteId: string;
 }) {
-  if (product.isFree) {
+  if (product.isFree || (product.priceInr && isCheckoutOpen())) {
     return (
       <ClaimDialog
         slug={product.slug}
         title={product.title}
+        priceInr={product.isFree ? null : product.priceInr}
         ctaLabel={ctaLabel}
         describedBy={noteId}
       />

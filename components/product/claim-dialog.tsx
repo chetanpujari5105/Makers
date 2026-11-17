@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,28 +17,66 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatInr } from "@/lib/money";
+
+type RazorpayResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open(): void };
+  }
+}
+
+/** Razorpay's Checkout script, loaded only when someone starts a payment. */
+function loadCheckout() {
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve();
+    script.onerror = () =>
+      reject(
+        new Error("We couldn’t load the payment window. Check your connection and try again."),
+      );
+    document.body.appendChild(script);
+  });
+}
 
 /*
- * Buyer-details dialog for FREE products: name, email, an optional
- * (unticked) marketing box and a privacy note. The server saves the lead,
- * grants access and emails a one-time link to My Library.
+ * Buyer-details dialog: name, email, an optional (unticked) marketing box and
+ * a privacy note. The server always saves the lead first.
+ * - Free (no priceInr): the server grants access and emails a one-time link.
+ * - Paid: the server creates the order from the database price, then Razorpay
+ *   Checkout opens. After paying, the server confirms the payment before the
+ *   success page; the library link arrives by email.
  */
 export function ClaimDialog({
   slug,
   title,
   ctaLabel,
   describedBy,
+  priceInr = null,
 }: {
   slug: string;
   title: string;
   ctaLabel: string;
   describedBy?: string;
+  priceInr?: number | null;
 }) {
   const id = useId();
+  const router = useRouter();
+  const paid = priceInr !== null;
+  // One key per attempt, so a double click or a retry reuses the same order.
+  const orderKey = useRef<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "confirming" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState("");
+  // Kept so a cancelled payment reopens the form already filled in.
+  const [buyer, setBuyer] = useState({ name: "", email: "" });
   const errorRef = useRef<HTMLParagraphElement>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -45,9 +84,11 @@ export function ClaimDialog({
     if (status === "sending") return;
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
+    setBuyer({ name: String(form.get("name") ?? ""), email });
     setStatus("sending");
     setError(null);
     try {
+      if (paid) return await startPayment(form, email);
       const response = await fetch("/api/free-claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,6 +113,67 @@ export function ClaimDialog({
     }
   }
 
+  function showError(message: string) {
+    setOpen(true);
+    setStatus("idle");
+    setError(message);
+    requestAnimationFrame(() => errorRef.current?.focus());
+  }
+
+  async function startPayment(form: FormData, email: string) {
+    orderKey.current ??= crypto.randomUUID();
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productSlug: slug,
+        name: form.get("name"),
+        email,
+        marketingOptIn: form.get("marketing") === "on" ? true : undefined,
+        website: form.get("website") || undefined,
+        idempotencyKey: orderKey.current,
+      }),
+    });
+    const order = (await response.json().catch(() => ({}))) as {
+      message?: string;
+      orderId?: string;
+      keyId?: string;
+      razorpayOrderId?: string;
+    };
+    if (!response.ok) throw new Error(order.message ?? "Something went wrong. Please try again.");
+    await loadCheckout();
+    // Close this dialog first: its focus trap would block Razorpay's window.
+    setOpen(false);
+    new window.Razorpay!({
+      key: order.keyId,
+      order_id: order.razorpayOrderId,
+      name: "MAKERS",
+      description: title,
+      prefill: { name: String(form.get("name") ?? ""), email },
+      handler: (result: RazorpayResponse) => void confirmPayment(result, order.orderId!),
+      modal: {
+        ondismiss: () => showError("Payment cancelled — nothing was charged. You can try again."),
+      },
+    }).open();
+  }
+
+  async function confirmPayment(result: RazorpayResponse, orderId: string) {
+    setOpen(true);
+    setStatus("confirming");
+    const response = await fetch("/api/payments/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(result),
+    }).catch(() => null);
+    if (response?.ok) {
+      router.push(`/checkout/success?order=${orderId}`);
+      return;
+    }
+    showError(
+      "We couldn’t confirm the payment yet. If money left your account, you’ll get an email as soon as it’s confirmed. You don’t need to pay again.",
+    );
+  }
+
   return (
     <Dialog
       open={open}
@@ -80,6 +182,7 @@ export function ClaimDialog({
         if (!next) {
           setStatus("idle");
           setError(null);
+          orderKey.current = null;
         }
       }}
     >
@@ -94,11 +197,17 @@ export function ClaimDialog({
           <DialogDescription>
             {status === "done"
               ? `We’ve sent a link to ${sentTo}. It opens your library, where the files and setup steps are waiting.`
-              : "It’s free. Tell us where to send your access link."}
+              : paid
+                ? `${formatInr(priceInr)}. Pay securely with Razorpay; your library link arrives by email. Test mode — no real money is taken.`
+                : "It’s free. Tell us where to send your access link."}
           </DialogDescription>
         </DialogHeader>
 
-        {status === "done" ? (
+        {status === "confirming" ? (
+          <p role="status" className="text-base">
+            Confirming your payment with Razorpay…
+          </p>
+        ) : status === "done" ? (
           <div role="status" className="flex flex-col gap-4">
             <p className="text-base">
               The link works once and expires in 15 minutes. No email? Check your spam folder, or
@@ -110,13 +219,21 @@ export function ClaimDialog({
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <Label htmlFor={`${id}-name`}>Your name</Label>
-              <Input id={`${id}-name`} name="name" autoComplete="name" required maxLength={100} />
+              <Input
+                id={`${id}-name`}
+                name="name"
+                autoComplete="name"
+                required
+                maxLength={100}
+                defaultValue={buyer.name}
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor={`${id}-email`}>Email address</Label>
               <Input
                 id={`${id}-email`}
                 name="email"
+                defaultValue={buyer.email}
                 type="email"
                 inputMode="email"
                 spellCheck={false}
@@ -152,7 +269,7 @@ export function ClaimDialog({
                 loading={status === "sending"}
                 className="w-full sm:w-auto"
               >
-                Send my access link
+                {paid ? `Continue to payment · ${formatInr(priceInr)}` : "Send my access link"}
               </Button>
             </DialogFooter>
           </form>
