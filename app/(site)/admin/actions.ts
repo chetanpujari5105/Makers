@@ -8,6 +8,8 @@ import { readProductForm } from "@/lib/admin/product-form";
 import { addLinkFile, removeFile, saveProduct, setProductStatus } from "@/lib/admin/products";
 import { createCoupon, setCouponActive } from "@/lib/admin/coupons";
 import { getOrder } from "@/lib/admin/records";
+import { setReviewStatus } from "@/lib/admin/reviews";
+import { MAX_UPDATE_EMAILS, publishUpdate } from "@/lib/admin/updates";
 import { couponCodeSchema } from "@/lib/payments/coupons";
 import { sendReceipt } from "@/lib/payments/orders";
 
@@ -153,5 +155,59 @@ export async function setCouponActiveAction(form: FormData): Promise<ActionResul
       code,
     });
     return { ok: true, message: `${code} ${active ? "turned on" : "turned off"}.` };
+  });
+}
+
+// Only the status can be changed. "Verified purchase" is not an input here.
+const moderateSchema = z.object({ id, status: z.enum(["approved", "rejected", "pending"]) });
+
+export async function moderateReviewAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const input = moderateSchema.safeParse(Object.fromEntries(form));
+    if (!input.success) return { ok: false, message: "Unknown review." };
+    if (!(await setReviewStatus(input.data.id, input.data.status)))
+      return { ok: false, message: "Unknown review." };
+    await audit(`review_${input.data.status}`, "review", input.data.id);
+    updateTag("catalogue");
+    const words = {
+      approved: "Approved — it’s on the product page.",
+      rejected: "Rejected — it stays hidden.",
+      pending: "Moved back to waiting.",
+    };
+    return { ok: true, message: words[input.data.status] };
+  });
+}
+
+const updateSchema = z.object({
+  productId: id,
+  version: z.string().trim().min(1, "Add a version, like 1.1.").max(40),
+  notes: z.string().trim().min(5, "Describe what changed.").max(2000),
+});
+
+export async function publishUpdateAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const input = updateSchema.safeParse(Object.fromEntries(form));
+    if (!input.success) return { ok: false, message: input.error.issues[0]!.message };
+    const notify = form.get("notify") === "on";
+    const result = await publishUpdate({ ...input.data, notify });
+    if (!result) return { ok: false, message: "Unknown product." };
+    await audit("update_publish", "product", input.data.productId, {
+      title: result.title,
+      version: input.data.version,
+      sent: result.sent,
+      failed: result.failed,
+      skipped: result.skipped,
+    });
+    updateTag("catalogue");
+    if (result.skipped)
+      return {
+        ok: true,
+        message: `Update saved, but no emails were sent: ${result.skipped} buyers is more than the ${MAX_UPDATE_EMAILS} a day the free email plan allows. Buyers will see it in their library.`,
+      };
+    if (!notify) return { ok: true, message: "Update saved. Buyers will see it in their library." };
+    return {
+      ok: result.failed === 0,
+      message: `Update saved. Emails sent: ${result.sent}. Failed: ${result.failed}.`,
+    };
   });
 }

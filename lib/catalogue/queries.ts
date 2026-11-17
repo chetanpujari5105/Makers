@@ -5,6 +5,8 @@ import { getDb } from "@/db";
 import { categories, productFiles, products } from "@/db/schema";
 
 import { galleryImageSchema, productContentSchema, requirementSchema } from "./content-schema";
+import { listApprovedReviews, type PublicReview } from "@/lib/library/reviews";
+
 import { PAGE_SIZE, type CatalogueFilterInput } from "./filters";
 import type { ProductDetail, ProductSummary, PublicFile } from "./types";
 
@@ -177,17 +179,20 @@ async function loadProduct(where: SQL): Promise<ProductDetail | null> {
     .limit(1);
   if (!row) return null;
 
-  const files: PublicFile[] = await db
-    .select({
-      label: productFiles.label,
-      deliveryType: productFiles.deliveryType,
-      fileName: productFiles.fileName,
-      mimeType: productFiles.mimeType,
-      sizeBytes: productFiles.sizeBytes,
-    })
-    .from(productFiles)
-    .where(eq(productFiles.productId, row.id))
-    .orderBy(asc(productFiles.sortOrder));
+  const [files, reviews]: [PublicFile[], PublicReview[]] = await Promise.all([
+    db
+      .select({
+        label: productFiles.label,
+        deliveryType: productFiles.deliveryType,
+        fileName: productFiles.fileName,
+        mimeType: productFiles.mimeType,
+        sizeBytes: productFiles.sizeBytes,
+      })
+      .from(productFiles)
+      .where(eq(productFiles.productId, row.id))
+      .orderBy(asc(productFiles.sortOrder)),
+    listApprovedReviews(row.id),
+  ]);
 
   // Published products passed these checks in db:publish; a failure here means
   // the row was edited by hand, and the error page is better than a half page.
@@ -199,5 +204,6 @@ async function loadProduct(where: SQL): Promise<ProductDetail | null> {
     requirements: requirementsSchema.parse(requirements),
     gallery: gallerySchema.parse(gallery),
     files,
+    reviews,
   };
 }
