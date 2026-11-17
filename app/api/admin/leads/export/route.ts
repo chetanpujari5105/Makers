@@ -1,5 +1,3 @@
-import { connection } from "next/server";
-
 import { audit } from "@/lib/admin/guard";
 import { leadsCsv } from "@/lib/admin/records";
 import { isAdmin } from "@/lib/auth/session";
@@ -7,7 +5,6 @@ import { jsonError } from "@/lib/security/request";
 
 /* GET /api/admin/leads/export — owner only. All leads as CSV, with the marketing opt-in column. */
 export async function GET() {
-  await connection();
   if (!(await isAdmin())) return jsonError(401, "Please sign in as the owner.");
   const csv = await leadsCsv();
   await audit("leads_export", "lead", null);

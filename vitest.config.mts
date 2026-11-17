@@ -13,6 +13,6 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.test.{ts,tsx}"],
-    exclude: ["node_modules/**", ".next/**", ".agents/**", "skills/**", "data/**"],
+    exclude: ["node_modules/**", ".next/**", ".agents/**", ".claude/**", "skills/**", "data/**"],
   },
 });
