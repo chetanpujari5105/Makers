@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/* Owner-only: upload a product file straight to the private R2 bucket, then record it. */
+/* Owner-only: upload a product file straight to the private storage bucket, then record it. */
 export function UploadForm({ productId }: { productId: string }) {
   const id = useId();
   const router = useRouter();
@@ -44,7 +44,7 @@ export function UploadForm({ productId }: { productId: string }) {
         headers: { "Content-Type": contentType! },
         body: file,
       });
-      if (!put.ok) throw new Error("The upload to storage failed. Check the R2 CORS settings.");
+      if (!put.ok) throw new Error("The upload to storage failed. Check the bucket’s CORS settings.");
       await post("/api/admin/files", {
         productId,
         key,

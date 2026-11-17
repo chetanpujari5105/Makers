@@ -7,9 +7,10 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /*
- * Private product files in Cloudflare R2 (S3-compatible). The bucket is
- * private: files are reached only through links signed here, after the
- * server has checked who is asking. Download links last 60 seconds.
+ * Private product files in any S3-compatible bucket. Currently Backblaze B2;
+ * Cloudflare R2 works by changing only the STORAGE_* settings (.env.example).
+ * The bucket is private: files are reached only through links signed here,
+ * after the server has checked who is asking. Download links last 60 seconds.
  */
 export const DOWNLOAD_LINK_SECONDS = 60;
 const UPLOAD_LINK_SECONDS = 5 * 60;
@@ -39,24 +40,27 @@ export function isStorageConfigured() {
 }
 
 let client: S3Client | undefined;
-function r2() {
-  if (!isStorageConfigured()) throw new Error("File storage (R2) is not configured.");
+function storage() {
+  if (!isStorageConfigured()) throw new Error("File storage is not configured.");
   client ??= new S3Client({
-    region: "auto",
-    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    region: process.env.STORAGE_REGION || "auto",
+    endpoint: process.env.STORAGE_ENDPOINT,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+      accessKeyId: process.env.STORAGE_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY!,
     },
+    // B2 and R2 don't accept the SDK's newer default checksum headers on signed links.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
   return client;
 }
-const bucket = () => process.env.R2_BUCKET_PRIVATE!;
+const bucket = () => process.env.STORAGE_BUCKET!;
 
 export function downloadUrl(key: string, fileName: string | null) {
   const safeName = (fileName ?? key.split("/").pop() ?? "download").replace(/[^\w.\- ]/g, "_");
   return getSignedUrl(
-    r2(),
+    storage(),
     new GetObjectCommand({
       Bucket: bucket(),
       Key: key,
@@ -68,7 +72,7 @@ export function downloadUrl(key: string, fileName: string | null) {
 
 export function uploadUrl(key: string, contentType: string, size: number) {
   return getSignedUrl(
-    r2(),
+    storage(),
     new PutObjectCommand({
       Bucket: bucket(),
       Key: key,
@@ -82,7 +86,7 @@ export function uploadUrl(key: string, contentType: string, size: number) {
 /** Size of an uploaded object, or null if it isn't there. */
 export async function objectSize(key: string) {
   try {
-    const head = await r2().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
+    const head = await storage().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
     return head.ContentLength ?? null;
   } catch {
     return null;

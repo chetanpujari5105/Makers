@@ -133,7 +133,7 @@ export type DownloadResult =
 
 /**
  * Checks that `email` holds an active entitlement to the product this file
- * belongs to. R2 files also use up one download: the count goes up only
+ * belongs to. Stored files also use up one download: the count goes up only
  * while it is below the limit, in the same statement that writes the
  * download log, so parallel requests can't exceed the limit.
  * Unknown files and files of other products look the same ("not_found").

@@ -5,12 +5,12 @@ import { authorizeDownload } from "@/lib/library/access";
 import { hashIp } from "@/lib/security/crypto";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { clientIp, isSameOrigin, redirectTo } from "@/lib/security/request";
-import { downloadUrl, isStorageConfigured } from "@/lib/storage/r2";
+import { downloadUrl, isStorageConfigured } from "@/lib/storage/files";
 
 /*
  * POST /api/download/[fileId] — the only way to a paid or free file.
  * Signed-in customer + active entitlement + download limit, then a
- * 60-second R2 link (or the private external link). POST, not GET, so link
+ * 60-second signed storage link (or the private external link). POST, not GET, so link
  * previews and prefetching can't use up downloads.
  */
 export async function POST(request: Request, { params }: RouteContext<"/api/download/[fileId]">) {

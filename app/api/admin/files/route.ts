@@ -4,10 +4,10 @@ import { getDb } from "@/db";
 import { productFiles } from "@/db/schema";
 import { isAdmin } from "@/lib/auth/session";
 import { isSameOrigin, jsonError } from "@/lib/security/request";
-import { allowedUploadTypes, MAX_UPLOAD_BYTES, objectSize } from "@/lib/storage/r2";
+import { allowedUploadTypes, MAX_UPLOAD_BYTES, objectSize } from "@/lib/storage/files";
 
 /*
- * POST /api/admin/files — owner only. Confirms an upload really reached R2
+ * POST /api/admin/files — owner only. Confirms an upload really reached storage
  * (and its size) before recording it as a product file.
  */
 const bodySchema = z.object({

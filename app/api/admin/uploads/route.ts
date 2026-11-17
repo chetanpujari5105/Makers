@@ -8,12 +8,12 @@ import {
   isStorageConfigured,
   MAX_UPLOAD_BYTES,
   uploadUrl,
-} from "@/lib/storage/r2";
+} from "@/lib/storage/files";
 
 /*
  * POST /api/admin/uploads — owner only. Checks the file type and size, then
  * returns a 5-minute signed PUT link so the browser uploads straight to the
- * private R2 bucket. The file is recorded only after /api/admin/files confirms it.
+ * private storage bucket. The file is recorded only after /api/admin/files confirms it.
  */
 const bodySchema = z.object({
   productId: z.uuid(),
@@ -24,7 +24,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   if (!isSameOrigin(request) || !(await isAdmin()))
     return jsonError(401, "Please sign in as the owner.");
-  if (!isStorageConfigured()) return jsonError(503, "File storage (R2) isn’t set up yet.");
+  if (!isStorageConfigured()) return jsonError(503, "File storage isn’t set up yet.");
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError(400, parsed.error.issues[0]?.message ?? "Invalid upload.");

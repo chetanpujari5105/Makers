@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { getDb } from "@/db";
 import { leads, productFiles, products } from "@/db/schema";
 import { isAdmin } from "@/lib/auth/session";
-import { isStorageConfigured } from "@/lib/storage/r2";
+import { isStorageConfigured } from "@/lib/storage/files";
 
 export const metadata: Metadata = { title: "Owner admin", robots: { index: false } };
 
@@ -82,7 +82,7 @@ async function AdminContent() {
         </h2>
         {!storageReady ? (
           <p role="status" className="rounded-lg border border-border bg-card p-4 text-base">
-            File storage (Cloudflare R2) isn’t set up yet, so uploads are switched off.
+            File storage isn’t set up yet, so uploads are switched off.
           </p>
         ) : null}
         {productRows.length === 0 ? (

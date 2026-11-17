@@ -131,7 +131,7 @@ Sample products say “Sample content” on their page until you replace them. T
 
 ## 8. Phase 2 services: files, email, rate limits and owner login
 
-The site runs locally without these: sign-in links are printed in the terminal, rate limits are kept in memory, and uploads/downloads say "not set up yet". A deployed site **refuses** those requests until the services are set up. It never pretends they worked.
+The site runs locally without these: sign-in links are printed in the terminal, rate limits are kept in memory, and uploads/downloads say "not set up yet". On Vercel, Upstash and the secrets below are already set (2026-11-17). A deployed site **refuses** those requests until the services are set up. It never pretends they worked.
 
 Never paste a key into chat or a committed file. Put values in `.env.local` (local) and in Vercel → Project → Settings → Environment Variables (Preview and Production).
 
@@ -141,12 +141,14 @@ Never paste a key into chat or a committed file. Put values in `.env.local` (loc
 2. `npm run admin:hash`: type your admin password (hidden, 12+ characters) and copy the printed line into `ADMIN_PASSWORD_HASH`.
 3. Set `ADMIN_EMAIL` to your email.
 
-**Cloudflare R2 (private product files).** Turning on R2 asks you to add an "R2 subscription", which is free within 10 GB a month but billed to a payment method above that. That is your decision.
+**Backblaze B2 (private product files).** Free for 10 GB, no card. The code works with any S3-compatible storage (`lib/storage/files.ts`), so only the `STORAGE_*` settings change if you switch.
 
-1. R2 → Create bucket → name e.g. `makers-files`. Keep **public access off**.
-2. Bucket → Settings → CORS policy: allow `PUT` and `GET` from `http://localhost:3000` and `https://makers-alpha.vercel.app`, header `Content-Type`.
-3. R2 → Manage API tokens → Create token → **Object Read & Write**, only this bucket.
-4. Fill `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_BUCKET_PRIVATE`.
+1. B2 → Buckets → Create a bucket → name `makers-files`, **Files in bucket: Private**.
+2. CORS (lets `/admin` upload straight from the browser): allow `PUT` and `GET` with header `Content-Type` from `http://localhost:3000` and `https://makers-alpha.vercel.app`. The web page only offers simple rules, so this is set through the B2 API.
+3. Application Keys → Add a new key → **only this bucket**, Read and Write.
+4. Fill `STORAGE_ENDPOINT` (`https://s3.<region>.backblazeb2.com`, shown on the bucket as "Endpoint"), `STORAGE_REGION` (e.g. `us-west-004`), `STORAGE_ACCESS_KEY_ID` (keyID), `STORAGE_SECRET_ACCESS_KEY` (applicationKey) and `STORAGE_BUCKET`.
+
+_Alternative, Cloudflare R2:_ turning on R2 requires an "R2 subscription" with a payment method (free under 10 GB a month). Create a private bucket, the same CORS rules and an Object Read & Write token for that bucket. Then set `STORAGE_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com` and `STORAGE_REGION=auto`.
 
 **Resend (email)**
 
