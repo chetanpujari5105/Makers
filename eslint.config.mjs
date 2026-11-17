@@ -16,6 +16,14 @@ const eslintConfig = defineConfig([
       ],
       // Stray console.log calls can leak personal data into logs; use warn/error deliberately.
       "no-console": ["warn", { allow: ["warn", "error"] }],
+      // New shadcn components import `cn` from the "cn" package, which mangles
+      // our custom tokens (see docs/DECISIONS.md). Use the configured helper.
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [{ name: "cn", message: 'Import { cn } from "@/lib/utils" instead.' }],
+        },
+      ],
     },
   },
   // Turn off style rules that Prettier handles (must come last).

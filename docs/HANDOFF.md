@@ -1,6 +1,6 @@
 # Handoff — MAKERS
 
-Last updated: 2026-11-17, end of Phase 0. Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
+Last updated: 2026-11-17, end of Phase 0 (approved and merged into `main`). Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
 
 ## 1. What exists
 
@@ -37,7 +37,7 @@ app/
 components/
   ui/                   button, card, dialog, input, badge, label, checkbox (+ tests)
   layout/               container, wordmark, site-header, desktop-nav, mobile-nav,
-                        site-footer, coming-soon
+                        site-footer, coming-soon, error-message
   product/ checkout/ library/ admin/   Empty (README says which phase)
 lib/
   brand.ts              Store name, tagline, goals, nav — single source of brand truth
@@ -65,12 +65,14 @@ PRODUCT.md, DESIGN.md   Product truth + design system summary (used by the impec
 
 ## 4. Conventions
 
+- **Git:** `main` is production (Vercel deploys it once connected). Start each phase on a new branch from `main` (`phase-1-catalogue`, `phase-2-…`). Run `npm run check` and the `code-review` skill before each commit. Merge into `main` only after the owner approves the phase. Commit messages: `feat:`, `fix:`, `docs:`, `chore:`. Never commit `.env*` files (only `.env.example`).
+
 - **Files:** kebab-case (`site-header.tsx`); exports PascalCase (`SiteHeader`). Tests sit next to the file: `button.test.tsx`.
 - **Imports:** always the `@/` alias (`@/components/ui/button`, `@/lib/brand`). Planned aliases `@/db/...` work too (alias is `@/* → ./*`).
-- **`cn`:** import from `@/lib/utils`. It is `clsx` + `tailwind-merge` with the custom tokens registered (`text-h3`, `px-gutter`, `max-w-page`, `shadow-card`…). **When you add a token to `globals.css`, register it in `lib/utils.ts`**, or `cn()` may silently drop or keep conflicting classes. New shadcn components may import `cn` from the `cn` package — change that to `@/lib/utils`.
+- **`cn`:** import from `@/lib/utils`. It is `clsx` + `tailwind-merge` with the custom tokens registered (`text-h3`, `px-gutter`, `max-w-page`, `shadow-card`…). **When you add a token to `globals.css`, register it in `lib/utils.ts`**, or `cn()` may silently drop or keep conflicting classes. New shadcn components import `cn` from the `cn` package — ESLint now rejects that import (`no-restricted-imports`); change it to `@/lib/utils`.
 - **Validation:** every external input (route params, query strings, API bodies) goes through a Zod schema in `lib/validators.ts` (example: `goalSlugSchema`).
 - **Motion utilities:** Tailwind v4 `scale-*`/`translate-*` use the CSS `scale`/`translate` properties — list those (not `transform`) in `transition-[...]`, and add `motion-press`, `motion-lift` or `motion-nudge` so reduced-motion removes the movement.
-- **Server first:** components are Server Components unless they need state/effects/browser APIs. Current client components: `desktop-nav` (usePathname), `mobile-nav`, `dialog`, `label`, `checkbox`, error boundaries, `design-preview/_components/dialog-demo`.
+- **Server first:** components are Server Components unless they need state/effects/browser APIs. Current client components: `desktop-nav` (usePathname), `mobile-nav`, `dialog`, `label`, `checkbox`, `error-message` and the error boundaries, `design-preview/_components/dialog-demo`.
 - **Next.js 16 specifics** (check `node_modules/next/dist/docs/` before using an API):
   - `cacheComponents: true` and `partialPrefetching: true` are on (create-next-app defaults). Route segment configs `dynamic`, `dynamicParams`, `revalidate`, `fetchCache` are **unavailable**. Use `"use cache"`, `cacheLife`, `<Suspense>`, `connection()`.
   - Don't call `Date.now()`/`new Date()`/`Math.random()` in rendered server code without `connection()` + Suspense or caching — the build will fail.
@@ -111,7 +113,7 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 
 1. **Unknown `/category/<slug>` returns HTTP 200** (shows the correct "We couldn’t find that page" UI with `noindex`). Cause: with Cache Components, a param not listed in `generateStaticParams` streams, so the status is sent before `notFound()` runs. Unknown top-level URLs correctly return 404. Phase 1 replaces this page — verify real 404 status there (e.g. check the slug before any streaming boundary, or follow the Next 16 docs on `notFound` with Cache Components).
 2. **ESLint 9** shows a "no longer supported" npm warning. ESLint 10 was tried and rejected: `eslint-plugin-react`, `eslint-plugin-jsx-a11y` and `eslint-plugin-import` (used by `eslint-config-next`) don't support it yet. Revisit when they do.
-3. **4 moderate `npm audit` findings**, all inside the `shadcn` CLI's dependency chain (`ts-morph` → `minimatch`). `shadcn` is a dev dependency (only its `tailwind.css` is imported at build time); nothing ships to browsers. Do not run `npm audit fix --force` (breaking). Re-check when shadcn updates.
+3. **4 moderate `npm audit` findings**, all inside the `shadcn` CLI's dependency chain (`ts-morph` → `minimatch`). `shadcn` is a dev dependency (only its `tailwind.css` is imported at build time); nothing ships to browsers. The CLI also bundles its own private copy of the `cn` package — that is expected and not used by our code. Do not run `npm audit fix --force` (breaking). Re-check when shadcn updates.
 4. **No full Content-Security-Policy yet** — only `frame-ancestors 'none'`. Phase 3 must add a CSP that allows Razorpay Checkout (scripts + frames) and test checkout with it.
 5. **npm 11 blocks install scripts** by default (`fsevents` warning). Harmless on this project; no action needed.
 6. **Mobile screenshots:** headless Chrome has a 500px minimum window width, so `--window-size=390,...` screenshots are cropped, not emulated. Use real device emulation (DevTools Protocol `Emulation.setDeviceMetricsOverride`) or Playwright (Phase 2).
@@ -119,6 +121,6 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 
 ## 8. Phase 1 — first three tasks
 
-1. **Database foundation:** install Drizzle ORM, drizzle-kit and `@neondatabase/serverless` (check current docs/versions); create `db/index.ts` (pooled `DATABASE_URL`) and `drizzle.config.ts` (unpooled `DATABASE_URL_UNPOOLED` for migrations); add `db:generate`, `db:migrate`, `db:seed`, `db:studio` scripts; document pooled vs direct in README.
+1. **Database foundation:** create branch `phase-1-catalogue` from `main`; install Drizzle ORM, drizzle-kit and `@neondatabase/serverless` (check current docs/versions); create `db/index.ts` (pooled `DATABASE_URL`) and `drizzle.config.ts` (unpooled `DATABASE_URL_UNPOOLED` for migrations); add `db:generate`, `db:migrate`, `db:seed`, `db:studio` scripts; document pooled vs direct in README.
 2. **Schema + migrations:** implement every table in PROJECT_SPEC.md §9 with UUID keys, integer minor-unit money, enums, unique constraints, check constraints and the §9.17 indexes. Generate the first migration and run it against a **development** Neon branch.
 3. **Idempotent seed + catalogue read path:** seed the four goal categories (map `lib/brand.ts` `goals[].goalGroup` to `categories.goal_group`) and six realistic **draft** sample products (no fake reviews/sales); add a server-only data layer that returns **published** products only; then build Home featured strip, `/explore`, `/category/[slug]` and `/products/[slug]` on top of `components/ui` — replacing the placeholder pages.

@@ -2,11 +2,11 @@
 
 ## Project state (keep this section current and under ~40 lines)
 
-- **Current phase:** Phase 0 — Project foundation. **Status:** built, all checks pass, awaiting owner review.
-- **Branch:** `phase-0-foundation` (one branch per phase; `main` = production).
-- **Done:** Next.js 16.4 App Router + strict TypeScript, Tailwind v4, shadcn/ui (Radix), lucide-react, framer-motion (installed, unused). Design tokens in `app/globals.css`. Brand config in `lib/brand.ts`. Header, mobile menu, footer, home placeholder, loading/error/not-found/global-error pages. Five core components restyled (Button, Card, Dialog, Input, Badge) + Label, Checkbox. `/design-preview` page. Vitest (17 tests), Zod validators in `lib/validators.ts`, ESLint, Prettier, `npm run check`. Basic security headers.
+- **Current phase:** Phase 0 — Project foundation. **Status:** complete, all checks pass, approved by the owner and merged into `main` (2026-11-17).
+- **Branches:** `main` = production and now contains Phase 0. Each phase gets its own branch from `main` (next: `phase-1-catalogue`) and is merged only after owner approval.
+- **Done:** Next.js 16.4 App Router + strict TypeScript, Tailwind v4, shadcn/ui (Radix), lucide-react, framer-motion (installed, unused). Design tokens in `app/globals.css`. Brand config in `lib/brand.ts`. Header, mobile menu, footer, home placeholder, loading/error (site + root)/not-found/global-error pages. Five core components restyled (Button, Card, Dialog, Input, Badge) + Label, Checkbox. `/design-preview` page. Vitest (17 tests), Zod validators in `lib/validators.ts`, ESLint (blocks the `cn` npm package — use `@/lib/utils`), Prettier, `npm run check`. Basic security headers.
 - **Not built (by design):** database, catalogue, product pages, payments, file storage, buyer login, admin. Nav links lead to honest "being built" pages.
-- **Next:** Phase 1 — Neon + Drizzle schema, seeds, public catalogue and product page. Do not start until the owner approves Phase 0.
+- **Next:** Phase 1 — Neon + Drizzle schema, seeds, public catalogue and product page. **Not started.** Do not start until the owner explicitly says to.
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).
 - **One command for every quality gate:** `npm run check` (format → lint → typecheck → test → build).
