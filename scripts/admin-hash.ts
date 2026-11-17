@@ -27,10 +27,14 @@ async function readHidden(prompt: string) {
   return value;
 }
 
-const password = await readHidden("Admin password (min 12 characters): ");
-if (password.length < 12) {
-  console.error("Too short. Use at least 12 characters.");
-  process.exit(1);
+async function main() {
+  const password = await readHidden("Admin password (min 12 characters): ");
+  if (password.length < 12) {
+    console.error("Too short. Use at least 12 characters.");
+    process.exit(1);
+  }
+  stdout.write(`\nADMIN_PASSWORD_HASH=${await hashPassword(password)}\n`);
+  process.exit(0);
 }
-stdout.write(`\nADMIN_PASSWORD_HASH=${await hashPassword(password)}\n`);
-process.exit(0);
+
+void main();
