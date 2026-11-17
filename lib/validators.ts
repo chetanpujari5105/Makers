@@ -12,3 +12,9 @@ const goalSlugs = goals.map((goal) => goal.slug) as [GoalSlug, ...GoalSlug[]];
 
 /** Route param for /category/[slug]: only the four known goal slugs. */
 export const goalSlugSchema = z.enum(goalSlugs);
+
+/** Route param for /products/[slug]: lowercase words joined by single hyphens. */
+export const productSlugSchema = z
+  .string()
+  .max(120)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
