@@ -75,6 +75,8 @@ export function ClaimDialog({
   const [status, setStatus] = useState<"idle" | "sending" | "confirming" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState("");
+  // Kept so a cancelled payment reopens the form already filled in.
+  const [buyer, setBuyer] = useState({ name: "", email: "" });
   const errorRef = useRef<HTMLParagraphElement>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -82,6 +84,7 @@ export function ClaimDialog({
     if (status === "sending") return;
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
+    setBuyer({ name: String(form.get("name") ?? ""), email });
     setStatus("sending");
     setError(null);
     try {
@@ -216,13 +219,21 @@ export function ClaimDialog({
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <Label htmlFor={`${id}-name`}>Your name</Label>
-              <Input id={`${id}-name`} name="name" autoComplete="name" required maxLength={100} />
+              <Input
+                id={`${id}-name`}
+                name="name"
+                autoComplete="name"
+                required
+                maxLength={100}
+                defaultValue={buyer.name}
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor={`${id}-email`}>Email address</Label>
               <Input
                 id={`${id}-email`}
                 name="email"
+                defaultValue={buyer.email}
                 type="email"
                 inputMode="email"
                 spellCheck={false}
