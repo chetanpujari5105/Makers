@@ -54,7 +54,11 @@ export const safeNextPath = z
   .catch(undefined);
 
 /** Paid checkout: the buyer form plus a per-dialog key so double submits reuse one order. No amount — prices come from the database. */
-export const orderRequestSchema = buyerFormSchema.extend({ idempotencyKey: z.uuid() });
+export const orderRequestSchema = buyerFormSchema.extend({
+  idempotencyKey: z.uuid(),
+  /** Optional; checked and normalised on the server. */
+  couponCode: z.string().trim().max(60).optional(),
+});
 
 /** What Razorpay Checkout hands the browser after a payment attempt. */
 export const paymentVerifySchema = z.object({

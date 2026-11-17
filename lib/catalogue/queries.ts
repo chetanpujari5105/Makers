@@ -5,6 +5,8 @@ import { getDb } from "@/db";
 import { categories, productFiles, products } from "@/db/schema";
 
 import { galleryImageSchema, productContentSchema, requirementSchema } from "./content-schema";
+import { listApprovedReviews, type PublicReview } from "@/lib/library/reviews";
+
 import { PAGE_SIZE, type CatalogueFilterInput } from "./filters";
 import type { ProductDetail, ProductSummary, PublicFile } from "./types";
 
@@ -146,7 +148,19 @@ export async function listPublishedSlugs() {
 const requirementsSchema = z.array(requirementSchema);
 const gallerySchema = z.array(galleryImageSchema);
 
-export async function getProduct(slug: string): Promise<ProductDetail | null> {
+export function getProduct(slug: string): Promise<ProductDetail | null> {
+  return loadProduct(and(isPublished, eq(products.slug, slug))!);
+}
+
+/**
+ * Owner preview (admin only — the caller checks): any status, by id. Throws
+ * if the page content is incomplete; the preview shows what is missing.
+ */
+export function getProductPreview(id: string): Promise<ProductDetail | null> {
+  return loadProduct(eq(products.id, id));
+}
+
+async function loadProduct(where: SQL): Promise<ProductDetail | null> {
   const db = getDb();
   const [row] = await db
     .select({
@@ -161,21 +175,24 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
     })
     .from(products)
     .innerJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(isPublished, eq(products.slug, slug)))
+    .where(where)
     .limit(1);
   if (!row) return null;
 
-  const files: PublicFile[] = await db
-    .select({
-      label: productFiles.label,
-      deliveryType: productFiles.deliveryType,
-      fileName: productFiles.fileName,
-      mimeType: productFiles.mimeType,
-      sizeBytes: productFiles.sizeBytes,
-    })
-    .from(productFiles)
-    .where(eq(productFiles.productId, row.id))
-    .orderBy(asc(productFiles.sortOrder));
+  const [files, reviews]: [PublicFile[], PublicReview[]] = await Promise.all([
+    db
+      .select({
+        label: productFiles.label,
+        deliveryType: productFiles.deliveryType,
+        fileName: productFiles.fileName,
+        mimeType: productFiles.mimeType,
+        sizeBytes: productFiles.sizeBytes,
+      })
+      .from(productFiles)
+      .where(eq(productFiles.productId, row.id))
+      .orderBy(asc(productFiles.sortOrder)),
+    listApprovedReviews(row.id),
+  ]);
 
   // Published products passed these checks in db:publish; a failure here means
   // the row was edited by hand, and the error page is better than a half page.
@@ -187,5 +204,6 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
     requirements: requirementsSchema.parse(requirements),
     gallery: gallerySchema.parse(gallery),
     files,
+    reviews,
   };
 }

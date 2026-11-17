@@ -76,7 +76,7 @@ export function ClaimDialog({
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState("");
   // Kept so a cancelled payment reopens the form already filled in.
-  const [buyer, setBuyer] = useState({ name: "", email: "" });
+  const [buyer, setBuyer] = useState({ name: "", email: "", coupon: "" });
   const errorRef = useRef<HTMLParagraphElement>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -84,7 +84,11 @@ export function ClaimDialog({
     if (status === "sending") return;
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
-    setBuyer({ name: String(form.get("name") ?? ""), email });
+    setBuyer({
+      name: String(form.get("name") ?? ""),
+      email,
+      coupon: String(form.get("coupon") ?? ""),
+    });
     setStatus("sending");
     setError(null);
     try {
@@ -132,6 +136,7 @@ export function ClaimDialog({
         marketingOptIn: form.get("marketing") === "on" ? true : undefined,
         website: form.get("website") || undefined,
         idempotencyKey: orderKey.current,
+        couponCode: String(form.get("coupon") ?? "").trim() || undefined,
       }),
     });
     const order = (await response.json().catch(() => ({}))) as {
@@ -242,6 +247,25 @@ export function ClaimDialog({
                 maxLength={254}
               />
             </div>
+            {paid ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={`${id}-coupon`}>Coupon code (optional)</Label>
+                <Input
+                  id={`${id}-coupon`}
+                  name="coupon"
+                  defaultValue={buyer.coupon}
+                  autoComplete="off"
+                  spellCheck={false}
+                  maxLength={40}
+                  aria-describedby={`${id}-coupon-hint`}
+                  // A different coupon is a different order, so the next submit starts a new one.
+                  onChange={() => (orderKey.current = null)}
+                />
+                <p id={`${id}-coupon-hint`} className="text-sm text-muted-foreground">
+                  The discounted price is shown in the payment window.
+                </p>
+              </div>
+            ) : null}
             {/* Honeypot: hidden from people and screen readers; bots fill it in. */}
             <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
               <label htmlFor={`${id}-website`}>Website</label>

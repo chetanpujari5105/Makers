@@ -1,7 +1,15 @@
 import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/db";
-import { categories, customers, entitlements, leads, productFiles, products } from "@/db/schema";
+import {
+  categories,
+  customers,
+  entitlements,
+  leads,
+  productFiles,
+  products,
+  productUpdates,
+} from "@/db/schema";
 import { productContentSchema } from "@/lib/catalogue/content-schema";
 
 /*
@@ -121,9 +129,20 @@ export async function getLibraryProduct(email: string, slug: string) {
     .where(and(eq(productFiles.productId, row.productId), eq(productFiles.isPreview, false)))
     .orderBy(asc(productFiles.sortOrder));
 
+  const updates = await db
+    .select({
+      version: productUpdates.version,
+      notes: productUpdates.notes,
+      createdAt: productUpdates.createdAt,
+    })
+    .from(productUpdates)
+    .where(eq(productUpdates.productId, row.productId))
+    .orderBy(desc(productUpdates.createdAt))
+    .limit(5);
+
   const { contentJson, productId: _productId, ...rest } = row;
   const content = productContentSchema.safeParse(contentJson);
-  return { ...rest, content: content.success ? content.data : null, files };
+  return { ...rest, content: content.success ? content.data : null, files, updates };
 }
 
 export type DownloadResult =

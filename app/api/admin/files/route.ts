@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { getDb } from "@/db";
@@ -43,5 +44,7 @@ export async function POST(request: Request) {
       sizeBytes: size,
       mimeType: allowedUploadTypes[extension] ?? "application/octet-stream",
     });
+  // The public "What you'll get" list shows file names and sizes.
+  revalidateTag("catalogue", "max");
   return Response.json({ ok: true });
 }

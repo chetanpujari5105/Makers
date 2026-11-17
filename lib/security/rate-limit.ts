@@ -14,6 +14,7 @@ const limits = {
   download: { tokens: 30, window: "60 m" },
   adminLogin: { tokens: 5, window: "15 m" },
   order: { tokens: 10, window: "10 m" },
+  review: { tokens: 5, window: "60 m" },
 } as const;
 
 export type LimitName = keyof typeof limits;
