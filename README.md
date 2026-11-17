@@ -129,7 +129,36 @@ Sample products say “Sample content” on their page until you replace them. T
 | `db/`, `lib/payments/`, `lib/storage/`, … | Empty for now; each has a README saying which phase fills it                   |
 | `docs/`                                   | Handoff notes, decisions log, acceptance tests, tools guide                    |
 
-## 8. Project documents
+## 8. Phase 2 services: files, email, rate limits and owner login
+
+The site runs locally without these: sign-in links are printed in the terminal, rate limits are kept in memory, and uploads/downloads say "not set up yet". On Vercel, Upstash and the secrets below are already set (2026-11-17). A deployed site **refuses** those requests until the services are set up. It never pretends they worked.
+
+Never paste a key into chat or a committed file. Put values in `.env.local` (local) and in Vercel → Project → Settings → Environment Variables (Preview and Production).
+
+**Owner login (`/admin`)**
+
+1. `openssl rand -base64 48`: run it twice, for `SESSION_SECRET` and `MAGIC_LINK_SECRET` (use different values).
+2. `npm run admin:hash`: type your admin password (hidden, 12+ characters) and copy the printed line into `ADMIN_PASSWORD_HASH`.
+3. Set `ADMIN_EMAIL` to your email.
+
+**Backblaze B2 (private product files).** Free for 10 GB, no card. The code works with any S3-compatible storage (`lib/storage/files.ts`), so only the `STORAGE_*` settings change if you switch.
+
+1. B2 → Buckets → Create a bucket → name `makers-files`, **Files in bucket: Private**.
+2. CORS (lets `/admin` upload straight from the browser): allow `PUT` and `GET` with header `Content-Type` from `http://localhost:3000` and `https://makers-alpha.vercel.app`. The web page only offers simple rules, so this is set through the B2 API.
+3. Application Keys → Add a new key → **only this bucket**, Read and Write.
+4. Fill `STORAGE_ENDPOINT` (`https://s3.<region>.backblazeb2.com`, shown on the bucket as "Endpoint"), `STORAGE_REGION` (e.g. `us-west-004`), `STORAGE_ACCESS_KEY_ID` (keyID), `STORAGE_SECRET_ACCESS_KEY` (applicationKey) and `STORAGE_BUCKET`.
+
+_Alternative, Cloudflare R2:_ turning on R2 requires an "R2 subscription" with a payment method (free under 10 GB a month). Create a private bucket, the same CORS rules and an Object Read & Write token for that bucket. Then set `STORAGE_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com` and `STORAGE_REGION=auto`.
+
+**Resend (email)**
+
+1. Sign up on the free plan and create an API key with "Sending access" → `RESEND_API_KEY`.
+2. Until you verify a domain, use `EMAIL_FROM="MAKERS <onboarding@resend.dev>"`. It only delivers to your own Resend email.
+3. To email real buyers: Domains → add your domain → add the DNS records it shows → use an address on that domain.
+
+**Upstash Redis (rate limits).** Vercel → Storage → Create → Upstash for Redis → Free plan → connect to the `makers` project. It adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically; the code reads either name.
+
+## 9. Project documents
 
 - `PROJECT_SPEC.md` — what the store must do (the source of truth)
 - `BUILD_PLAN.md` — the phases, in order

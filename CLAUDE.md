@@ -8,7 +8,8 @@
 - **Database migrations on `main`:** run once per schema change, owner-approved, tables only (never `db:seed`). Vercel Preview and Production both read Neon `main`, so previews show an empty catalogue until real products are published. A Preview-only override to `development` did not save in Vercel (the `DATABASE_*` variables are owned by the Neon integration).
 - **Done in Phase 1:** schema + migration, idempotent seed (6 sample drafts), `db:publish`, endpoint check; query layer `lib/catalogue/queries.ts` (published only, explicit columns, no file keys/private links) with cached wrappers `catalogue.ts`; URL filters `filters.ts`; real Home, `/explore`, `/category/[slug]`, `/products/[slug]`, `/free`, `sitemap.xml`, `robots.txt`; real 404s via `proxy.ts`; JSON-LD + OG. 50 tests (6 run against the development DB).
 - **Not done yet in Phase 1:** MDX loader + safe MDX components (BUILD_PLAN task); not needed by the current pages.
-- **Not built (by design):** payments, real downloads, buyer login, admin, newsletter.
+- **Phase 2** (branch `phase-2-free-flow`, not merged): free claim + leads, magic-link My Library, Start Here, protected downloads, minimal owner admin, Resend emails, Upstash limits. Code done and tested on the development DB; Vercel secrets + Upstash done; Backblaze B2 storage (instead of R2, owner choice) and Resend being set up (README §8). See `docs/HANDOFF.md` §9.
+- **Not built (by design):** payments, newsletter, full admin editing.
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).
 - **Token-saving tools (use every session):**
