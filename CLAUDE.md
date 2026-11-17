@@ -9,6 +9,9 @@
 - **Next:** Phase 1 — Neon + Drizzle schema, seeds, public catalogue and product page. **Not started.** Do not start until the owner explicitly says to.
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).
+- **Token-saving tools (use every session):**
+  - **graphify** — a code map in `graphify-out/` (not committed). Before reading many files to answer "where/how is X built?", run `graphify query "<question>"` (or `graphify explain "X"`, `graphify affected "X"`). After code changes run `graphify update .` (free, no AI calls).
+  - **ponytail** plugin (enabled in `.claude/settings.json`) — smallest complete change, no unrequested abstractions. Never cuts validation, security, accessibility or anything in this file. Use `/ponytail-review` on a phase diff before reporting.
 - **One command for every quality gate:** `npm run check` (format → lint → typecheck → test → build).
 
 ---
