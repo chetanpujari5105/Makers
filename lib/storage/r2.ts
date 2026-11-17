@@ -1,4 +1,9 @@
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /*
@@ -28,7 +33,9 @@ export const allowedUploadTypes: Record<string, string> = {
 
 export function isStorageConfigured() {
   const e = process.env;
-  return Boolean(e.R2_ACCOUNT_ID && e.R2_ACCESS_KEY_ID && e.R2_SECRET_ACCESS_KEY && e.R2_BUCKET_PRIVATE);
+  return Boolean(
+    e.R2_ACCOUNT_ID && e.R2_ACCESS_KEY_ID && e.R2_SECRET_ACCESS_KEY && e.R2_BUCKET_PRIVATE,
+  );
 }
 
 let client: S3Client | undefined;
@@ -62,7 +69,12 @@ export function downloadUrl(key: string, fileName: string | null) {
 export function uploadUrl(key: string, contentType: string, size: number) {
   return getSignedUrl(
     r2(),
-    new PutObjectCommand({ Bucket: bucket(), Key: key, ContentType: contentType, ContentLength: size }),
+    new PutObjectCommand({
+      Bucket: bucket(),
+      Key: key,
+      ContentType: contentType,
+      ContentLength: size,
+    }),
     { expiresIn: UPLOAD_LINK_SECONDS },
   );
 }

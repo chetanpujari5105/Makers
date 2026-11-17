@@ -32,7 +32,17 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // One-time sign-in links: never leak the token to other sites or caches.
+      {
+        source: "/library/continue",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+    ];
   },
 };
 

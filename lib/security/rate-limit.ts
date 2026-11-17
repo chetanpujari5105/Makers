@@ -28,7 +28,11 @@ export async function rateLimit(name: LimitName, key: string) {
   let limiter = limiters.get(name);
   if (!limiter) {
     const { tokens, window } = limits[name];
-    limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(tokens, window), prefix: `rl:${name}` });
+    limiter = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(tokens, window),
+      prefix: `rl:${name}`,
+    });
     limiters.set(name, limiter);
   }
   const { success } = await limiter.limit(key);
@@ -38,7 +42,7 @@ export async function rateLimit(name: LimitName, key: string) {
 // shortcut: per-process memory, development only; deployed sites need Upstash.
 const local = new Map<string, number[]>();
 function localLimit(name: LimitName, key: string) {
-  if (process.env.NODE_ENV === "production" && !process.env.ALLOW_LOCAL_RATE_LIMIT) {
+  if (process.env.NODE_ENV === "production") {
     throw new Error("Rate limiting is not configured (UPSTASH_REDIS_REST_URL / _TOKEN).");
   }
   const { tokens, window } = limits[name];

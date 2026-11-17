@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalogue/labels";
 import type { ProductDetail, ProductSummary } from "@/lib/catalogue/types";
 
+import { ClaimDialog } from "./claim-dialog";
 import { DisclosureList } from "./disclosure-list";
 import { PriceTag } from "./price-tag";
 import { ProductGrid } from "./product-card";
@@ -129,7 +130,7 @@ export function ProductPage({
                 ) : null}
               </dl>
 
-              <BuyBlock price={product} ctaLabel={ctaLabel} />
+              <BuyBlock product={product} ctaLabel={ctaLabel} />
               <p className="text-base text-muted-foreground">{product.shortDescription}</p>
             </div>
           </div>
@@ -142,9 +143,7 @@ export function ProductPage({
             <p className="truncate text-sm font-medium">{product.title}</p>
             <PriceTag isFree={product.isFree} priceInr={product.priceInr} className="text-lg" />
           </div>
-          <Button disabled aria-describedby="buy-note">
-            {ctaLabel}
-          </Button>
+          <ProductCta product={product} ctaLabel={ctaLabel} noteId="buy-note" />
         </div>
       </StickyBuyBar>
 
@@ -328,7 +327,7 @@ export function ProductPage({
               <h2 id="final-cta-title" className="text-h3">
                 Ready to start?
               </h2>
-              <BuyBlock price={product} ctaLabel={ctaLabel} noteId="buy-note-final" />
+              <BuyBlock product={product} ctaLabel={ctaLabel} noteId="buy-note-final" />
             </section>
           </div>
         </Container>
@@ -353,27 +352,54 @@ export function ProductPage({
 
 function BuyBlock({
   id,
-  price,
+  product,
   ctaLabel,
   noteId = "buy-note",
 }: {
   id?: string;
-  price: Pick<ProductDetail, "isFree" | "priceInr">;
+  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
   ctaLabel: string;
   noteId?: string;
 }) {
   return (
     <div id={id} className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-        <PriceTag isFree={price.isFree} priceInr={price.priceInr} className="text-[1.75rem]" />
-        <Button size="lg" disabled aria-describedby={noteId}>
-          {ctaLabel}
-        </Button>
+        <PriceTag isFree={product.isFree} priceInr={product.priceInr} className="text-[1.75rem]" />
+        <ProductCta product={product} ctaLabel={ctaLabel} noteId={noteId} />
       </div>
       <p id={noteId} className="text-sm text-muted-foreground">
-        Opens soon — buying and downloads are still being set up.
+        {product.isFree
+          ? "Free. We’ll email you a one-time link to your library."
+          : "Opens soon — paid checkout is still being set up."}
       </p>
     </div>
+  );
+}
+
+/* Free products open the buyer-details dialog; paid checkout arrives in Phase 3. */
+function ProductCta({
+  product,
+  ctaLabel,
+  noteId,
+}: {
+  product: Pick<ProductDetail, "slug" | "title" | "isFree">;
+  ctaLabel: string;
+  noteId: string;
+}) {
+  if (product.isFree) {
+    return (
+      <ClaimDialog
+        slug={product.slug}
+        title={product.title}
+        ctaLabel={ctaLabel}
+        describedBy={noteId}
+      />
+    );
+  }
+  return (
+    <Button size="lg" disabled aria-describedby={noteId}>
+      {ctaLabel}
+    </Button>
   );
 }
 

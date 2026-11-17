@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import { cookieOptions, signValue, verifyValue } from "./signed-cookie";
 
@@ -9,7 +10,9 @@ import { cookieOptions, signValue, verifyValue } from "./signed-cookie";
 export const CUSTOMER_COOKIE = "makers_session";
 const CUSTOMER_DAYS = 30;
 
+// connection(): checking expiry reads the clock, which must happen at request time.
 export async function getCustomerEmail() {
+  await connection();
   const store = await cookies();
   return verifyValue(store.get(CUSTOMER_COOKIE)?.value, "customer")?.sub ?? null;
 }
@@ -29,6 +32,7 @@ export const ADMIN_COOKIE = "makers_admin";
 const ADMIN_HOURS = 8;
 
 export async function isAdmin() {
+  await connection();
   const store = await cookies();
   const payload = verifyValue(store.get(ADMIN_COOKIE)?.value, "admin");
   return Boolean(payload && payload.sub === process.env.ADMIN_EMAIL?.trim().toLowerCase());
