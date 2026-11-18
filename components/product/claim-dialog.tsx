@@ -61,6 +61,7 @@ export function ClaimDialog({
   ctaLabel,
   describedBy,
   priceInr = null,
+  testMode = false,
   cover,
 }: {
   slug: string;
@@ -68,6 +69,8 @@ export function ClaimDialog({
   ctaLabel: string;
   describedBy?: string;
   priceInr?: number | null;
+  /** Razorpay test keys: tell the buyer no real money is taken. */
+  testMode?: boolean;
   /** Small cover shown at the top, so the buyer sees what they're getting. */
   cover?: React.ReactNode;
 }) {
@@ -225,7 +228,7 @@ export function ClaimDialog({
             {status === "done"
               ? `We’ve sent a link to ${sentTo}. It opens your library, where the files and setup steps are waiting.`
               : paid
-                ? `${formatInr(priceInr)}. Pay securely with Razorpay; your library link arrives by email. Test mode — no real money is taken.`
+                ? `${formatInr(priceInr)}. Pay securely with Razorpay; your library link arrives by email.${testMode ? " Test mode — no real money is taken." : ""}`
                 : "It’s free. Tell us where to send your access link."}
           </DialogDescription>
         </DialogHeader>

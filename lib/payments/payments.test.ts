@@ -199,15 +199,23 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
   const receipts = () =>
     warn.mock.calls.filter((c) => String(c[0]).includes("Your receipt")).length;
 
-  it("opens checkout only with test keys, and never on Vercel production", async () => {
-    const { isCheckoutOpen } = await import("./razorpay");
+  it("opens checkout with test keys locally, live keys only on production, never on previews", async () => {
+    const { isCheckoutOpen, isTestCheckout } = await import("./razorpay");
     expect(isCheckoutOpen()).toBe(true);
+    expect(isTestCheckout()).toBe(true);
     vi.stubEnv("VERCEL_ENV", "production");
-    expect(isCheckoutOpen()).toBe(false);
+    expect(isCheckoutOpen()).toBe(false); // test keys on the public site
     expect((await startOrder(buyer("prod"))).res.status).toBe(503);
+    vi.stubEnv("RAZORPAY_KEY_ID", "rzp_live_abc");
+    expect(isCheckoutOpen()).toBe(true);
+    expect(isTestCheckout()).toBe(false);
+    vi.stubEnv("VERCEL_ENV", "preview");
+    expect(isCheckoutOpen()).toBe(false); // previews share the production database
+    vi.stubEnv("RAZORPAY_KEY_ID", "rzp_test_fake123");
+    expect(isCheckoutOpen()).toBe(false);
     vi.stubEnv("VERCEL_ENV", "");
     vi.stubEnv("RAZORPAY_KEY_ID", "rzp_live_abc");
-    expect(isCheckoutOpen()).toBe(false);
+    expect(isCheckoutOpen()).toBe(false); // live keys never run locally
     vi.stubEnv("RAZORPAY_KEY_ID", "rzp_test_fake123");
   });
 
