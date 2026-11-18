@@ -4,10 +4,8 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal/legal-page";
 import { brand } from "@/lib/brand";
 
-// Draft until the owner reviews it; not indexed.
 export const metadata: Metadata = {
   title: "Refunds, cancellations and delivery",
-  robots: { index: false },
 };
 
 export default function RefundPolicyPage() {

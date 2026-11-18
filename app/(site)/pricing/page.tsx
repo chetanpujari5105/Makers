@@ -6,8 +6,7 @@ import { getCatalogue } from "@/lib/catalogue/catalogue";
 import { legal } from "@/lib/brand";
 import { formatInr } from "@/lib/money";
 
-// Draft until the owner reviews it; not indexed.
-export const metadata: Metadata = { title: "Pricing", robots: { index: false } };
+export const metadata: Metadata = { title: "Pricing" };
 
 /** Every published product with the full price you pay (from the database, never typed by hand). */
 async function allProducts() {

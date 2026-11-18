@@ -11,16 +11,27 @@ import type { PaymentProvider, ProviderPayment } from "./provider";
 const API = "https://api.razorpay.com/v1";
 
 /**
- * Checkout opens only with complete settings that match the site:
- * LIVE keys on Vercel Production (owner approved 2026-11-18), TEST keys
- * locally. Vercel previews never take payments: they share the production
- * database, so a test-card purchase there would grant real access.
+ * Razorpay keys are present and right for this site: LIVE keys only on Vercel
+ * Production, TEST keys only locally, nothing on Vercel previews (they share
+ * the production database, so a test-card purchase there would grant real
+ * access). Payment confirmations (browser check + webhook) need only this, so
+ * a payment already in progress still grants access after checkout is closed.
  */
-export function isCheckoutOpen() {
+export function paymentsConfigured() {
   const e = process.env;
   if (!e.RAZORPAY_KEY_ID || !e.RAZORPAY_KEY_SECRET || !e.RAZORPAY_WEBHOOK_SECRET) return false;
   if (e.VERCEL_ENV === "preview") return false;
   return e.RAZORPAY_KEY_ID.startsWith(e.VERCEL_ENV === "production" ? "rzp_live_" : "rzp_test_");
+}
+
+/**
+ * New paid checkouts. On Production this also needs the on/off switch
+ * CHECKOUT_ENABLED=true (default OFF), so deploying code never opens
+ * payments by accident. Locally, test keys alone open test checkout.
+ */
+export function isCheckoutOpen() {
+  if (!paymentsConfigured()) return false;
+  return process.env.VERCEL_ENV !== "production" || process.env.CHECKOUT_ENABLED === "true";
 }
 
 /** True when checkout is open with test keys (no real money): buyers are told so. */
@@ -31,7 +42,7 @@ const hex = (secret: string, value: string) =>
   createHmac("sha256", secret).update(value).digest("hex");
 
 export function razorpay(): PaymentProvider {
-  if (!isCheckoutOpen()) throw new Error("Razorpay is not configured for this environment.");
+  if (!paymentsConfigured()) throw new Error("Razorpay is not configured for this environment.");
   const keyId = process.env.RAZORPAY_KEY_ID!;
   const keySecret = process.env.RAZORPAY_KEY_SECRET!;
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET!;

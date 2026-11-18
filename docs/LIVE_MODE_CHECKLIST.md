@@ -4,9 +4,10 @@ Owner approved switching on live payments on 2026-11-18 ("take control and do it
 
 ## Code (this branch)
 
-- `isCheckoutOpen()` (`lib/payments/razorpay.ts`): **live** keys (`rzp_live_`) only on Vercel Production, **test** keys (`rzp_test_`) only locally, **never** on previews (they share the production database).
+- `paymentsConfigured()` (`lib/payments/razorpay.ts`): **live** keys (`rzp_live_`) only on Vercel Production, **test** keys (`rzp_test_`) only locally, **never** on previews (they share the production database). Payment confirmations (browser check + webhook) need only this.
+- `isCheckoutOpen()`: new checkouts. On Production it also needs the on/off switch **`CHECKOUT_ENABLED=true`** (default OFF; added 2026-11-19), so a deploy never opens payments by accident.
 - Buyers see "test mode — no real money" only with test keys.
-- Test: `lib/payments/payments.test.ts` ("opens checkout with test keys locally, live keys only on production, never on previews").
+- Tests: `lib/payments/payments.test.ts` ("the checkout switch…", "emergency OFF…", "buyer closes the tab…").
 
 ## Owner steps (secrets and logins: the owner does these)
 
@@ -25,10 +26,18 @@ Done 2026-11-18: keys added by the owner, webhook enabled (4 events), Production
 
 ## Still open (owner's call; not blocking the code)
 
-- Legal pages still show "[Owner to fill]" for seller name, address, phone and grievance officer (`legal` in `lib/brand.ts`). Indian e-commerce rules expect these on a site that sells.
-- GST / invoice questions for a CA (`docs/PHASE3_READINESS.md`).
-- Rights to sell material adapted from other creators: owner confirmed permission on 2026-11-18.
+- Legal details filled 2026-11-18; owner + lawyer reviewed the policy pages 2026-11-19; CA review done (owner, 2026-11-19). Terms §7 still has the limitation-of-liability marker until the owner pastes the lawyer's sentence or approves dropping it.
+- GTA 6 Clipping Playbook: owner states it is their own work (2026-11-19; `docs/DECISIONS.md`).
+- Launch on the real domain: `docs/LAUNCH_RUNBOOK.md`.
 
-## Turning it off again
+## Turning checkout on and off (Production)
 
-Delete the three `RAZORPAY_*` variables from Vercel Production and redeploy: checkout returns to "Opens soon".
+- **On:** Vercel → makers → Settings → Environment Variables → `CHECKOUT_ENABLED` = `true`, **Production** only (not a secret) → Deployments → latest Production → Redeploy (approve with your passkey).
+- **Emergency off:** same place, set `CHECKOUT_ENABLED` to `false` (or delete it) → Redeploy. Product pages show "Opens soon" and `/api/orders` answers 503 within a minute of the deploy. Payments already made still complete (webhook + browser check keep working), so nobody pays without getting access.
+- **Fully off (remove the keys):** delete the three `RAZORPAY_*` variables from Production and redeploy. Do this only if a key leaked; payments in flight would then wait until keys return (Razorpay retries webhooks for 24 hours).
+
+## Webhook reference
+
+- URL format: `https://<your-domain>/api/webhooks/razorpay` — today `https://makers-alpha.vercel.app/api/webhooks/razorpay`, on launch day `https://fieldkitt.xyz/api/webhooks/razorpay`.
+- Events: `payment.captured`, `order.paid`, `payment.failed`, `refund.processed`.
+- Secret: the same value as `RAZORPAY_WEBHOOK_SECRET` in Vercel Production.

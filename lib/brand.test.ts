@@ -31,8 +31,8 @@ describe("brand configuration", () => {
     // Not registered under GST and no UDYAM given: these stay empty, never guessed.
     expect(legal.gstin).toBeNull();
     expect(legal.udyam).toBeNull();
-    // Only the owner can say they've reviewed the policies.
-    expect(legal.policiesReviewedOn).toBeNull();
+    // Owner and lawyer reviewed every policy page (owner, 2026-11-19).
+    expect(legal.policiesReviewedOn).toBe("19 November 2026");
   });
 
   it("links every policy and trust page from the footer", () => {

@@ -5,8 +5,7 @@ import { BusinessDetails, GrievanceOfficer, LegalPage } from "@/components/legal
 import { brand } from "@/lib/brand";
 import { dataItems, processors } from "@/lib/legal/data-map";
 
-// Draft until the owner and a lawyer review it; not indexed.
-export const metadata: Metadata = { title: "Privacy", robots: { index: false } };
+export const metadata: Metadata = { title: "Privacy" };
 
 /* The lists below come from lib/legal/data-map.ts, the same source as docs/DATA_MAP.md. */
 export default function PrivacyPage() {

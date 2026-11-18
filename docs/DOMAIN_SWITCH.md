@@ -64,7 +64,7 @@ Cookies belong to the address that set them. After the switch, **everyone is sig
 
 1. Razorpay Dashboard → **Account & Settings → Business website details**: change the website to `https://example.com`. Razorpay may re-review the website. The policy pages are at `/terms`, `/privacy`, `/refund-policy`, `/contact` and `/pricing`.
 2. **Checkout branding:** set the display name "Fieldkitt" and upload `public/brand/fieldkitt-mark.svg` (or a PNG made from it).
-3. When you approve live mode and webhooks: the webhook URL is `https://example.com/api/webhooks/razorpay` (see `docs/HANDOFF.md` §10).
+3. Webhook (live since 2026-11-18): edit its URL to `https://example.com/api/webhooks/razorpay`, same four events and same secret (`docs/LIVE_MODE_CHECKLIST.md`). Also update Account & Settings → Customer support details → Website/Contact link to `https://example.com/contact`. Ordered launch steps: `docs/LAUNCH_RUNBOOK.md`.
    - **Check:** a test-mode payment on a preview still completes (preview only, never with live keys).
    - **Undo:** change the website back in the dashboard.
 

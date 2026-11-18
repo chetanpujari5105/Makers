@@ -9,8 +9,7 @@ import {
 } from "@/components/legal/legal-page";
 import { brand, legal } from "@/lib/brand";
 
-// Draft until the owner and a lawyer review it; not indexed.
-export const metadata: Metadata = { title: "Terms", robots: { index: false } };
+export const metadata: Metadata = { title: "Terms" };
 
 export default function TermsPage() {
   return (
