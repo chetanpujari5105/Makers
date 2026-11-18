@@ -214,7 +214,12 @@ export function HomeView({
               </p>
             </div>
             <div className="flex items-center gap-8">
-              <FluidOrb size={112} color="#b5381f" className="hidden sm:block" />
+              <FluidOrb
+                size={112}
+                color="#b5381f"
+                still="/images/orb-still.webp"
+                className="hidden sm:block"
+              />
               <Button asChild size="lg" variant="secondary">
                 <Link href="/find">
                   Find the right resource
@@ -267,7 +272,7 @@ function HeroPlates({ products }: { products: ProductSummary[] }) {
         <li
           key={plate.key}
           className={cn(
-            "group/plate motion-lift relative bg-card p-2 shadow-raised transition-[translate] duration-200 ease-out has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring pointer-fine:hover:-translate-y-1",
+            "group/plate motion-lift relative bg-card p-2 shadow-raised transition-[translate] ease-out has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring pointer-fine:hover:-translate-y-1",
             i === 0 && "-rotate-[1.5deg]",
             i === 1 && "row-span-2 mt-[45%] rotate-1",
             i === 2 && "-rotate-[0.5deg]",
@@ -326,7 +331,7 @@ function SectionHeader({
         {linkLabel}
         <ArrowRightIcon
           aria-hidden="true"
-          className="motion-nudge size-4 transition-[translate] duration-200 ease-out pointer-fine:group-hover/more:translate-x-0.5"
+          className="motion-nudge size-4 transition-[translate] ease-out pointer-fine:group-hover/more:translate-x-0.5"
         />
       </Link>
     </div>

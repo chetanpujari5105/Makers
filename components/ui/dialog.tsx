@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * - small-screen fit: never taller than the viewport, scrolls inside, so the
  *   submit button is always reachable;
  * - a 44px visible close button;
- * - 200ms ease-out entry / 150ms exit (exit is faster), no decorative blur;
+ * - 250ms ease-out entry / 150ms exit (exit is faster), no decorative blur;
  * - reduced motion: scale is removed globally, the fade remains.
  * Always include a DialogTitle (screen readers announce it).
  */
@@ -43,7 +43,7 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       className={cn(
         "fixed inset-0 isolate z-50 bg-overlay",
-        "data-open:animate-in data-open:duration-200 data-open:ease-out data-open:fade-in-0",
+        "data-open:animate-in data-open:duration-250 data-open:ease-out data-open:fade-in-0",
         "data-closed:animate-out data-closed:duration-150 data-closed:ease-out data-closed:fade-out-0",
         className,
       )}
@@ -69,7 +69,7 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-6",
           "max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain",
           "rounded-2xl bg-popover p-6 text-base text-popover-foreground shadow-dialog sm:p-8",
-          "data-open:animate-in data-open:duration-200 data-open:ease-out data-open:fade-in-0 data-open:zoom-in-95",
+          "data-open:animate-in data-open:duration-250 data-open:ease-out data-open:fade-in-0 data-open:zoom-in-95",
           "data-closed:animate-out data-closed:duration-150 data-closed:ease-out data-closed:fade-out-0 data-closed:zoom-out-95",
           "focus-visible:outline-none",
           className,

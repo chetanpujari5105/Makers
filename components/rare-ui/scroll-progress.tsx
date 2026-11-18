@@ -5,31 +5,57 @@
  * Copyright (c) 2026 Swami Malode. MIT + Commons Clause + Attribution; see ./README.md.
  * Changes: direction A tokens, no blur, ease-out under 300 ms instead of springs,
  * focus moves into the list when it opens and back to the pill when it closes.
+ * Motion is transform and opacity only: the ring is two rotating half-rings, and the
+ * pill and the list fade and scale instead of animating width and height.
  */
 import {
   AnimatePresence,
   LazyMotion,
+  domAnimation,
   m,
   useReducedMotion,
   useScroll,
   useSpring,
+  useTransform,
+  type MotionValue,
 } from "framer-motion";
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
 export type ScrollProgressSection = { id: string; label: string };
 
-// Layout animations are the heavy part of framer-motion; fetch them after the page shows.
-const loadLayoutFeatures = () => import("./layout-features").then((mod) => mod.default);
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-const SIZE = { duration: 0.26, ease: EASE_OUT } as const;
-const FADE = { duration: 0.2, ease: EASE_OUT } as const;
-const INSTANT = { duration: 0 } as const;
+const PANEL = { duration: 0.25, ease: EASE_OUT } as const;
+const FADE = { duration: 0.15, ease: EASE_OUT } as const;
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-type Size = { width: number; height: number };
+/** Reading progress as a ring, drawn by rotating two half-rings (transform only, no repaint). */
+function ProgressRing({ progress }: { progress: MotionValue<number> }) {
+  const firstHalf = useTransform(progress, [0, 0.5], [0, 180], { clamp: true });
+  const secondHalf = useTransform(progress, [0.5, 1], [0, 180], { clamp: true });
+  const half = "absolute inset-0 rounded-full border-[2.5px] border-primary will-change-transform";
+  return (
+    <span
+      aria-hidden="true"
+      className="relative size-5 shrink-0 rounded-full border-[2.5px] border-foreground/15"
+    >
+      <span className="absolute -inset-[2.5px] [clip-path:inset(0_0_0_50%)]">
+        <m.span
+          className={cn(half, "[clip-path:inset(0_50%_0_0)]")}
+          style={{ rotate: firstHalf }}
+        />
+      </span>
+      <span className="absolute -inset-[2.5px] [clip-path:inset(0_50%_0_0)]">
+        <m.span
+          className={cn(half, "[clip-path:inset(0_0_0_50%)]")}
+          style={{ rotate: secondHalf }}
+        />
+      </span>
+    </span>
+  );
+}
 
 export type ScrollProgressProps = ComponentProps<"div"> & {
   sections: ScrollProgressSection[];
@@ -43,7 +69,6 @@ export function ScrollProgress({
   offset = 120,
   ...props
 }: ScrollProgressProps) {
-  const layoutId = useId();
   const reduceMotion = useReducedMotion() ?? false;
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 });
@@ -73,33 +98,21 @@ export function ScrollProgress({
 
   const label = sections.find((s) => s.id === activeId)?.label;
 
-  const collapsedRef = useRef<HTMLDivElement>(null);
-  const openRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const reopenFocus = useRef(false);
-
-  const [collapsedSize, setCollapsedSize] = useState<Size>();
-  const [openSize, setOpenSize] = useState<Size>();
+  // The widest label, so the pill keeps one width while labels crossfade.
   const [labelWidth, setLabelWidth] = useState<number>();
 
   useIsoLayoutEffect(() => {
     const measure = () => {
       if (labelRef.current) setLabelWidth(labelRef.current.offsetWidth);
-      if (collapsedRef.current)
-        setCollapsedSize({
-          width: collapsedRef.current.offsetWidth,
-          height: collapsedRef.current.offsetHeight,
-        });
-      if (openRef.current)
-        setOpenSize({ width: openRef.current.offsetWidth, height: openRef.current.offsetHeight });
     };
     measure();
     const ro = new ResizeObserver(measure);
-    for (const el of [labelRef.current, collapsedRef.current, openRef.current])
-      if (el) ro.observe(el);
+    if (labelRef.current) ro.observe(labelRef.current);
     document.fonts?.ready.then(measure).catch(() => {});
     return () => ro.disconnect();
   }, [sections]);
@@ -139,163 +152,120 @@ export function ScrollProgress({
     target?.focus({ preventScroll: true });
   };
 
-  const size = open ? openSize : collapsedSize;
-  const radius = open ? 20 : (collapsedSize?.height ?? 32) / 2;
   const row = "flex items-center gap-3 px-3 py-2.5 text-base leading-none";
+  const surface =
+    "absolute bottom-0 left-1/2 -translate-x-1/2 border border-border bg-card shadow-[0_12px_32px_-16px_rgb(var(--palette-shadow)/0.45)]";
+  const pop = {
+    initial: { opacity: 0, scale: reduceMotion ? 1 : 0.96 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: reduceMotion ? 1 : 0.96 },
+    style: { originY: 1 },
+  };
 
   return (
-    <LazyMotion features={loadLayoutFeatures} strict>
+    <LazyMotion features={domAnimation} strict>
       <div
         ref={rootRef}
         data-slot="scroll-progress"
         className={cn("fixed bottom-6 left-1/2 z-30 -translate-x-1/2", className)}
         {...props}
       >
-        {/* Invisible copies, measured so the surface can animate between the two sizes. */}
-        <div className="pointer-events-none invisible absolute" aria-hidden="true">
-          <div ref={collapsedRef} className="inline-flex items-center gap-2.5 py-2 pr-4 pl-2.5">
-            <span className="size-5" />
-            <span ref={labelRef} className="text-base leading-none font-medium whitespace-nowrap">
-              {label}
-            </span>
-          </div>
-          <div ref={openRef} className="w-max p-1.5">
-            {sections.map((s) => (
-              <div key={s.id} className={row}>
-                <span className="size-1.5" />
-                <span className="whitespace-nowrap">{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {size && (
-          <m.div
-            data-slot="scroll-progress-surface"
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border bg-card shadow-[0_12px_32px_-16px_rgb(var(--palette-shadow)/0.45)]"
-            initial={false}
-            animate={{ width: size.width, height: size.height, borderRadius: radius }}
-            transition={reduceMotion ? INSTANT : SIZE}
-          >
-            <AnimatePresence
-              initial={false}
-              mode="popLayout"
-              onExitComplete={() => {
-                if (!reopenFocus.current) return;
-                reopenFocus.current = false;
-                pillRef.current?.focus();
-              }}
+        {/* Invisible stack of every label, measured once for the pill's width. */}
+        <span
+          ref={labelRef}
+          aria-hidden="true"
+          className="pointer-events-none invisible absolute grid"
+        >
+          {sections.map((s) => (
+            <span
+              key={s.id}
+              className="col-start-1 row-start-1 text-base leading-none font-medium whitespace-nowrap"
             >
-              {open ? (
-                <m.ul
-                  key="list"
-                  ref={listRef}
-                  aria-label="Sections on this page"
-                  className="absolute inset-0 flex flex-col p-1.5"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={FADE}
-                  onAnimationStart={() =>
-                    listRef.current
-                      ?.querySelector<HTMLButtonElement>('[aria-current="true"]')
-                      ?.focus()
-                  }
-                >
-                  {sections.map((s) => {
-                    const isActive = s.id === activeId;
-                    return (
-                      <li key={s.id}>
-                        <button
-                          type="button"
-                          aria-current={isActive ? "true" : undefined}
-                          onClick={() => selectSection(s.id)}
-                          className={cn(
-                            "relative w-full rounded-xl text-left transition-colors",
-                            row,
-                            isActive
-                              ? "text-foreground"
-                              : "text-muted-foreground pointer-fine:hover:text-foreground",
-                          )}
-                        >
-                          {isActive && (
-                            <m.span
-                              layoutId={`${layoutId}-active`}
-                              className="absolute inset-0 rounded-xl bg-muted"
-                              transition={reduceMotion ? INSTANT : SIZE}
-                            />
-                          )}
-                          <span
-                            className={cn(
-                              "relative size-1.5 shrink-0 rounded-full",
-                              isActive ? "bg-primary" : "bg-foreground/30",
-                            )}
-                          />
-                          <span className="relative whitespace-nowrap">{s.label}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </m.ul>
-              ) : (
-                <m.button
-                  key="pill"
-                  ref={pillRef}
-                  type="button"
-                  onClick={() => setOpen(true)}
-                  aria-expanded={false}
-                  aria-label={label ? `Reading: ${label}. Show sections` : "Show sections"}
-                  className="absolute inset-0 flex items-center gap-2.5 py-2 pr-4 pl-2.5"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={FADE}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-5 shrink-0 -rotate-90"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      fill="none"
-                      strokeWidth="2.5"
-                      className="stroke-foreground/15"
-                    />
-                    <m.circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      fill="none"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      className="stroke-primary"
-                      style={{ pathLength: progress }}
-                    />
-                  </svg>
-                  <span className="relative h-5 shrink-0" style={{ width: labelWidth }}>
-                    <AnimatePresence initial={false}>
-                      {label && (
-                        <m.span
-                          key={label}
-                          className="absolute inset-y-0 left-0 flex items-center text-base leading-none font-medium whitespace-nowrap text-foreground"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={FADE}
-                        >
-                          {label}
-                        </m.span>
+              {s.label}
+            </span>
+          ))}
+        </span>
+
+        <AnimatePresence
+          initial={false}
+          onExitComplete={() => {
+            if (!reopenFocus.current) return;
+            reopenFocus.current = false;
+            pillRef.current?.focus();
+          }}
+        >
+          {open ? (
+            <m.ul
+              key="list"
+              ref={listRef}
+              aria-label="Sections on this page"
+              className={cn(surface, "flex w-max flex-col rounded-[20px] p-1.5")}
+              {...pop}
+              transition={PANEL}
+              onAnimationStart={() =>
+                listRef.current?.querySelector<HTMLButtonElement>('[aria-current="true"]')?.focus()
+              }
+            >
+              {sections.map((s) => {
+                const isActive = s.id === activeId;
+                return (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      aria-current={isActive ? "true" : undefined}
+                      onClick={() => selectSection(s.id)}
+                      className={cn(
+                        "w-full rounded-xl text-left transition-colors",
+                        row,
+                        isActive
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground pointer-fine:hover:text-foreground",
                       )}
-                    </AnimatePresence>
-                  </span>
-                </m.button>
-              )}
-            </AnimatePresence>
-          </m.div>
-        )}
+                    >
+                      <span
+                        className={cn(
+                          "size-1.5 shrink-0 rounded-full",
+                          isActive ? "bg-primary" : "bg-foreground/30",
+                        )}
+                      />
+                      <span className="whitespace-nowrap">{s.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </m.ul>
+          ) : (
+            <m.button
+              key="pill"
+              ref={pillRef}
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-expanded={false}
+              aria-label={label ? `Reading: ${label}. Show sections` : "Show sections"}
+              className={cn(surface, "flex items-center gap-2.5 rounded-full py-2 pr-4 pl-2.5")}
+              {...pop}
+              transition={FADE}
+            >
+              <ProgressRing progress={progress} />
+              <span className="relative h-5 shrink-0" style={{ width: labelWidth }}>
+                <AnimatePresence initial={false}>
+                  {label && (
+                    <m.span
+                      key={label}
+                      className="absolute inset-y-0 left-0 flex items-center text-base leading-none font-medium whitespace-nowrap text-foreground"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={FADE}
+                    >
+                      {label}
+                    </m.span>
+                  )}
+                </AnimatePresence>
+              </span>
+            </m.button>
+          )}
+        </AnimatePresence>
       </div>
     </LazyMotion>
   );

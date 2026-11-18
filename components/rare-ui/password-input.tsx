@@ -16,8 +16,8 @@ const LID_CLOSED = { top: 17, bottom: 17 };
 const LASHES = ["M4.4 14.6 3 16.4", "M9 16.6 8.5 19", "M15 16.6l.5 2.4", "M19.6 14.6l1.4 1.8"];
 
 const INSTANT: Transition = { duration: 0 };
-const LID: Transition = { duration: 0.2, ease: [0.23, 1, 0.32, 1] };
-const SWAP: Transition = { duration: 0.12, ease: "easeOut" };
+const LID: Transition = { duration: 0.15, ease: [0.23, 1, 0.32, 1] };
+const SWAP: Transition = { duration: 0.15, ease: [0.23, 1, 0.32, 1] };
 const BLINK: Transition = {
   duration: 1.1,
   times: [0, 0.5, 0.5, 1],
@@ -77,7 +77,9 @@ function Eye({ open, reduced }: { open: boolean; reduced: boolean }) {
           d={d}
           initial={false}
           animate={{ pathLength: open ? 0 : 1, opacity: open ? 0 : 1 }}
-          transition={reduced ? INSTANT : { duration: 0.2, delay: open ? 0 : 0.08 }}
+          transition={
+            reduced ? INSTANT : { duration: 0.15, delay: open ? 0 : 0.08, ease: [0.23, 1, 0.32, 1] }
+          }
         />
       ))}
     </svg>
@@ -147,7 +149,7 @@ export function PasswordInput({
       <div
         data-slot="password-input"
         className={cn(
-          "relative flex h-12 w-full items-center rounded-lg border border-input bg-card text-foreground transition-[border-color,box-shadow] duration-150 ease-out",
+          "relative flex h-12 w-full items-center rounded-lg border border-input bg-card text-foreground transition-[border-color] duration-150 ease-out",
           "focus-within:border-ring focus-within:shadow-[0_0_0_1px_var(--ring),0_0_0_5px_var(--primary-soft)] pointer-fine:hover:not-focus-within:border-foreground/50",
           disabled && "pointer-events-none opacity-55",
           className,

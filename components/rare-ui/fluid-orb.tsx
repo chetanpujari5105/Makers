@@ -3,9 +3,10 @@
 /*
  * Fluid orb — adapted from Rare UI (https://rareui.com).
  * Copyright (c) 2026 Swami Malode. MIT + Commons Clause + Attribution; see ./README.md.
- * Changes: pauses while off screen; decorative only; highlights use our paper colour.
+ * Changes: pauses while off screen; decorative only; highlights use our paper colour;
+ * a still image underneath, and the live orb only on capable devices (see orbMayAnimate).
  */
-import { useEffect, useRef, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -107,88 +108,161 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return shader;
 }
 
+type Nav = Navigator & {
+  connection?: { saveData?: boolean };
+  deviceMemory?: number;
+  getBattery?: () => Promise<{ charging: boolean; level: number }>;
+};
+
+/** Live WebGL only where it's cheap: wide screen, no data/motion saving, not a weak device. */
+export function orbMayAnimate(minWidth: string) {
+  const nav = navigator as Nav;
+  const query = (q: string) => window.matchMedia(q).matches;
+  return !(
+    nav.connection?.saveData ||
+    query("(prefers-reduced-data: reduce)") ||
+    query("(prefers-reduced-motion: reduce)") ||
+    !query(`(min-width: ${minWidth})`) ||
+    (nav.hardwareConcurrency ?? 8) < 4 ||
+    (nav.deviceMemory ?? 8) < 4
+  );
+}
+
+/** Best effort (Chrome only): skip the live orb on a low battery that isn't charging. */
+async function batteryLow() {
+  try {
+    const battery = await (navigator as Nav).getBattery?.();
+    return Boolean(battery && !battery.charging && battery.level < 0.2);
+  } catch {
+    return false;
+  }
+}
+
 export function FluidOrb({
   size = 240,
   color = "#1A73F2",
+  still,
+  liveFrom = "40rem",
   className,
   style,
   ...props
-}: FluidOrbProps) {
+}: FluidOrbProps & {
+  /** Still frame shown underneath, and on its own wherever the live orb is skipped. */
+  still: string;
+  /** Smallest screen width that gets the live WebGL orb. */
+  liveFrom?: string;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [live, setLive] = useState(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const gl = canvas?.getContext("webgl", { antialias: true, alpha: true });
-    if (!canvas || !gl) return; // no WebGL: the orb is decorative, so show nothing
-
-    const program = gl.createProgram();
-    const vert = compile(gl, gl.VERTEX_SHADER, VERT);
-    const frag = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-    if (!program || !vert || !frag) return;
-    gl.attachShader(program, vert);
-    gl.attachShader(program, frag);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
-    gl.useProgram(program);
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
-      gl.STATIC_DRAW,
-    );
-    const aPos = gl.getAttribLocation(program, "a_pos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-    const uTime = gl.getUniformLocation(program, "u_time");
-    gl.uniform3f(gl.getUniformLocation(program, "u_color"), ...hexToRgb(color));
-    const px = Math.round(size * Math.min(window.devicePixelRatio || 1, 2));
-    canvas.width = px;
-    canvas.height = px;
-    gl.viewport(0, 0, px, px);
-    gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), px, px);
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const start = performance.now();
-    let raf = 0;
-    let onScreen = false;
-    const render = (now: number) => {
-      gl.uniform1f(uTime, reduce ? 0 : (now - start) / 1000);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      if (!reduce && onScreen) raf = requestAnimationFrame(render);
-    };
-    render(start);
-
-    // Only animate while visible, so it costs nothing when scrolled away.
-    const observer = new IntersectionObserver(([entry]) => {
-      const was = onScreen;
-      onScreen = Boolean(entry?.isIntersecting);
-      if (onScreen && !was && !reduce) raf = requestAnimationFrame(render);
-      if (!onScreen) cancelAnimationFrame(raf);
+    if (!orbMayAnimate(liveFrom)) return;
+    let stop = () => {};
+    let cancelled = false;
+    void batteryLow().then((low) => {
+      if (!low && !cancelled) stop = startOrb(canvasRef.current, size, color, () => setLive(true));
     });
-    observer.observe(canvas);
-
     return () => {
-      observer.disconnect();
-      cancelAnimationFrame(raf);
-      gl.deleteProgram(program);
-      gl.deleteShader(vert);
-      gl.deleteShader(frag);
-      gl.deleteBuffer(buffer);
+      cancelled = true;
+      stop();
     };
-  }, [size, color]);
+  }, [size, color, liveFrom]);
 
   return (
     <div
       data-slot="fluid-orb"
+      data-live={live}
       aria-hidden="true"
       className={cn("relative shrink-0 overflow-hidden rounded-full", className)}
       style={{ width: size, height: size, ...style }}
       {...props}
     >
-      <canvas ref={canvasRef} className="size-full" />
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny decorative still; next/image adds nothing here */}
+      <img
+        src={still}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 size-full"
+      />
+      <canvas
+        ref={canvasRef}
+        data-live={live}
+        className="absolute inset-0 size-full opacity-0 transition-opacity duration-150 ease-out data-[live=true]:opacity-100"
+      />
     </div>
   );
+}
+
+/** Starts the WebGL loop and returns a stop function. If WebGL fails it does nothing, so the still stays. */
+function startOrb(
+  canvas: HTMLCanvasElement | null,
+  size: number,
+  color: string,
+  onFirstFrame: () => void,
+) {
+  const gl = canvas?.getContext("webgl", { antialias: true, alpha: true });
+  if (!canvas || !gl) return () => {};
+  const program = gl.createProgram();
+  const vert = compile(gl, gl.VERTEX_SHADER, VERT);
+  const frag = compile(gl, gl.FRAGMENT_SHADER, FRAG);
+  if (!program || !vert || !frag) return () => {};
+  gl.attachShader(program, vert);
+  gl.attachShader(program, frag);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return () => {};
+  gl.useProgram(program);
+
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+    gl.STATIC_DRAW,
+  );
+  const aPos = gl.getAttribLocation(program, "a_pos");
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(program, "u_time");
+  gl.uniform3f(gl.getUniformLocation(program, "u_color"), ...hexToRgb(color));
+  const px = Math.round(size * Math.min(window.devicePixelRatio || 1, 2));
+  canvas.width = px;
+  canvas.height = px;
+  gl.viewport(0, 0, px, px);
+  gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), px, px);
+
+  const start = performance.now();
+  let raf = 0;
+  let onScreen = false;
+  let shown = false;
+  const render = (now: number) => {
+    gl.uniform1f(uTime, (now - start) / 1000);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    if (!shown) {
+      shown = true;
+      onFirstFrame();
+    }
+    if (onScreen) raf = requestAnimationFrame(render);
+  };
+
+  // Only animate while visible, so it costs nothing when scrolled away.
+  const observer = new IntersectionObserver(([entry]) => {
+    const was = onScreen;
+    onScreen = Boolean(entry?.isIntersecting);
+    if (onScreen && !was) raf = requestAnimationFrame(render);
+    if (!onScreen) cancelAnimationFrame(raf);
+  });
+  observer.observe(canvas);
+
+  return () => {
+    observer.disconnect();
+    cancelAnimationFrame(raf);
+    gl.deleteProgram(program);
+    gl.deleteShader(vert);
+    gl.deleteShader(frag);
+    gl.deleteBuffer(buffer);
+  };
 }

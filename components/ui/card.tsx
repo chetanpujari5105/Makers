@@ -20,7 +20,8 @@ function Card({
       className={cn(
         "group/card relative flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-6 text-card-foreground shadow-card",
         interactive &&
-          "motion-lift transition-[box-shadow,translate] duration-200 ease-out focus-within:shadow-raised pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:shadow-raised",
+          // shortcut: overflow-hidden would clip a faded shadow layer, so the raised shadow switches without a fade; this card is only on /design-preview.
+          "motion-lift transition-[translate] ease-out focus-within:shadow-raised pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:shadow-raised",
         className,
       )}
       {...props}

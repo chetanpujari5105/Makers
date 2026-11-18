@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 // Layout animations are the heavy part of framer-motion; fetch them after the page shows.
 const loadLayoutFeatures = () => import("./layout-features").then((mod) => mod.default);
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-const SEND: Transition = { duration: 0.26, ease: EASE_OUT };
-const SHIFT: Transition = { duration: 0.24, ease: EASE_OUT };
-const LEAVE: Transition = { duration: 0.15, ease: [0.4, 0, 1, 1] };
+const SEND: Transition = { duration: 0.25, ease: EASE_OUT };
+const SHIFT: Transition = { duration: 0.25, ease: EASE_OUT };
+const LEAVE: Transition = { duration: 0.15, ease: EASE_OUT };
 const INSTANT: Transition = { duration: 0 };
 
 const QUESTION = '[data-slot="faq-question"]';

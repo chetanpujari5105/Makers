@@ -35,13 +35,15 @@ export function ProductCard({
       )}
     >
       <ViewTransition name={`cover-${product.slug}`} share="morph" default="none">
-        <ProductCover
-          title={product.title}
-          productType={product.productType}
-          goalSlug={product.goalSlug}
-          coverImage={product.coverImage}
-          className="motion-lift transition-[translate,box-shadow] duration-200 ease-out pointer-fine:group-hover/card:-translate-y-1 pointer-fine:group-hover/card:shadow-raised"
-        />
+        {/* The lift and the shadow live on a wrapper: the cover clips its own edges. */}
+        <div className="lift-shadow motion-lift transition-[translate] ease-out pointer-fine:group-hover/card:-translate-y-1 pointer-fine:group-hover/card:after:opacity-100">
+          <ProductCover
+            title={product.title}
+            productType={product.productType}
+            goalSlug={product.goalSlug}
+            coverImage={product.coverImage}
+          />
+        </div>
       </ViewTransition>
       <div className="flex flex-1 flex-col gap-2">
         {product.isSample ? (

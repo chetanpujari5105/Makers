@@ -84,7 +84,7 @@ export function ExploreFilters({ filters }: { filters: CatalogueFilters }) {
           {active > 0 ? <span className="text-muted-foreground">({active} on)</span> : null}
           <ChevronDownIcon
             aria-hidden="true"
-            className="ml-auto size-5 transition-[rotate] duration-200 ease-out group-open/filters:rotate-180"
+            className="ml-auto size-5 transition-[rotate] ease-out group-open/filters:rotate-180"
           />
         </summary>
         <div className="grid gap-4 border-t border-border p-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -171,7 +171,7 @@ function FilterSelect({
           id={id}
           name={name}
           defaultValue={value ?? ""}
-          className="h-12 w-full appearance-none rounded-lg border border-input bg-card pr-11 pl-4 text-base text-foreground transition-[border-color,box-shadow] duration-150 ease-out focus-visible:border-ring focus-visible:shadow-[0_0_0_1px_var(--ring),0_0_0_5px_var(--primary-soft)] focus-visible:outline-none pointer-fine:hover:not-focus:border-foreground/50"
+          className="h-12 w-full appearance-none rounded-lg border border-input bg-card pr-11 pl-4 text-base text-foreground transition-[border-color] duration-150 ease-out focus-visible:border-ring focus-visible:shadow-[0_0_0_1px_var(--ring),0_0_0_5px_var(--primary-soft)] focus-visible:outline-none pointer-fine:hover:not-focus:border-foreground/50"
         >
           {hasAny ? <option value="">Any</option> : null}
           {Object.entries(options).map(([key, text]) => (
