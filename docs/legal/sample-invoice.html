@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fieldkitt — sample invoice template</title>
+    <!-- Source for sample-invoice.pdf. Print with Chrome: Save as PDF, A4, no headers/footers. -->
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm;
+      }
+      body {
+        font:
+          11pt/1.45 -apple-system,
+          "Segoe UI",
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: #1d1b17;
+        margin: 0;
+      }
+      .banner {
+        border: 2px solid #b5381f;
+        color: #b5381f;
+        padding: 8px 12px;
+        font-weight: 700;
+        margin-bottom: 18px;
+      }
+      .fill {
+        background: #fdf0d5;
+        color: #7a4a00;
+        padding: 0 3px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #1d1b17;
+        padding-bottom: 12px;
+      }
+      h1 {
+        font-size: 20pt;
+        margin: 0;
+        letter-spacing: 0.02em;
+      }
+      .brand {
+        font:
+          600 18pt Georgia,
+          serif;
+      }
+      .brand span {
+        color: #b5381f;
+      }
+      .muted {
+        color: #5b5853;
+        font-size: 9.5pt;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin: 16px 0;
+      }
+      h2 {
+        font-size: 9pt;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #5b5853;
+        margin: 0 0 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 6px;
+        border-bottom: 1px solid #ded4c6;
+        vertical-align: top;
+      }
+      th {
+        font-size: 9pt;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #5b5853;
+      }
+      .num {
+        text-align: right;
+        white-space: nowrap;
+      }
+      .total td {
+        font-weight: 700;
+        border-bottom: 2px solid #1d1b17;
+      }
+      .gst {
+        margin-top: 14px;
+        border: 1px dashed #5b5853;
+        padding: 8px 12px;
+      }
+      footer {
+        margin-top: 24px;
+        font-size: 9pt;
+        color: #5b5853;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner">
+      SAMPLE TEMPLATE — not a valid invoice. Owner/CA review required before use. Highlighted fields
+      are placeholders.
+    </div>
+
+    <header>
+      <div>
+        <div class="brand">Fieldkitt<span>.</span></div>
+        <div class="muted">Practical kits by Chetan</div>
+      </div>
+      <div style="text-align: right">
+        <h1>INVOICE</h1>
+        <div class="muted"><span class="fill">[Title if GST-registered: “TAX INVOICE”]</span></div>
+      </div>
+    </header>
+
+    <div class="cols">
+      <div>
+        <h2>Seller</h2>
+        <div><span class="fill">[Legal name of seller]</span></div>
+        <div><span class="fill">[Full postal address, city, state, PIN]</span></div>
+        <div>
+          Email: <span class="fill">[support email]</span> · Phone:
+          <span class="fill">[phone]</span>
+        </div>
+        <div>PAN: <span class="fill">[PAN — optional, CA to confirm]</span></div>
+        <div>
+          <strong>GST status:</strong>
+          <span class="fill"
+            >[ONE of: “GSTIN: 00AAAAA0000A0Z0” OR “Not registered under GST — GST not
+            charged”]</span
+          >
+        </div>
+      </div>
+      <div>
+        <h2>Invoice details</h2>
+        <div>Invoice no.: <span class="fill">FK-2026-0001</span></div>
+        <div>Date: <span class="fill">18 Nov 2026</span></div>
+        <div>
+          Place of supply: <span class="fill">[Buyer's state — needed if GST-registered]</span>
+        </div>
+        <h2 style="margin-top: 12px">Billed to</h2>
+        <div><span class="fill">[Buyer name]</span></div>
+        <div><span class="fill">[buyer@example.com]</span></div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Item</th>
+          <th>SAC</th>
+          <th class="num">Qty</th>
+          <th class="num">Price</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>
+            <span class="fill">[Kit name]</span>
+            <div class="muted">Digital download — delivered to My Library</div>
+          </td>
+          <td><span class="fill">[CA to confirm]</span></td>
+          <td class="num">1</td>
+          <td class="num"><span class="fill">₹399.00</span></td>
+          <td class="num"><span class="fill">₹399.00</span></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Discount (coupon <span class="fill">[CODE]</span>)</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="num"><span class="fill">− ₹0.00</span></td>
+        </tr>
+        <tr class="total">
+          <td></td>
+          <td colspan="4">Total paid (INR)</td>
+          <td class="num"><span class="fill">₹399.00</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="muted" style="margin-top: 6px">
+      Amount in words: <span class="fill">Rupees three hundred ninety-nine only</span>
+    </div>
+
+    <div class="gst">
+      <strong>If NOT registered under GST:</strong> keep “GST not charged — seller not registered
+      under GST” and remove the tax lines.<br />
+      <strong>If registered:</strong> title “TAX INVOICE”, show GSTIN, place of supply, taxable
+      value and the GST break-up (CGST + SGST, or IGST) as your CA advises.
+      <span class="fill">[CA to confirm rates and wording]</span>
+    </div>
+
+    <div class="cols" style="margin-top: 18px">
+      <div>
+        <h2>Payment</h2>
+        <div>Paid via Razorpay on <span class="fill">18 Nov 2026</span></div>
+        <div>Payment ID: <span class="fill">pay_XXXXXXXXXXXXXX</span></div>
+        <div>Order ID: <span class="fill">order_XXXXXXXXXXXXXX</span></div>
+      </div>
+      <div>
+        <h2>Delivery and refunds</h2>
+        <div>Digital product, available immediately in My Library. No shipping.</div>
+        <div>
+          All sales are final — see the Refunds, cancellations and delivery policy on the website.
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      This is a computer-generated document and needs no signature. Questions:
+      <span class="fill">[support email]</span>. Grievance Officer:
+      <span class="fill">[name, email]</span>.
+    </footer>
+  </body>
+</html>

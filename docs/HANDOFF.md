@@ -246,3 +246,65 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
   7. Cookies `makers_session` / `makers_admin` — **leave alone** unless needed: renaming signs every buyer and the owner out.
 - **Still open:** trademark search for "Fieldkitt"; connecting the domain fieldkitt.xyz. Legal pages remain placeholders that say they need owner review.
 - **Footer line:** "© Fieldkitt — Practical kits by Chetan. Some interface pieces from Rare UI." — keep the Rare UI credit (licence).
+
+## 16. Pre-domain audit (branch `pre-domain-audit`, not merged)
+
+Goal: buying the domain is the last step. Nothing here touches payments, auth, the production database or secrets.
+
+**What changed**
+
+- **One URL setting.** Every absolute URL (canonical, Open Graph, sitemap, robots, JSON-LD, sign-in emails) comes from `NEXT_PUBLIC_SITE_URL` via `lib/site-url.ts`. Proved two ways: by `lib/domain-switch.test.ts`, and by a real build with `NEXT_PUBLIC_SITE_URL=https://fieldkitt.example`, where all 54 absolute links, the sitemap, robots and the product page `<head>` used it and `makers-alpha.vercel.app` appeared nowhere. Day-of steps are in `docs/DOMAIN_SWITCH.md`.
+- **Draft legal and trust pages:** `/about`, `/contact`, `/pricing` (new; prices read from the database), `/terms`, `/privacy`, `/refund-policy` (**no refunds**, owner decision). A Grievance Officer block is on Contact, Terms and Privacy.
+  - Every page shows "Draft: owner/lawyer review required" and is `noindex`.
+  - Missing owner details show as yellow "[Owner to fill: …]" markers. Fill in `legal` in `lib/brand.ts`, then update the "leaves every detail for the owner" test in `lib/brand.test.ts`.
+  - The footer links to every page. Links inside legal text are underlined.
+- **Sample invoice:** `docs/legal/sample-invoice.pdf`, built from `sample-invoice.html` (print it with Chrome: Save as PDF, A4). It is marked SAMPLE and needs owner/CA review. It has both GST lines (registered / not registered).
+- **Data map:** `lib/legal/data-map.ts` is the one list behind both `/privacy` and `docs/DATA_MAP.md`; `lib/legal/data-map.test.ts` fails if they drift.
+  - The deletion SQL in `DATA_MAP.md` ran on the development database for 22 test buyers: buyers without orders were removed completely, 16 orders were kept under "Deleted customer", and no leads, sign-in links or customers were left.
+  - It found and fixed a bug: the temporary table now uses `on commit drop`, so the SQL can run twice in one session.
+- **Privacy fix:** rate-limit keys sent to Upstash are now an HMAC of the IP or email (`lib/security/rate-limit.ts` + test), never the raw value.
+- **Layout shift fix:** My Library's footer no longer jumps when the page finishes loading. Phone CLS went from 0.106 (on 3 of 4 runs) to 0.000 (4 of 4).
+- **New test:** signed download links expire after 60 seconds, and unsafe file-name characters are replaced (`lib/storage/files.test.ts`, offline with dummy keys).
+
+**Product-page "meta description" (Lighthouse SEO 92): tried, measured, reverted.** See DECISIONS.
+
+- The cause: Next.js streams the title and description into `<body>` because the product page reads `params`, and Lighthouse only reads `<head>`.
+- Setting `htmlLimitedBots: /.*/` moved them into `<head>`, but phone performance fell about 5 points on every page and product runs never finished loading.
+- With the default setting, WhatsApp, Facebook, Slack, LinkedIn, X, Bing, Apple and Google's preview crawlers already get the tags in `<head>` (checked with curl). Googlebot reads the streamed tags.
+
+**Audit results (localhost; development database; production build unless noted)**
+
+| Check                                                               | Result                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`                                                     | Pass: 24 files, 109 tests, lint, types, build. The one build warning (Atkinson font fallback) is already on `main`.                                                                                                                                       |
+| `npm audit --omit=dev`                                              | 0 vulnerabilities. Dev-only tools (drizzle-kit, shadcn CLI, vitest) report 27; the only fixes are breaking downgrades, so none were applied.                                                                                                              |
+| Security headers                                                    | `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, CSP `frame-ancestors 'none'`. There is no full CSP (a gap, not a regression). HSTS comes from Vercel; checked on the preview.                                                |
+| CSRF                                                                | All 14 browser-called POST routes check same-origin. The webhook uses its signature instead, and the CSV export is GET + owner cookie. A cross-site request to `/api/payments/verify` gets 403.                                                           |
+| Cookies                                                             | `httpOnly`, `sameSite=lax`, `secure` in production, no `domain` (they follow the site's address).                                                                                                                                                         |
+| Rate limits                                                         | Seen working during tests: `/api/orders` 429 after repeated orders, admin sign-in `error=busy` after 5 tries.                                                                                                                                             |
+| Secrets in browser files                                            | 0 of 8 secret values and 0 secret names in 55 browser files.                                                                                                                                                                                              |
+| Samples and drafts                                                  | Sample products are `noindex` and left out of the sitemap. Unknown and draft slugs return 404. The 404 page is `noindex`.                                                                                                                                 |
+| Broken links                                                        | 24 same-site pages crawled, all 200.                                                                                                                                                                                                                      |
+| Keyboard                                                            | "Skip to content" is the first stop. Every stop has a visible ring (cards: ring on the card; inputs: vermilion border). The claim dialog opens with Enter, keeps focus inside, and Escape closes it and returns focus.                                    |
+| Reduced motion                                                      | Nothing moves. Only 150 ms colour fades run on the product contents links (same on `main`; recorded exception).                                                                                                                                           |
+| Phone/tablet widths                                                 | No sideways scroll on 10 pages at 390 and 768 px. Screenshots at 390/768/1440 look right.                                                                                                                                                                 |
+| Lighthouse vs `main` (3 interleaved runs + 6 extra phone Home runs) | Same scores as `main` everywhere: desktop 100; phone Home/Explore 91, Product 89. Library now has no layout shift. Accessibility and best practices are 100 everywhere. SEO 100, except Library (66, deliberately `noindex`) and Product (92, see above). |
+
+**User flows (`next dev`, development database, test emails, Razorpay test mode)**
+
+| Flow                           | Result                                                                                                                                                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Free claim                     | Pass: lead, customer and access created; marketing left unticked = no opt-in.                                                                                                                                                                            |
+| Library sign-in link           | Pass: the link (printed to the console locally) signs in, and the library lists the kit.                                                                                                                                                                 |
+| Used link again                | Pass: refused ("expired or was already used").                                                                                                                                                                                                           |
+| Expired link (over 15 minutes) | Pass: refused.                                                                                                                                                                                                                                           |
+| Start Here downloads           | Buttons shown. The actual download needs Backblaze B2, which isn't set up locally: **not tested**.                                                                                                                                                       |
+| Paid checkout, test card       | **Not automated.** Razorpay's card form would not run reliably under automation. The order was created at ₹399 from the database, the Razorpay form opened in Test Mode, and the bank simulator page opened. Owner to run by hand (steps in the report). |
+| Fake payment proof             | Pass: a forged signature gets 400, the order stays `created` and no access is granted.                                                                                                                                                                   |
+| Admin                          | Pass: wrong password refused; sign-in cookie `httpOnly` + `Lax`; create draft, edit; publish blocked while sections are missing; real products have no delete (archive only); sample deleted with the confirm tick.                                      |
+| Coupon                         | Pass: 10% coupon → server charged ₹359.10 (from the ₹399 database price); turned-off coupon → "This coupon isn't active."                                                                                                                                |
+| Refund flow                    | Dropped: no-refund policy (owner).                                                                                                                                                                                                                       |
+
+All test data was removed from the development database afterwards, and the deleted sample was restored with `npm run db:seed`.
+
+**Razorpay test-mode tips:** use a real-looking email domain (it rejects `@example.test`) and mobile `9000090000`; it refuses `9999999999` and `9876543210`.
