@@ -172,7 +172,8 @@ See `docs/DECISIONS.md` (dated log of owner decisions and spec deviations).
 ## 12. UI polish — direction A "Field Notes" (branch `phase-ui-polish`, not merged)
 
 - **What:** new palette and fonts, figure-plate covers for all 9 types, a new Home hero and section rhythm, the product page (facts line, first-win block, numbered steps, 65ch text), Explore goal chips and `next/form`, My Library cards, one designed empty state (`CatalogueEmpty`), the claim dialog cover, and motion (see `docs/DESIGN.md`).
-- **Fixed:** layout shift (Home 0.616 → 0, product 0.36 → 0) and font weight (398 → 111 KB). Before and after numbers are in `docs/UI_AUDIT.md` §5.
+- **Fixed:** layout shift (Home 0.616 → 0, product 0.36 → 0) and font weight (398 → about 97 KB on every page, with a 1 KB ₹-only font). Before and after numbers are in `docs/UI_AUDIT.md` §5.
+- **Checked before merge (2026-11-18):** `npm run check` (99 tests), `/security-review` (no findings), a Razorpay test purchase and a cancel, a free claim and My Library on localhost + development DB (test rows deleted), dialogs at 390 px. The unused `cn` package was removed.
 - **Not touched:** payments, auth, database and secrets. In `claim-dialog.tsx` only the markup changed (a cover at the top, an icon on errors); the submit, order, Razorpay and verify logic is unchanged.
 - **Where:** git worktree `.claude/worktrees/ui-polish` (local `npm run dev -- -p 3100`).
 - **Still to check after merge:** Lighthouse on production Home (CLS must stay under 0.1); `/design-preview/directions/a` returns 404 on production.

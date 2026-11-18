@@ -29,7 +29,8 @@ Every pair above was measured for WCAG AA. On the ink panel, use the paper (`sec
 
 - **Headlines:** Newsreader 500 (plus italic), via `next/font`, SIL Open Font License. Use the italic only for one short emphasis per screen (the hero's "_this week._", step and section numbers).
 - **Reading text:** Schibsted Grotesk (variable), SIL Open Font License.
-- **Weight on the page:** 109 KB of fonts in total, including the file the ₹ sign needs (the budget is 120 KB). Don't add weights or styles without measuring again.
+- **Weight on the page:** about 97 KB of fonts in total (the budget is 120 KB). Don't add weights or styles without measuring again.
+- **The ₹ sign** comes from two tiny files in `app/fonts/` (under 1 KB each), cut from the same two fonts and declared first in `--font-sans` and `--font-display` with `unicode-range: U+20B9`. Without them, a single ₹ downloads a 15–20 KB "latin-ext" file. If you change a font, cut a new ₹ file from it (`pyftsubset <font>.woff2 --unicodes=U+20B9 --flavor=woff2`).
 - **Scale:** unchanged fluid tokens (`text-display … text-sm`). Body text is at least 16px, and `text-sm` (15px) is the smallest size.
 - **Line length:** long text is at most `65ch` (product guide, descriptions).
 - **Labels in caps** (`FIG. 6`, `NOTION TEMPLATE`, `FIRST WIN`): `text-sm font-semibold uppercase tracking-[0.08–0.12em]`. Use them only for labels, never for sentences.

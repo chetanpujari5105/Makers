@@ -113,10 +113,28 @@
  * Tier 3 — Tailwind theme (generates utilities such as bg-primary,
  * text-h1, font-display, py-section, max-w-page, shadow-card)
  * ------------------------------------------------------------------------- */
+/* The ₹ sign alone, cut from the same two fonts (SIL OFL 1.1, under 1 KB each).
+ * Without these, one ₹ on a page downloads a 15–20 KB "latin-ext" font file. */
+@font-face {
+  font-family: "Schibsted Grotesk rupee";
+  src: url("./fonts/schibsted-grotesk-rupee.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+  unicode-range: U+20B9;
+}
+@font-face {
+  font-family: "Newsreader rupee";
+  src: url("./fonts/newsreader-rupee.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+20B9;
+}
+
 @theme inline {
   /* Fonts — loaded with next/font in app/layout.tsx */
-  --font-sans: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), ui-serif, Georgia, serif;
+  --font-sans:
+    "Schibsted Grotesk rupee", var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader rupee", var(--font-display-face), ui-serif, Georgia, serif;
   --font-heading: var(--font-display);
 
   /* Colours */

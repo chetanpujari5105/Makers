@@ -166,21 +166,21 @@ Same method as the baseline: local production build (`next start`) on the develo
 
 | Page    | Form factor | Performance  | LCP (before → after) | CLS (layout shift) | JS transferred | Fonts transferred |
 | ------- | ----------- | ------------ | -------------------- | ------------------ | -------------- | ----------------- |
-| Home    | Mobile      | 57 → **92**  | 5.4 s → **3.4 s**    | 0.616 → **0**      | 187 → 212 KB   | 398 → **111 KB**  |
-| Home    | Desktop     | 99 → 100     | 0.9 s → 0.7 s        | 0 → 0              | 187 → 212 KB   | 398 → 111 KB      |
-| Explore | Mobile      | 88 → **91**  | 3.9 s → 3.5 s        | 0 → 0              | 181 → 219 KB   | 414 → 132 KB\*    |
-| Explore | Desktop     | 100 → 100    | 0.8 s → 0.7 s        | 0 → 0              | 187 → 219 KB   | 398 → 111 KB      |
-| Product | Mobile      | 81 → **90**  | 5.3 s → **3.6 s**    | 0 → 0              | 199 → 224 KB   | 398 → 111 KB      |
-| Product | Desktop     | 81 → **100** | 1.0 s → 0.7 s        | 0.360 → **0**      | 199 → 224 KB   | 398 → 111 KB      |
+| Home    | Mobile      | 57 → **93**  | 5.4 s → **3.3 s**    | 0.616 → **0**      | 187 → 212 KB   | 398 → **97 KB**   |
+| Home    | Desktop     | 99 → 100     | 0.9 s → 0.7 s        | 0 → 0              | 187 → 212 KB   | 398 → 97 KB       |
+| Explore | Mobile      | 88 → **92**  | 3.9 s → 3.4 s        | 0 → 0              | 181 → 219 KB   | 414 → **98 KB**   |
+| Explore | Desktop     | 100 → 100    | 0.8 s → 0.7 s        | 0 → 0              | 187 → 219 KB   | 398 → 97 KB       |
+| Product | Mobile      | 81 → **91**  | 5.3 s → **3.5 s**    | 0 → 0              | 199 → 224 KB   | 398 → 97 KB       |
+| Product | Desktop     | 81 → **100** | 1.0 s → 0.7 s        | 0.360 → **0**      | 199 → 224 KB   | 398 → 97 KB       |
 
 Accessibility stays at 100 and Best practices at 100 everywhere. SEO is 91 on the product page, because the sample product has no meta description, as before.
 
-\* On a phone, Chrome draws the Price filter's options ("Under ₹500"…) in the reading font, which pulls in one extra 20 KB file. Every other page stays under the 120 KB budget.
+"After" is the final branch (re-measured 2026-11-18 after the ₹ fix below). Before that fix, Explore on a phone loaded 132 KB of fonts: Chrome measures the Price filter's options ("Under ₹500"…) in the reading font, and the ₹ pulled in a 20 KB "latin-ext" file. Styling the options alone did not help. Two ₹-only font files under 1 KB each (cut from the same fonts, so the sign looks identical) now cover every ₹ on every page.
 
 **What changed the numbers:**
 
 - **Layout shift (P1, P2):** fixed. Loading placeholders now match the page and are at least one screen tall, so the footer never shows and then jumps.
-- **Fonts (P3):** fell from 398 KB to 111 KB. That's two families, one headline weight, and the ₹ file only for the headline font.
+- **Fonts (P3):** fell from 398 KB to about 97 KB: two families, one headline weight, and a 1 KB file for the ₹ sign instead of the 15–20 KB "latin-ext" files.
 - **JavaScript:** +25–38 KB, from framer-motion (scroll entrances, loaded with `LazyMotion`) and `next/form` (Explore filters without a full page reload).
 
 **Other checks:**
@@ -193,5 +193,8 @@ Accessibility stays at 100 and Best practices at 100 everywhere. SEO is 91 on th
 - **Contrast:** every pair is AA (script in the session notes; values in `docs/DESIGN.md`).
 - **Keyboard only:** Home and the product page at 390 and 1440. The order is logical, every link and button shows a focus ring, and the hidden buy bar is skipped.
 - **Reduced motion:** scroll entrances end fully visible and don't move.
+- **Buyer flows (2026-11-18, localhost + development DB, Razorpay test mode):** one test-card purchase → "Payment confirmed" → the item is in My Library. Buying again with the same email is refused with a clear message. Cancelling the Razorpay window brings the dialog back with "Payment cancelled — nothing was charged" and the fields still filled. A free claim → "Check your email" → the sign-in link → My Library shows both items. All test rows were deleted afterwards. Locally there is no Resend key, so the email was printed to the server log instead of sent.
+- **Dialogs at 390 px:** both fit (16 px side margins), inputs are 16 px (no zoom on iPhone), buttons 48 px, focus starts in the name field. The paid dialog scrolls about 17 px inside itself.
+- **Security review** (`/security-review` on the branch diff): no findings.
 
-**Screenshots:** before and after, at 390, 768 and 1440, are in [`ui-audit/`](ui-audit/). Each file name is the label (`before-` or `after-`), the page (`home`, `product`, `explore`, `library`) and the width, for example `after-home-390.jpg`.
+**Screenshots:** before and after, at 390, 768 and 1440, are in [`ui-audit/`](ui-audit/). Each file name is the label (`before-` or `after-`), the page (`home`, `product`, `explore`, `library`) and the width, for example `after-home-390.jpg`. Also: `after-library-signed-in-1440.jpg` (My Library with two items) and `after-dialog-paid-390.jpg` / `after-dialog-free-390.jpg`.
