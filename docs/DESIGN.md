@@ -94,6 +94,25 @@ Every pair above was measured for WCAG AA. On the ink panel, use the paper (`sec
   - Loading placeholders must match the real layout and fill the screen. This fixed a 0.6 layout-shift score on Home.
 - **View-transition names must be unique on a page.** Only `ProductCard` covers and the product-page hero cover carry `cover-{slug}`.
 
+## Rare UI components (`components/rare-ui/`)
+
+Four components adapted from [Rare UI](https://rareui.com), chosen by the owner on 2026-11-18. Licence and changes: `components/rare-ui/README.md`.
+
+| Component        | Where                                              | Rule                                                                                                                                                                                                   |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ScrollProgress` | Product page, phones only, above the buy bar       | A progress ring and the current section. Tap it to open the section list. Desktop keeps the side list.                                                                                                 |
+| `Faq`            | Product page "Questions"                           | Questions sit in paper bubbles and answers in vermilion bubbles. Only for short Q&A; "Common problems" stays a plain list.                                                                             |
+| `PasswordInput`  | Owner sign-in                                      | An animated eye shows or hides the password. Same size and focus ring as the other inputs.                                                                                                             |
+| `FluidOrb`       | Home "Not sure where to start?" panel, `sm` and up | **The one exception** to "no gradients": a paper-to-vermilion WebGL orb, owner-approved. It is decorative, pauses off screen, and shows a still frame with reduced motion. Don't use it anywhere else. |
+
+- **Motion:** all four follow the rules above (at or under 300 ms, ease-out, no bounce, no blur).
+- **Weight:** the layout animations for `Faq` and `ScrollProgress` load after the page appears (`components/rare-ui/layout-features.ts`).
+- **Licence:**
+  - Keep the footer credit link to rareui.com.
+  - Never ship these components inside a product MAKERS sells (Commons Clause).
+  - When adding another one, answer **No** if `shadcn add` asks to overwrite `lib/utils.ts`.
+  - Remove the `cn` package if `shadcn add` puts it back.
+
 ## Empty states and words
 
 - **One component:** `CatalogueEmpty` (a small stack of blank plates, one plain sentence, one useful action). It's used on Home, Explore, category, Free and My Library.

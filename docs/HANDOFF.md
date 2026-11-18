@@ -189,3 +189,26 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 - **Not touched:** payments, auth, database and secrets. In `claim-dialog.tsx` only the markup changed (a cover at the top, an icon on errors); the submit, order, Razorpay and verify logic is unchanged.
 - **Production check after merge (read-only):** `/`, `/explore`, `/free`, `/library` and the sample product return 200; `/admin` sends a signed-out visitor to `/admin/login` (a 307 inside the streamed page, so `curl` sees 200); an unknown path, `/design-preview/directions/a` and `/design-preview/home` return 404. Layout shift (CLS) is 0 on Home, Explore and the product page, phone and desktop. Fonts are 95–96 KB, and the ₹ comes from the 1 KB file. Numbers: `docs/UI_AUDIT.md` §5.
 - **Known weak spots:** the product page on a phone scored anywhere from 55 to 99 on production. The difference is server wait time (the free Neon database and functions waking up after the deploy), not the page itself. With one real product, the Home hero fills empty spots with type-only plates and can repeat that product's type (two "FIG. 1 PDF workbook" plates).
+
+## 14. Rare UI components (branch `phase-rare-ui`, not merged)
+
+- **What:**
+  - `ScrollProgress` on product pages, phones only.
+  - The `Faq` thread for product "Questions".
+  - `PasswordInput` on `/admin/login`. The login form, field name and POST are unchanged.
+  - `FluidOrb` in the Home finder panel.
+  - A footer credit "Some interface pieces from Rare UI".
+- **Rules:** `components/rare-ui/README.md` and `docs/DESIGN.md`.
+- **Checked (localhost, production build):**
+  - `npm run check` passes.
+  - **Keyboard:**
+    - The pill list opens with focus on the current section; Escape returns focus to the pill.
+    - FAQ questions expand and arrow keys move between them.
+    - The eye button and password field are reachable, with a focus ring.
+  - **Search and no JavaScript:** closed FAQ answers stay in the page HTML.
+  - **No WebGL:** the orb shows nothing, because it is decorative.
+  - **Layout and speed:**
+    - Layout shift is 0 on every page.
+    - The product page on a phone scored 90 (91 before).
+    - JavaScript on the product page went up by about 29 KB, loaded after the page appears.
+    - Home went up by 7 KB.

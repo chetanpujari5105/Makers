@@ -7,6 +7,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { PriceTag } from "@/components/product/price-tag";
 import { ProductGrid } from "@/components/product/product-card";
 import { ProductCover } from "@/components/product/product-cover";
+import { FluidOrb } from "@/components/rare-ui/fluid-orb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ProductTypeKey } from "@/lib/catalogue/content-schema";
@@ -212,12 +213,15 @@ export function HomeView({
                 Answer three quick questions and we’ll suggest a resource that fits.
               </p>
             </div>
-            <Button asChild size="lg" variant="secondary">
-              <Link href="/find">
-                Find the right resource
-                <ArrowRightIcon aria-hidden="true" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-8">
+              <FluidOrb size={112} color="#b5381f" className="hidden sm:block" />
+              <Button asChild size="lg" variant="secondary">
+                <Link href="/find">
+                  Find the right resource
+                  <ArrowRightIcon aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
           </Reveal>
         </Container>
       </section>

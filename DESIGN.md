@@ -29,7 +29,7 @@ A well-made workbook: warm paper (`#f7f3ec`), ink text (`#1d1b17`) and one vermi
   - The cover morphs from card to product page.
   - Reduced motion keeps fades only.
 - **Never:**
-  - gradients, glass or blur
+  - gradients, glass or blur (one owner-approved exception: the Rare UI fluid orb on Home, see `docs/DESIGN.md`)
   - fake badges, ratings, sales counts or scarcity
   - stock images as covers
   - layout shift from loading states

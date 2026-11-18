@@ -3,6 +3,8 @@ import { ViewTransition } from "react";
 import { ChevronRightIcon, FileIcon, LinkIcon } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { Faq } from "@/components/rare-ui/faq";
+import { ScrollProgress } from "@/components/rare-ui/scroll-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,6 +162,12 @@ export function ProductPage({
           <ProductCta product={product} ctaLabel={ctaLabel} noteId="buy-note" />
         </div>
       </StickyBuyBar>
+
+      {/* Phones: reading progress and section jump, above the buy bar (desktop has the side list). */}
+      <ScrollProgress
+        sections={toc}
+        className="bottom-[calc(6rem+env(safe-area-inset-bottom))] lg:hidden"
+      />
 
       {/* 2–14. The guide */}
       <div className="border-t border-border bg-card">
@@ -364,8 +372,12 @@ export function ProductPage({
 
             {content.faq.length > 0 ? (
               <Section id="faq" title="Questions">
-                <DisclosureList
-                  items={content.faq.map((f) => ({ title: f.question, body: f.answer }))}
+                <Faq
+                  items={content.faq.map((f, i) => ({
+                    id: String(i),
+                    question: f.question,
+                    answer: f.answer,
+                  }))}
                 />
               </Section>
             ) : null}
