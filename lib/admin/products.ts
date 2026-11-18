@@ -1,7 +1,7 @@
 import { asc, count, desc, eq } from "drizzle-orm";
 
 import { getDb } from "@/db";
-import { categories, entitlements, productFiles, products } from "@/db/schema";
+import { categories, entitlements, orderItems, productFiles, products } from "@/db/schema";
 import { goals, type GoalSlug } from "@/lib/brand";
 import { publishProblems } from "@/lib/catalogue/publish-check";
 import { deleteObject, isStorageConfigured } from "@/lib/storage/files";
@@ -226,4 +226,37 @@ export async function removeFile(
   if (file.fileKey && isStorageConfigured()) await deleteObject(file.fileKey);
   await audit("file_remove", "product", file.productId, { label: file.label });
   return { ok: true };
+}
+
+/**
+ * Deletes a sample product, its files (rows and stored objects), updates and
+ * reviews. Only sample products, and only when nobody has access or an order.
+ */
+export async function deleteSampleProduct(
+  id: string,
+): Promise<{ ok: true; title: string } | { ok: false; message: string }> {
+  const db = getDb();
+  const product = await getAdminProduct(id);
+  if (!product) return { ok: false, message: "That product was already deleted." };
+  if (!product.isSample) return { ok: false, message: "Only sample products can be deleted." };
+  const [[access], [sold]] = await Promise.all([
+    db.select({ n: count() }).from(entitlements).where(eq(entitlements.productId, id)),
+    db.select({ n: count() }).from(orderItems).where(eq(orderItems.productId, id)),
+  ]);
+  if (access!.n > 0 || sold!.n > 0)
+    return {
+      ok: false,
+      message: "Someone has access to or ordered this sample, so it can’t be deleted.",
+    };
+  const keys = (
+    await db
+      .select({ key: productFiles.fileKey })
+      .from(productFiles)
+      .where(eq(productFiles.productId, id))
+  ).flatMap((f) => (f.key ? [f.key] : []));
+  // Files, updates, reviews and bundle items go with the product (cascade).
+  await db.delete(products).where(eq(products.id, id));
+  if (isStorageConfigured()) await Promise.all(keys.map(deleteObject));
+  await audit("product_delete", "product", id, { title: product.title, files: keys.length });
+  return { ok: true, title: product.title };
 }

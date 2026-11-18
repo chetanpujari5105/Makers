@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import {
   addLinkAction,
+  deleteSampleProductAction,
   removeFileAction,
   setProductStatusAction,
 } from "@/app/(site)/admin/actions";
@@ -164,6 +165,26 @@ async function EditProduct({ params }: Pick<PageProps<"/admin/products/[id]">, "
           slugLocked={product.status !== "draft" || product.buyerCount > 0}
         />
       </section>
+
+      {product.isSample ? (
+        <section aria-labelledby="delete-title" className="flex flex-col gap-3">
+          <h2 id="delete-title" className="text-h2">
+            Delete this sample
+          </h2>
+          <p className="text-base text-muted-foreground">
+            Removes the sample, its page and its stored files for good. Only works while nobody has
+            access to it.
+          </p>
+          <ActionForm
+            action={deleteSampleProductAction}
+            submitLabel="Delete sample"
+            variant="outline"
+            confirm="Yes, delete it"
+          >
+            <input type="hidden" name="id" value={product.id} />
+          </ActionForm>
+        </section>
+      ) : null}
     </div>
   );
 }

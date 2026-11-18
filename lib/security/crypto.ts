@@ -44,7 +44,12 @@ export async function hashPassword(password: string) {
 }
 
 export async function verifyPassword(password: string, stored: string | undefined) {
-  const [scheme, salt, hash] = stored?.split(":") ?? [];
+  // Accept a value pasted together with its name, as `npm run admin:hash` prints it.
+  const [scheme, salt, hash] =
+    stored
+      ?.trim()
+      .replace(/^ADMIN_PASSWORD_HASH=/, "")
+      .split(":") ?? [];
   if (scheme !== "scrypt" || !salt || !hash) return false;
   const actual = await scryptAsync(password, Buffer.from(salt, "base64url"), 64);
   return safeEqual(actual.toString("base64url"), hash);
