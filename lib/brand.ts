@@ -61,7 +61,7 @@ export const legal = {
   /** City whose courts handle disputes (Terms). */
   jurisdictionCity: "Baramati, Maharashtra" as OwnerValue,
   /** Date the owner (or a lawyer) last reviewed the policies. */
-  policiesReviewedOn: null as OwnerValue,
+  policiesReviewedOn: "19 November 2026" as OwnerValue,
   /** Required by the Consumer Protection (E-Commerce) Rules 2020 and IT Rules 2021. */
   grievanceOfficer: {
     name: "Chetan Kantu Pujari" as OwnerValue,

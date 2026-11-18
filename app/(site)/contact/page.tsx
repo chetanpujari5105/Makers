@@ -3,8 +3,7 @@ import Link from "next/link";
 
 import { BusinessDetails, GrievanceOfficer, LegalPage } from "@/components/legal/legal-page";
 
-// Draft until the owner reviews it; not indexed.
-export const metadata: Metadata = { title: "Contact", robots: { index: false } };
+export const metadata: Metadata = { title: "Contact" };
 
 export default function ContactPage() {
   return (

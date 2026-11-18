@@ -4,8 +4,7 @@ import Link from "next/link";
 import { BusinessDetails, LegalPage } from "@/components/legal/legal-page";
 import { brand } from "@/lib/brand";
 
-// Draft until the owner reviews it; not indexed.
-export const metadata: Metadata = { title: "About", robots: { index: false } };
+export const metadata: Metadata = { title: "About" };
 
 export default function AboutPage() {
   return (

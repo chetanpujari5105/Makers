@@ -30,14 +30,20 @@ function LegalPage({
     <Container size="prose" className="flex flex-col gap-8 py-section">
       <header className="flex flex-col gap-4">
         <h1 className="text-h1">{title}</h1>
-        <p
-          role="note"
-          className="rounded-lg border border-warning/40 bg-warning-soft px-4 py-3 text-base text-warning"
-        >
-          <strong>Draft: owner/lawyer review required.</strong> This page is a starting point, not
-          legal advice, and hasn’t been checked by a lawyer. Last reviewed:{" "}
-          <OwnerField value={legal.policiesReviewedOn} label="review date" />.
-        </p>
+        {legal.policiesReviewedOn ? (
+          <p className="text-base text-muted-foreground">
+            Last reviewed: {legal.policiesReviewedOn}.
+          </p>
+        ) : (
+          <p
+            role="note"
+            className="rounded-lg border border-warning/40 bg-warning-soft px-4 py-3 text-base text-warning"
+          >
+            <strong>Draft: owner/lawyer review required.</strong> This page is a starting point, not
+            legal advice, and hasn’t been checked by a lawyer. Last reviewed:{" "}
+            <OwnerField value={legal.policiesReviewedOn} label="review date" />.
+          </p>
+        )}
         {intro ? <div className="text-lead text-muted-foreground">{intro}</div> : null}
       </header>
       <div className="flex flex-col gap-8 text-base leading-relaxed [&_a]:text-primary [&_a]:underline [&_h2]:text-h3 [&_li]:ml-5 [&_li]:list-disc [&_section]:flex [&_section]:flex-col [&_section]:gap-3">
