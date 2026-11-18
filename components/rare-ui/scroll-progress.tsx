@@ -80,7 +80,8 @@ export function ScrollProgress({
 
   useEffect(() => {
     const update = () => {
-      if (scrollLock.current) return;
+      // Hidden (desktop) or a section was just picked: skip the heading reads.
+      if (scrollLock.current || !rootRef.current?.getClientRects().length) return;
       const active = sections.findLast(({ id }) => {
         const top = document.getElementById(id)?.getBoundingClientRect().top;
         return top !== undefined && top <= offset;

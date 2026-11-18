@@ -190,25 +190,26 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 - **Production check after merge (read-only):** `/`, `/explore`, `/free`, `/library` and the sample product return 200; `/admin` sends a signed-out visitor to `/admin/login` (a 307 inside the streamed page, so `curl` sees 200); an unknown path, `/design-preview/directions/a` and `/design-preview/home` return 404. Layout shift (CLS) is 0 on Home, Explore and the product page, phone and desktop. Fonts are 95–96 KB, and the ₹ comes from the 1 KB file. Numbers: `docs/UI_AUDIT.md` §5.
 - **Known weak spots:** the product page on a phone scored anywhere from 55 to 99 on production. The difference is server wait time (the free Neon database and functions waking up after the deploy), not the page itself. With one real product, the Home hero fills empty spots with type-only plates and can repeat that product's type (two "FIG. 1 PDF workbook" plates).
 
-## 14. Rare UI components (branch `phase-rare-ui`, not merged)
+## 14. Rare UI components and smooth motion (branch `phase-rare-ui`)
 
 - **What:**
   - `ScrollProgress` on product pages, phones only.
+  - `RailToc`: an "On this page" list with a paper plane, on product pages, desktop.
   - The `Faq` thread for product "Questions".
   - `PasswordInput` on `/admin/login`. The login form, field name and POST are unchanged.
-  - `FluidOrb` in the Home finder panel.
-  - A footer credit "Some interface pieces from Rare UI".
-- **Rules:** `components/rare-ui/README.md` and `docs/DESIGN.md`.
+  - `FluidOrb` in the Home finder panel. It has a 2 KB still image underneath, and the live orb runs only on capable devices.
+  - A footer credit, "Some interface pieces from Rare UI". **Keep it:** the licence requires it.
+- **Licence rule (Commons Clause):** never sell or bundle these components inside a MAKERS product. Details: `components/rare-ui/README.md`.
+- **Motion clean-up:** every animation now uses only transforms and opacity, one curve, 150 ms for feedback and 250 ms for panels. Measured before and after (CPU slowed 4×) in `docs/MOTION_AUDIT.md`.
+  - **Scrolling a product page on a phone:** 183 → 3 layouts and 359 → 15 paints. The cause was the progress ring.
+  - **Card hover:** 52 → 6 paints.
+  - **Claim dialog:** 45 → 4 layouts.
+  - **FAQ:** 99 → 6 layouts.
+- **Orb cost:** about 1 Lighthouse point, and 120 fps on a slowed phone profile, so it did not need hiding below `lg`.
+  - It stays a still image with Save-Data, reduced data or motion, a weak CPU or little memory, a low battery, or no WebGL. Each case was tested.
 - **Checked (localhost, production build):**
-  - `npm run check` passes.
-  - **Keyboard:**
-    - The pill list opens with focus on the current section; Escape returns focus to the pill.
-    - FAQ questions expand and arrow keys move between them.
-    - The eye button and password field are reachable, with a focus ring.
-  - **Search and no JavaScript:** closed FAQ answers stay in the page HTML.
-  - **No WebGL:** the orb shows nothing, because it is decorative.
-  - **Layout and speed:**
-    - Layout shift is 0 on every page.
-    - The product page on a phone scored 90 (91 before).
-    - JavaScript on the product page went up by about 29 KB, loaded after the page appears.
-    - Home went up by 7 KB.
+  - `npm run check` passes (100 tests).
+  - Security review: no findings.
+  - Keyboard-only flows pass, with reduced motion off and on: rail, pill, dialog, menu, FAQ and the password eye.
+  - Lighthouse is unchanged within noise: Home 92, Explore 91, Product 91 on phones; 99–100 on desktop; CLS 0 everywhere.
+- **Known, not new:** the product page's SEO score is 91. Next 16 streams the page description into the body, and Lighthouse looks for it in the head. Google reads it after rendering, but this is worth a look before launch.

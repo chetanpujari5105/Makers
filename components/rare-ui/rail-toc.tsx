@@ -94,7 +94,8 @@ export function RailToc({
   );
 
   const sync = useCallback(() => {
-    if (!nodes.length) return;
+    // Hidden (phones): skip the per-scroll heading reads entirely.
+    if (!nodes.length || !listRef.current?.getClientRects().length) return;
     // a clicked heading holds the plane until the reader scrolls, since headings near the end can't scroll up to the anchor
     if (pinned.current !== null) {
       aim(nodes[pinned.current] ?? first);

@@ -68,45 +68,51 @@ Every pair above was measured for WCAG AA. On the ink panel, use the paper (`sec
 
 ## Motion
 
-| What                        | How                                                                                                           | Timing                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Button press                | CSS `scale(0.97)` on `:active`                                                                                | 150 ms ease-out                     |
-| Card hover (mouse only)     | Cover plate lifts 4px and gains a shadow; title underlines                                                    | 200 ms                              |
-| Scroll entrance             | `<Reveal>` (`components/motion/reveal.tsx`, framer-motion `LazyMotion` + `m`): fade in and rise 8px, **once** | 260 ms, 40 ms stagger (max 5 steps) |
-| Card → product page         | React `<ViewTransition name="cover-{slug}" share="morph">`: the plate grows into the product cover            | 260 ms                              |
-| Explore filters             | `next/form` keeps you on the page; results crossfade (`.crossfade`)                                           | 120 ms out, 200 ms in               |
-| Dialogs                     | Fade + scale from 0.95                                                                                        | 200 ms in, 150 ms out               |
-| Mobile menu                 | Slides in from the right                                                                                      | 250 ms in, 150 ms out               |
-| Mobile buy bar              | Slides up and fades once the hero's button scrolls away                                                       | 240 ms                              |
-| Success in the claim dialog | The cover thumbnail settles in (fade + zoom from 90%)                                                         | 300 ms                              |
-| Loading                     | Placeholders shaped like the real page, at least one screen tall, with a soft pulse                           | —                                   |
+One curve everywhere: the strong ease-out `cubic-bezier(0.23, 1, 0.32, 1)` (`--motion-ease-out`; also Tailwind's `ease-out` and the default for any `transition`). Two lengths: **150 ms for feedback** (`--duration-fast`: hover, press, focus, small fades) and **250 ms for panels** (`--duration-panel`: dialogs, menus, bars, page morphs). Nothing over 300 ms. Exits may be faster than entries.
+
+| What                        | How                                                                                                                       | Timing                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Button press                | CSS `scale(0.97)` on `:active`                                                                                            | 150 ms                              |
+| Card hover (mouse only)     | Cover plate lifts 4px; a shadow painted once underneath fades in (`.lift-shadow` + `after:opacity-100`); title underlines | 150 ms                              |
+| Scroll entrance             | `<Reveal>` (`components/motion/reveal.tsx`, framer-motion `LazyMotion` + `m`): fade in and rise 8px, **once**             | 250 ms, 40 ms stagger (max 5 steps) |
+| Card → product page         | React `<ViewTransition name="cover-{slug}" share="morph">`: the plate grows into the product cover                        | 250 ms                              |
+| Explore filters             | `next/form` keeps you on the page; results crossfade (`.crossfade`)                                                       | 120 ms out, 200 ms in               |
+| Dialogs                     | Fade + scale from 0.95                                                                                                    | 250 ms in, 150 ms out               |
+| Mobile menu                 | Slides in from the right; the backdrop fades                                                                              | 250 ms in, 150 ms out               |
+| Mobile buy bar              | Slides up and fades once the hero's button scrolls away                                                                   | 250 ms                              |
+| Success in the claim dialog | The cover thumbnail settles in (fade + zoom from 90%)                                                                     | 250 ms                              |
+| "Common problems" answers   | Native `<details>`: the answer fades in, the height opens at once                                                         | 250 ms                              |
+| Loading                     | Placeholders shaped like the real page, at least one screen tall, with a soft pulse                                       | —                                   |
 
 **Rules:**
 
-- UI motion stays at or under 300 ms and uses the strong ease-out `cubic-bezier(0.23, 1, 0.32, 1)`. No bounce.
+- **Animate only `transform` (translate, scale, rotate) and `opacity`.** Never animate `box-shadow`, `width`, `height`, `top`, `filter` or SVG attributes; they repaint or re-lay-out on every frame. For a shadow, paint it once on a layer and fade the layer (`.lift-shadow`). Measured before and after: `docs/MOTION_AUDIT.md`.
+- **Allowed exception:** colour changes on small controls (hover colour of a link, button or chip) keep a 150 ms colour transition. They repaint only that control, and only on hover.
+- Focus rings appear at once (no transition), so keyboard users see them immediately.
 - **Never use `<Reveal>` above the fold or on a headline.** Its content is hidden until JavaScript runs. A `<noscript>` rule shows it when JavaScript is off.
 - **Reduced motion:**
   - Movement is removed: framer-motion's `reducedMotion="user"` and the CSS block in `globals.css`.
   - Fades stay.
   - View transitions become an instant swap.
 - **No layout shift:**
-  - Animate only `opacity` and transforms.
   - Loading placeholders must match the real layout and fill the screen. This fixed a 0.6 layout-shift score on Home.
 - **View-transition names must be unique on a page.** Only `ProductCard` covers and the product-page hero cover carry `cover-{slug}`.
 
 ## Rare UI components (`components/rare-ui/`)
 
-Four components adapted from [Rare UI](https://rareui.com), chosen by the owner on 2026-11-18. Licence and changes: `components/rare-ui/README.md`.
+Five components adapted from [Rare UI](https://rareui.com), chosen by the owner on 2026-11-18. Licence and changes: `components/rare-ui/README.md`.
 
-| Component        | Where                                              | Rule                                                                                                                                                                                                   |
-| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ScrollProgress` | Product page, phones only, above the buy bar       | A progress ring and the current section. Tap it to open the section list. Desktop keeps the side list.                                                                                                 |
-| `Faq`            | Product page "Questions"                           | Questions sit in paper bubbles and answers in vermilion bubbles. Only for short Q&A; "Common problems" stays a plain list.                                                                             |
-| `PasswordInput`  | Owner sign-in                                      | An animated eye shows or hides the password. Same size and focus ring as the other inputs.                                                                                                             |
-| `FluidOrb`       | Home "Not sure where to start?" panel, `sm` and up | **The one exception** to "no gradients": a paper-to-vermilion WebGL orb, owner-approved. It is decorative, pauses off screen, and shows a still frame with reduced motion. Don't use it anywhere else. |
+| Component        | Where                                              | Rule                                                                                                                                                                                                                                                                                 |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ScrollProgress` | Product page, phones only, above the buy bar       | A progress ring and the current section. Tap it to open the section list.                                                                                                                                                                                                            |
+| `RailToc`        | Product page, desktop (`lg` and up), left column   | "On this page" list with a vermilion paper plane that flies down a dashed rail to the section you're reading. Plain `#` links, so it works without JavaScript.                                                                                                                       |
+| `Faq`            | Product page "Questions"                           | Questions sit in paper bubbles and answers in vermilion bubbles. Only for short Q&A; "Common problems" stays a plain list.                                                                                                                                                           |
+| `PasswordInput`  | Owner sign-in                                      | An animated eye shows or hides the password. Same size and focus ring as the other inputs.                                                                                                                                                                                           |
+| `FluidOrb`       | Home "Not sure where to start?" panel, `sm` and up | **The one exception** to "no gradients": a paper-to-vermilion WebGL orb, owner-approved. Decorative. A 2 KB still image (`public/images/orb-still.webp`) sits underneath; the live orb starts only on capable devices (see below) and pauses off screen. Don't use it anywhere else. |
 
-- **Motion:** all four follow the rules above (at or under 300 ms, ease-out, no bounce, no blur).
-- **Weight:** the layout animations for `Faq` and `ScrollProgress` load after the page appears (`components/rare-ui/layout-features.ts`).
+- **The live orb is skipped** (the still image stays) with Save-Data on, `prefers-reduced-data`, reduced motion, fewer than 4 CPU cores, under 4 GB memory, a battery under 20% that isn't charging (Chrome only), no WebGL, and below `sm` (the orb is hidden there).
+- **Motion:** all five follow the rules above.
+- **Weight:** only `Faq` uses layout animations; they load after the page appears (`components/rare-ui/layout-features.ts`). `ScrollProgress` and `RailToc` pause their scroll work while hidden (desktop and phones respectively).
 - **Licence:**
   - Keep the footer credit link to rareui.com.
   - Never ship these components inside a product MAKERS sells (Commons Clause).
