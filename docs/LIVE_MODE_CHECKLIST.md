@@ -11,15 +11,17 @@ Owner approved switching on live payments on 2026-11-18 ("take control and do it
 ## Owner steps (secrets and logins: the owner does these)
 
 1. [x] Razorpay account activated (Account & Settings → Activation details: activated 2026-11-17).
-2. [ ] Razorpay → switch the top toggle to **Live** → Account & Settings → API keys → Generate live key. Copy the Key ID and Key Secret (the secret is shown once).
-3. [ ] Make a webhook secret without printing it: in Terminal run `openssl rand -hex 32 | pbcopy` (copies it to the clipboard).
-4. [ ] Razorpay (Live) → Account & Settings → Webhooks → Add new webhook:
+2. [x] Razorpay → switch the top toggle to **Live** → Account & Settings → API keys → Generate live key. Copy the Key ID and Key Secret (the secret is shown once).
+3. [x] Make a webhook secret without printing it: in Terminal run `openssl rand -hex 32 | pbcopy` (copies it to the clipboard).
+4. [x] Razorpay (Live) → Account & Settings → Webhooks → Add new webhook:
    - URL: `https://makers-alpha.vercel.app/api/webhooks/razorpay` (change it when the domain moves; `docs/DOMAIN_SWITCH.md`)
    - Secret: paste from step 3
    - Events: `payment.captured`, `order.paid`, `payment.failed`, `refund.processed`
-5. [ ] Vercel → makers → Settings → Environment Variables → add, **Production only**, marked Sensitive: `RAZORPAY_KEY_ID` (rzp_live_…), `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (same value as step 4).
-6. [ ] Say "merge" → Production redeploys with the new code and keys.
-7. [ ] One real purchase with your own card on the live site; check the order in Admin → Orders, the email, the library download, and the webhook delivery (Razorpay → Webhooks → the webhook → recent deliveries: 200).
+5. [x] Vercel → makers → Settings → Environment Variables → add, **Production only**, marked Sensitive: `RAZORPAY_KEY_ID` (rzp_live_…), `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (same value as step 4).
+6. [x] Say "merge" → Production redeploys with the new code and keys.
+7. [ ] **(still to do)** One real purchase with your own card on the live site; check the order in Admin → Orders, the email, the library download, and the webhook delivery (Razorpay → Webhooks → the webhook → recent deliveries: 200).
+
+Done 2026-11-18: keys added by the owner, webhook enabled (4 events), Production redeployed; the live page shows the buy button and `/api/orders` validates input (400) instead of 503. Razorpay's onboarding test payment was done on localhost with test keys (order paid, access granted).
 
 ## Still open (owner's call; not blocking the code)
 
