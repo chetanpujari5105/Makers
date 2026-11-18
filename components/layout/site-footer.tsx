@@ -43,7 +43,11 @@ function SiteFooter() {
 
       <Container className="flex flex-col gap-2 border-t border-border py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
         <p>
-          © {brand.name}. {brand.name} is a working name.
+          © {brand.name}. {brand.name} is a working name. Some interface pieces from{" "}
+          <a href="https://rareui.com" rel="noopener">
+            Rare UI
+          </a>
+          .
         </p>
         {brand.socialLinks.length > 0 ? (
           <ul className="flex gap-4">

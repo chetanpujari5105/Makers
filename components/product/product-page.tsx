@@ -3,6 +3,9 @@ import { ViewTransition } from "react";
 import { ChevronRightIcon, FileIcon, LinkIcon } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { Faq } from "@/components/rare-ui/faq";
+import { RailToc } from "@/components/rare-ui/rail-toc";
+import { ScrollProgress } from "@/components/rare-ui/scroll-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -161,25 +164,17 @@ export function ProductPage({
         </div>
       </StickyBuyBar>
 
+      {/* Phones: reading progress and section jump, above the buy bar (desktop has the side list). */}
+      <ScrollProgress
+        sections={toc}
+        className="bottom-[calc(6rem+env(safe-area-inset-bottom))] lg:hidden"
+      />
+
       {/* 2–14. The guide */}
       <div className="border-t border-border bg-card">
         <Container className="grid gap-12 py-section lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">
-            <nav aria-label="On this page" className="sticky top-24 flex flex-col gap-3">
-              <p className="text-sm font-medium text-muted-foreground">On this page</p>
-              <ul className="flex flex-col border-l border-border">
-                {toc.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={`#${item.id}`}
-                      className="-ml-px block border-l border-transparent py-1.5 pl-4 text-sm text-muted-foreground no-underline hover:border-foreground hover:text-foreground"
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <RailToc items={toc} className="sticky top-24" />
           </aside>
 
           <div className="flex max-w-[65ch] flex-col gap-16">
@@ -364,8 +359,12 @@ export function ProductPage({
 
             {content.faq.length > 0 ? (
               <Section id="faq" title="Questions">
-                <DisclosureList
-                  items={content.faq.map((f) => ({ title: f.question, body: f.answer }))}
+                <Faq
+                  items={content.faq.map((f, i) => ({
+                    id: String(i),
+                    question: f.question,
+                    answer: f.answer,
+                  }))}
                 />
               </Section>
             ) : null}

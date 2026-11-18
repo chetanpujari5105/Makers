@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { CircleAlertIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,11 @@ export function ClaimDialog({
   // Kept so a cancelled payment reopens the form already filled in.
   const [buyer, setBuyer] = useState({ name: "", email: "", coupon: "" });
   const errorRef = useRef<HTMLParagraphElement>(null);
+  // The dialog shows the price in the sans font. Fetch its tiny ₹ file (under 1 KB) now,
+  // so opening the dialog doesn't swap the glyph and re-lay-out the form.
+  useEffect(() => {
+    void document.fonts?.load('1em "Schibsted Grotesk rupee"', "₹").catch(() => {});
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -207,7 +212,7 @@ export function ClaimDialog({
               aria-hidden="true"
               className={
                 status === "done"
-                  ? "w-20 animate-in duration-300 ease-out fade-in-0 zoom-in-90"
+                  ? "w-20 animate-in duration-250 ease-out fade-in-0 zoom-in-90"
                   : "w-20"
               }
             >

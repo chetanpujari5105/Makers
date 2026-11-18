@@ -22,7 +22,7 @@ function MobileNav() {
       </DialogPrimitive.Trigger>
 
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-overlay data-open:animate-in data-open:duration-200 data-open:fade-in-0 data-closed:animate-out data-closed:duration-150 data-closed:fade-out-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-overlay data-open:animate-in data-open:duration-250 data-open:ease-out data-open:fade-in-0 data-closed:animate-out data-closed:duration-150 data-closed:ease-out data-closed:fade-out-0" />
         <DialogPrimitive.Content
           className="fixed inset-y-0 right-0 z-50 flex w-[min(24rem,calc(100%-3rem))] flex-col overflow-y-auto overscroll-contain bg-card shadow-dialog data-open:animate-in data-open:duration-250 data-open:ease-out data-open:slide-in-from-right data-closed:animate-out data-closed:duration-150 data-closed:ease-out data-closed:slide-out-to-right"
           aria-describedby={undefined}

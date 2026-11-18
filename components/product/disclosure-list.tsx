@@ -14,7 +14,7 @@ export function DisclosureList({ items }: { items: { title: string; body: string
             {item.title}
             <ChevronDownIcon
               aria-hidden="true"
-              className="size-5 shrink-0 text-muted-foreground transition-[rotate] duration-200 ease-out group-open:rotate-180"
+              className="size-5 shrink-0 text-muted-foreground transition-[rotate] ease-out group-open:rotate-180"
             />
           </summary>
           <p className="max-w-prose pb-5 text-body text-foreground/85">{item.body}</p>

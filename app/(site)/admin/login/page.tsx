@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
+import { PasswordInput } from "@/components/rare-ui/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,10 +29,9 @@ export default function AdminLoginPage({ searchParams }: PageProps<"/admin/login
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="admin-password">Password</Label>
-          <Input
+          <PasswordInput
             id="admin-password"
             name="password"
-            type="password"
             autoComplete="current-password"
             required
           />

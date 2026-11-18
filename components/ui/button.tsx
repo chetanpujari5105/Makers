@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   [
     "motion-press group/button relative inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent font-medium whitespace-nowrap select-none",
-    "transition-[background-color,border-color,color,box-shadow,scale] duration-150 ease-out",
+    "transition-[background-color,border-color,color,scale] duration-150 ease-out",
     "active:not-disabled:scale-[0.97]",
     "disabled:cursor-not-allowed disabled:opacity-55 aria-busy:cursor-progress aria-busy:opacity-85",
     "aria-invalid:border-destructive",

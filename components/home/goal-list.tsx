@@ -23,7 +23,7 @@ export function GoalList() {
               {goal.label}
               <ArrowRightIcon
                 aria-hidden="true"
-                className="motion-nudge size-5 shrink-0 self-center text-primary opacity-0 transition-[opacity,translate] duration-200 ease-out pointer-fine:group-hover/goal:translate-x-1 pointer-fine:group-hover/goal:opacity-100"
+                className="motion-nudge size-5 shrink-0 self-center text-primary opacity-0 transition-[opacity,translate] ease-out pointer-fine:group-hover/goal:translate-x-1 pointer-fine:group-hover/goal:opacity-100"
               />
             </Link>
           </h3>

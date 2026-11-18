@@ -101,12 +101,11 @@
     0 1px 2px rgb(var(--palette-shadow) / 0.08), 0 18px 40px -18px rgb(var(--palette-shadow) / 0.35);
   --elevation-dialog: 0 24px 64px -16px rgb(var(--palette-shadow) / 0.35);
 
-  /* Motion — strong ease-out; UI motion stays at or under 300ms */
+  /* Motion — one curve (strong ease-out). Feedback 150ms, panels 250ms, nothing over 300ms.
+     Animate only transform and opacity; see docs/MOTION_AUDIT.md. */
   --motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --motion-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --duration-fast: 150ms;
-  --duration-base: 200ms;
-  --duration-slow: 300ms;
+  --duration-panel: 250ms;
 }
 
 /* ---------------------------------------------------------------------------
@@ -217,7 +216,8 @@
 
   /* Motion */
   --ease-out: var(--motion-ease-out);
-  --ease-in-out: var(--motion-ease-in-out);
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--motion-ease-out);
 }
 
 /* ---------------------------------------------------------------------------
@@ -293,21 +293,16 @@
     touch-action: manipulation;
   }
 
-  /* Lets <details> animate to its natural height (progressive enhancement) */
-  :root {
-    interpolate-size: allow-keywords;
-  }
-
-  /* Disclosure (FAQ, common problems): native <details>, height eases open */
+  /* Disclosure (common problems): native <details>. The answer fades in; the height
+     snaps open, because animating height re-lays-out the page on every frame. */
   .disclosure::details-content {
-    block-size: 0;
-    overflow-y: clip;
+    opacity: 0;
     transition:
-      block-size var(--duration-base) var(--motion-ease-out),
-      content-visibility var(--duration-base) allow-discrete;
+      opacity var(--duration-panel) var(--motion-ease-out),
+      content-visibility var(--duration-panel) allow-discrete;
   }
   .disclosure[open]::details-content {
-    block-size: auto;
+    opacity: 1;
   }
   .disclosure > summary::-webkit-details-marker {
     display: none;
@@ -319,13 +314,31 @@
   }
 }
 
+/* Hover shadow, painted once and faded in with opacity (no per-frame repaint).
+ * Put it on an element that does not clip (no overflow-hidden); show it with after:opacity-100. */
+@layer components {
+  .lift-shadow {
+    position: relative;
+  }
+  .lift-shadow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--shadow-raised);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--motion-ease-out);
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * View transitions (React <ViewTransition>, browsers that support them).
  * .morph: a card's cover plate grows into the product page cover.
  * .crossfade: Explore results swap when filters change.
  * ------------------------------------------------------------------------- */
 ::view-transition-group(*) {
-  animation-duration: 260ms;
+  animation-duration: 250ms;
   animation-timing-function: var(--motion-ease-out);
 }
 ::view-transition-old(.crossfade) {
@@ -354,10 +367,6 @@
     --tw-exit-translate-x: 0 !important;
     --tw-exit-translate-y: 0 !important;
     scroll-behavior: auto !important;
-  }
-
-  .disclosure::details-content {
-    transition: none;
   }
 
   /* Page and cover transitions become an instant swap. */
