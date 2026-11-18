@@ -13,7 +13,7 @@
 - **Phase 4** (merged 2026-11-18): owner admin for products, orders (+ resend receipt), customers, leads + CSV, coupons, reviews, updates and an audit log. Its migration is on production Neon `main`. Walkthrough on localhost + development DB passed; 5 bugs fixed with tests (see `docs/HANDOFF.md` §11 item 12).
 - **UI polish** (**merged into `main` 2026-11-18**, merge commit `67f7a86`; production verified): owner picked direction A "Field Notes" (warm paper, vermilion, Newsreader + Schibsted Grotesk, figure-plate covers). Layout shift and font weight fixed. Design and motion rules: `docs/DESIGN.md`; results: `docs/UI_AUDIT.md` §5; `docs/HANDOFF.md` §13.
 - **Rare UI + smooth motion** (**merged into `main` 2026-11-18**, merge commit `138017c`; production verified): 5 adapted components in `components/rare-ui/` (licence: footer credit link required; never resell them in a product — Commons Clause; see its README). Motion is transform/opacity only, one curve, 150/250 ms: `docs/MOTION_AUDIT.md`. Never let `shadcn add` overwrite `lib/utils.ts`. `docs/HANDOFF.md` §14.
-- **Brand Fieldkit** (**merged into `main` 2026-11-18**, owner said "merge"): name/tagline/owner in `lib/brand.ts`; inline header logo `components/layout/wordmark.tsx`; icons, OG image, manifest in `app/`; logo files `public/brand/`; owner originals `docs/brand/originals/`. Trademark and domain checks still open. See `docs/HANDOFF.md` §15.
+- **Brand Fieldkitt** (first merged as "Fieldkit" 2026-11-18; **renamed to Fieldkitt on branch `rename-fieldkitt`, not merged — waiting for the owner's "merge"**; matches the domain fieldkitt.xyz): name/tagline/owner in `lib/brand.ts`; inline header logo `components/layout/wordmark.tsx`; icons, OG image, manifest in `app/`; logo files `public/brand/`; owner originals `docs/brand/originals/`. Trademark and domain checks still open. See `docs/HANDOFF.md` §15.
 - **Not built (by design):** live payments (live mode not approved), bundle editing/purchases, USD prices, MDX guide loader, newsletter. No Razorpay webhook is registered yet (owner: not until live mode).
 - **Read before working:** `docs/HANDOFF.md` (map, commands, conventions, tokens), `docs/DECISIONS.md` (owner decisions + deviations), `docs/SKILLS_AND_TOOLS.md` (which skills to use per phase).
 - **Next.js 16 warning:** APIs differ from older tutorials (e.g. `error.tsx` receives `retry`, Cache Components are on, `dynamicParams` is unavailable). Check `node_modules/next/dist/docs/` before writing Next.js code (see `AGENTS.md`).
@@ -24,7 +24,7 @@
 
 ---
 
-You are building a production-minded, single-owner digital product storefront called **Fieldkit** — "Practical kits by Chetan" (brand locked 2026-11-18; repo, package and Vercel project are still named `makers`). The owner is a creator, not a senior engineer. Make decisions carefully, explain technical terms in plain English, and give exact terminal commands.
+You are building a production-minded, single-owner digital product storefront called **Fieldkitt** — "Practical kits by Chetan" (brand locked 2026-11-18, renamed from "Fieldkit" the same day to match fieldkitt.xyz; repo, package and Vercel project are still named `makers`). The owner is a creator, not a senior engineer. Make decisions carefully, explain technical terms in plain English, and give exact terminal commands.
 
 ## 1. Source of truth
 

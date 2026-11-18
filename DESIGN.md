@@ -1,4 +1,4 @@
-# Design system — Fieldkit
+# Design system — Fieldkitt
 
 Direction A "Field Notes", chosen by the owner on 2026-11-18. Source of truth for values: `app/globals.css`. Full guide (colour, type, covers, motion, empty states, checks): [`docs/DESIGN.md`](docs/DESIGN.md).
 

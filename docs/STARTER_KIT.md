@@ -1,8 +1,8 @@
-# Fieldkit (formerly MAKERS) — Claude Code Project Starter Kit
+# Fieldkitt (formerly MAKERS) — Claude Code Project Starter Kit
 
 This folder contains the build brief and working instructions for creating a single-owner digital resource store.
 
-**Brand:** Fieldkit — Practical kits by Chetan (decided 2026-11-18; working name was MAKERS)
+**Brand:** Fieldkitt — Practical kits by Chetan (decided 2026-11-18; working name was MAKERS)
 
 **Owner model:** One store owner publishes and manages every product. This is not a multi-vendor marketplace.
 

@@ -24,7 +24,7 @@ export type NavLink = { label: string; href: string };
 
 export const brand = {
   /** Brand locked 2026-11-18 (docs/DECISIONS.md). Logo files: public/brand/. */
-  name: "Fieldkit",
+  name: "Fieldkitt",
   tagline: "Practical kits by Chetan",
   ownerName: "Chetan",
   description:

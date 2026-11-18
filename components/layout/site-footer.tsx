@@ -16,9 +16,9 @@ function SiteFooter() {
           <Link href="/" translate="no" className="inline-flex min-h-11 items-center">
             {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG; next/image would add ~14 KB of JavaScript */}
             <img
-              src="/brand/fieldkit-header.svg"
+              src="/brand/fieldkitt-header.svg"
               alt={`${brand.name}, go to the home page`}
-              width={136}
+              width={146}
               height={32}
               loading="lazy"
               decoding="async"
