@@ -73,7 +73,7 @@ export default async function PricingPage() {
                 <tr key={product.slug} className="border-b border-border">
                   <td className="py-2 pr-4">
                     <Link href={`/products/${product.slug}`}>{product.title}</Link>
-                    {product.isSample ? " (sample)" : null}
+                    {product.isSample && !/\(sample\)/i.test(product.title) ? " (sample)" : null}
                   </td>
                   <td className="py-2 text-right tabular-nums">
                     {product.isFree
