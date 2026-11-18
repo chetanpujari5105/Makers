@@ -72,16 +72,23 @@ async function ExploreResults({ searchParams }: Pick<PageProps<"/explore">, "sea
   );
 }
 
+/* Matches the filters form and the card grid, and fills the screen, so nothing jumps. */
 function ResultsSkeleton() {
   return (
-    <div role="status" aria-live="polite" className="flex flex-col gap-8">
+    <div role="status" aria-live="polite" className="min-h-[100svh]">
       <span className="sr-only">Loading resources…</span>
       <div aria-hidden="true" className="flex flex-col gap-4 motion-safe:animate-pulse">
-        <div className="h-12 w-full rounded-lg bg-muted" />
+        <div className="mt-7 h-12 w-full rounded-lg bg-muted" />
         <div className="h-12 w-full rounded-xl bg-muted" />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="h-11 w-36 rounded-full bg-muted" />
+        <div className="mt-4 mb-4 h-8 w-40 bg-muted" />
+        <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[4/5] rounded-xl bg-muted" />
+            <div key={i} className="flex flex-col gap-4 border-t border-border pt-4">
+              <div className="aspect-[4/3] bg-muted" />
+              <div className="h-7 w-3/4 bg-muted" />
+              <div className="h-5 w-full bg-muted" />
+            </div>
           ))}
         </div>
       </div>

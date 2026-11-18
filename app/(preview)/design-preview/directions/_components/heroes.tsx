@@ -9,7 +9,7 @@ import type { ProductSummary } from "@/lib/catalogue/types";
 import { cn } from "@/lib/utils";
 
 import { DirectionCover } from "./covers";
-import { Figure } from "./figures";
+import { Figure } from "@/components/product/figure";
 
 function SearchRow({ id, className, big }: { id: string; className?: string; big?: boolean }) {
   return (

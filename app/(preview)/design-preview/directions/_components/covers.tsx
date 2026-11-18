@@ -5,7 +5,7 @@ import { formatInr } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import type { DirectionId } from "../_lib/directions";
-import { Figure } from "./figures";
+import { Figure } from "@/components/product/figure";
 
 const goalBg: Record<string, string> = {
   create: "bg-cover-create",

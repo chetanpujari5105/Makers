@@ -36,8 +36,8 @@ export function StickyBuyBar({
       data-visible={visible}
       inert={!visible}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-gutter pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-raised lg:hidden",
-        "translate-y-full opacity-0 transition-[translate,opacity] duration-200 ease-out motion-reduce:translate-y-0",
+        "fixed inset-x-0 bottom-0 z-40 bg-card px-gutter pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-1px_0_var(--border),0_-12px_32px_-16px_rgb(var(--palette-shadow)/0.3)] lg:hidden",
+        "translate-y-full opacity-0 transition-[translate,opacity] duration-[240ms] ease-out motion-reduce:translate-y-0",
         "data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100",
       )}
     >

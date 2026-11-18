@@ -31,8 +31,8 @@
     --cover-work: var(--palette-cover-work);
     --cover-build: var(--palette-cover-build);
     /* Headings and .font-display / .font-sans read these */
-    --font-fraunces: var(--dir-display);
-    --font-geist: var(--dir-sans);
+    --font-display-face: var(--dir-display);
+    --font-body-face: var(--dir-sans);
     background: var(--background);
     color: var(--foreground);
     font-family: var(--dir-sans), ui-sans-serif, system-ui, sans-serif;

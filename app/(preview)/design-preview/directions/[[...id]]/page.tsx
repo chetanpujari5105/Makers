@@ -14,7 +14,7 @@ import { formatInr } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import { CoverSheet, DirectionCard, DirectionCover } from "../_components/covers";
-import { Figure } from "../_components/figures";
+import { Figure } from "@/components/product/figure";
 import { HeroA, HeroB, HeroC } from "../_components/heroes";
 import { directionIds, directions, type Direction, type DirectionId } from "../_lib/directions";
 import "../directions.css";
