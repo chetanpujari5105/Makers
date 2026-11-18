@@ -190,7 +190,7 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 - **Production check after merge (read-only):** `/`, `/explore`, `/free`, `/library` and the sample product return 200; `/admin` sends a signed-out visitor to `/admin/login` (a 307 inside the streamed page, so `curl` sees 200); an unknown path, `/design-preview/directions/a` and `/design-preview/home` return 404. Layout shift (CLS) is 0 on Home, Explore and the product page, phone and desktop. Fonts are 95–96 KB, and the ₹ comes from the 1 KB file. Numbers: `docs/UI_AUDIT.md` §5.
 - **Known weak spots:** the product page on a phone scored anywhere from 55 to 99 on production. The difference is server wait time (the free Neon database and functions waking up after the deploy), not the page itself. With one real product, the Home hero fills empty spots with type-only plates and can repeat that product's type (two "FIG. 1 PDF workbook" plates).
 
-## 14. Rare UI components and smooth motion (branch `phase-rare-ui`)
+## 14. Rare UI components and smooth motion (merged into `main` 2026-11-18, `138017c`)
 
 - **What:**
   - `ScrollProgress` on product pages, phones only.
@@ -212,4 +212,5 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
   - Security review: no findings.
   - Keyboard-only flows pass, with reduced motion off and on: rail, pill, dialog, menu, FAQ and the password eye.
   - Lighthouse is unchanged within noise: Home 92, Explore 91, Product 91 on phones; 99–100 on desktop; CLS 0 everywhere.
+- **Production after merge:** status codes as before (pages 200, unknown page and design previews 404, `/admin` lands on `/admin/login`). Orb device cases, scroll and hover traces match localhost. Lighthouse: Home desktop median 97 (5 runs), phones 91–97, CLS 0. Details: `docs/MOTION_AUDIT.md`.
 - **Known, not new:** the product page's SEO score is 91. Next 16 streams the page description into the body, and Lighthouse looks for it in the head. Google reads it after rendering, but this is worth a look before launch.

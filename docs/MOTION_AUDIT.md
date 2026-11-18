@@ -100,3 +100,16 @@ Home and the "before" column are the median of 3 runs; the "after" phone scores 
   - The rail plane jumps straight to the section without the spring.
   - The orb shows its still image.
   - View transitions swap instantly (CSS rule unchanged).
+
+## Production after merge (`138017c`, read-only)
+
+| Check                                        | Result                                            |
+| -------------------------------------------- | ------------------------------------------------- |
+| Product page scroll, phone, CPU 4×           | 120 fps, 0 dropped frames, 3 layouts, 20 paints   |
+| Card hover, desktop, CPU 4×                  | 120 fps, 6 paints                                 |
+| Home with the orb on screen, desktop, CPU 4× | 120 fps, no main-thread work, no long tasks       |
+| Orb device cases (same 10 as above)          | Same results as localhost                         |
+| Lighthouse, Home desktop (5 runs)            | 96–99, median 97, CLS 0                           |
+| Lighthouse, phone (3 runs, median)           | Home 97, Explore 95, Product 91. CLS 0 everywhere |
+
+Production Lighthouse varies a lot from run to run (the same page scored 69–94), because of the network and the server waking up. Low runs show a slow first paint with no blocking JavaScript.
