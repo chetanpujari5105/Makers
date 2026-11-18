@@ -18,16 +18,21 @@ describe("brand configuration", () => {
     ]);
   });
 
-  it("does not invent contact details before the owner provides them", () => {
-    expect(brand.supportEmail).toBeNull();
+  it("uses the owner's own contact and legal details (given 2026-11-18), no invented ones", () => {
+    expect(brand.supportEmail).toBe("chetanpujari92@gmail.com");
     expect(brand.socialLinks).toHaveLength(0);
-  });
-
-  it("leaves every legal and grievance detail for the owner to fill in", () => {
-    const { grievanceOfficer, ...rest } = legal;
-    for (const value of [...Object.values(rest), ...Object.values(grievanceOfficer)]) {
-      expect(value).toBeNull();
-    }
+    expect(legal.legalName).toBe("Chetan Kantu Pujari");
+    expect(legal.grievanceOfficer).toEqual({
+      name: "Chetan Kantu Pujari",
+      designation: "Owner",
+      email: "chetanpujari92@gmail.com",
+      phone: "+91 98341 06594",
+    });
+    // Not registered under GST and no UDYAM given: these stay empty, never guessed.
+    expect(legal.gstin).toBeNull();
+    expect(legal.udyam).toBeNull();
+    // Only the owner can say they've reviewed the policies.
+    expect(legal.policiesReviewedOn).toBeNull();
   });
 
   it("links every policy and trust page from the footer", () => {
