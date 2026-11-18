@@ -374,4 +374,32 @@ describe.skipIf(!hasDb)("owner flows (development database)", () => {
       warn.mock.calls.filter((c) => String(c[0]).includes("Updated: Admin test guide")),
     ).toHaveLength(0);
   });
+
+  it("only a sample nobody has access to can be deleted, with its files", async () => {
+    const del = (id: string) => actions.deleteSampleProductAction(fd({ id }));
+    expect(await del(productId)).toEqual({
+      ok: false,
+      message: "Only sample products can be deleted.",
+    });
+    await db.update(s.products).set({ isSample: true }).where(eq(s.products.id, productId));
+    expect((await del(productId)).message).toMatch(/has access to or ordered/);
+
+    const created = await actions.saveProductAction(
+      base({ title: "Sample to delete", slug: `${run}-sample` }),
+    );
+    const sampleId = created.href!.split("/").pop()!;
+    await db.update(s.products).set({ isSample: true }).where(eq(s.products.id, sampleId));
+    await actions.addLinkAction(fd({ productId: sampleId, label: "Guide", url: "https://x.test" }));
+    expect(await del(sampleId)).toMatchObject({ ok: true, href: "/admin/products" });
+    const left = await db
+      .select({ id: s.productFiles.id })
+      .from(s.productFiles)
+      .where(eq(s.productFiles.productId, sampleId));
+    expect(left).toHaveLength(0);
+    const logs = await db
+      .delete(s.adminAuditLogs)
+      .where(eq(s.adminAuditLogs.targetId, sampleId))
+      .returning({ action: s.adminAuditLogs.action });
+    expect(logs.map((l) => l.action)).toContain("product_delete");
+  });
 });

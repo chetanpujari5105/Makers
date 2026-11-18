@@ -5,7 +5,13 @@ import { z } from "zod";
 
 import { audit, ownerOnly, type ActionResult } from "@/lib/admin/guard";
 import { readProductForm } from "@/lib/admin/product-form";
-import { addLinkFile, removeFile, saveProduct, setProductStatus } from "@/lib/admin/products";
+import {
+  addLinkFile,
+  deleteSampleProduct,
+  removeFile,
+  saveProduct,
+  setProductStatus,
+} from "@/lib/admin/products";
 import { createCoupon, setCouponActive } from "@/lib/admin/coupons";
 import { getOrder } from "@/lib/admin/records";
 import { setReviewStatus } from "@/lib/admin/reviews";
@@ -86,6 +92,17 @@ export async function removeFileAction(form: FormData): Promise<ActionResult> {
     if (!result.ok) return result;
     updateTag("catalogue");
     return { ok: true, message: "Removed." };
+  });
+}
+
+export async function deleteSampleProductAction(form: FormData): Promise<ActionResult> {
+  return ownerOnly(async () => {
+    const productId = id.safeParse(form.get("id"));
+    if (!productId.success) return { ok: false, message: "Unknown product." };
+    const result = await deleteSampleProduct(productId.data);
+    if (!result.ok) return result;
+    updateTag("catalogue");
+    return { ok: true, message: `Deleted ${result.title}.`, href: "/admin/products" };
   });
 }
 
