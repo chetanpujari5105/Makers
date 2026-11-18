@@ -18,7 +18,7 @@ export function isEmailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
-/** Sender shown as "Fieldkit <address>": the name comes from lib/brand.ts, the address from EMAIL_FROM. */
+/** Sender shown as "Fieldkitt <address>": the name comes from lib/brand.ts, the address from EMAIL_FROM. */
 export function senderFrom(emailFrom: string) {
   const address = emailFrom.match(/<([^>]+)>/)?.[1] ?? emailFrom;
   return `${brand.name} <${address.trim()}>`;

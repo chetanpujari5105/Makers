@@ -40,7 +40,7 @@ Buying a domain needs your card and acceptance of the registrar's terms, so **yo
    - Some DNS hosts add your domain to the end of names and values automatically. If verification fails, remove the duplicated domain part.
    - If a record already exists at the same name (for example an SPF record), merge the values instead of adding a second one.
 5. Press **Verify**. It usually passes within 15 minutes; after 72 hours, use **Restart verification**.
-6. Create a sending-only API key if you want a new one. Then set `EMAIL_FROM` in Vercel for **Production** and **Preview**, for example `hello@mail.yourstore.com` (the code adds the display name "Fieldkit" from `lib/brand.ts`), and redeploy.
+6. Create a sending-only API key if you want a new one. Then set `EMAIL_FROM` in Vercel for **Production** and **Preview**, for example `hello@mail.yourstore.com` (the code adds the display name "Fieldkitt" from `lib/brand.ts`), and redeploy.
 7. Test: claim a free product with your own email, then with a friend's. Both should arrive.
 
 ## 4. Optional: a support inbox

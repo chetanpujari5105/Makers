@@ -78,7 +78,7 @@ describe("access email", () => {
   });
 
   it("sends under the brand name, keeping the configured address", () => {
-    expect(senderFrom("MAKERS <onboarding@resend.dev>")).toBe("Fieldkit <onboarding@resend.dev>");
-    expect(senderFrom(" hello@mail.example ")).toBe("Fieldkit <hello@mail.example>");
+    expect(senderFrom("MAKERS <onboarding@resend.dev>")).toBe("Fieldkitt <onboarding@resend.dev>");
+    expect(senderFrom(" hello@mail.example ")).toBe("Fieldkitt <hello@mail.example>");
   });
 });
