@@ -247,7 +247,9 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 - **Still open:** trademark search for "Fieldkitt"; connecting the domain fieldkitt.xyz. Legal pages remain placeholders that say they need owner review.
 - **Footer line:** "© Fieldkitt — Practical kits by Chetan. Some interface pieces from Rare UI." — keep the Rare UI credit (licence).
 
-## 16. Pre-domain audit (branch `pre-domain-audit`, not merged)
+## 16. Pre-domain audit (merged into `main` 2026-11-18, merge commit `66017ba`)
+
+- **Production check after merge:** all pages 200 (unknown page 404); the 6 legal pages show the draft banner and are `noindex`; no one-t "Fieldkit"; sitemap uses the production address; HSTS, `X-Frame-Options: DENY` and `frame-ancestors 'none'` present; `/api/orders` still 503 (checkout closed); an invalid same-site POST to `/api/leads` gets 400, so the HMAC rate limiter runs with the production `SESSION_SECRET`.
 
 Goal: buying the domain is the last step. Nothing here touches payments, auth, the production database or secrets.
 
