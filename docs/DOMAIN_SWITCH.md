@@ -4,7 +4,7 @@ Everything in the code is ready. Every absolute link (canonical, Open Graph, sit
 
 Below, `example.com` stands for your domain. Do the steps **in order**. Each one says how to check it worked and how to undo it.
 
-> Before you buy: run the trademark search for "Fieldkit" and check that the domain and social handles are free (still open in `docs/DECISIONS.md`).
+> Before you buy: run the trademark search for "Fieldkitt" and check that the domain and social handles are free (still open in `docs/DECISIONS.md`).
 
 ## 0. A few days before (nothing changes for visitors)
 
@@ -55,7 +55,7 @@ Cookies belong to the address that set them. After the switch, **everyone is sig
 1. Resend → **Domains → Add Domain** → `mail.example.com`. Pick the region closest to your buyers.
 2. Resend lists DNS records: SPF (TXT and MX on the `send` subdomain), DKIM (TXT) and an optional DMARC (TXT). **Copy them exactly** into the registrar's DNS page.
 3. Wait for Resend to show **Verified**.
-4. Vercel → env var `EMAIL_FROM` = `hello@mail.example.com` for **Production**. Preview can use it too. You only need the address: the code adds the name "Fieldkit". Redeploy.
+4. Vercel → env var `EMAIL_FROM` = `hello@mail.example.com` for **Production**. Preview can use it too. You only need the address: the code adds the name "Fieldkitt". Redeploy.
    - **Check:** request a library link to an address that is **not** your Resend login, such as a second mailbox. It must arrive, not in spam, and show "via mail.example.com" / "signed by example.com".
    - **Undo:** set `EMAIL_FROM` back to `onboarding@resend.dev` and redeploy. That address only delivers to your own Resend email.
 5. Fill in `brand.supportEmail` and `legal.grievanceOfficer.email` in `lib/brand.ts`, plus the `SUPPORT_EMAIL` env var used in emails. Then update the "leaves every detail for the owner" test in `lib/brand.test.ts`.
@@ -63,7 +63,7 @@ Cookies belong to the address that set them. After the switch, **everyone is sig
 ## 7. Razorpay
 
 1. Razorpay Dashboard → **Account & Settings → Business website details**: change the website to `https://example.com`. Razorpay may re-review the website. The policy pages are at `/terms`, `/privacy`, `/refund-policy`, `/contact` and `/pricing`.
-2. **Checkout branding:** set the display name "Fieldkit" and upload `public/brand/fieldkit-mark.svg` (or a PNG made from it).
+2. **Checkout branding:** set the display name "Fieldkitt" and upload `public/brand/fieldkitt-mark.svg` (or a PNG made from it).
 3. When you approve live mode and webhooks: the webhook URL is `https://example.com/api/webhooks/razorpay` (see `docs/HANDOFF.md` §10).
    - **Check:** a test-mode payment on a preview still completes (preview only, never with live keys).
    - **Undo:** change the website back in the dashboard.
@@ -71,7 +71,7 @@ Cookies belong to the address that set them. After the switch, **everyone is sig
 ## 8. Search and sharing
 
 1. Google Search Console → add a **Domain** property (verify with the DNS TXT record it gives you) → submit `https://example.com/sitemap.xml`.
-2. Paste a product link into WhatsApp or Slack and check that the preview shows the Fieldkit image and the right title.
+2. Paste a product link into WhatsApp or Slack and check that the preview shows the Fieldkitt image and the right title.
 
 ## 9. Final checks
 

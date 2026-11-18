@@ -4,7 +4,7 @@ Chosen by the owner on 2026-11-18 (see `DECISIONS.md`; the options are in `DESIG
 
 ## The idea in one line
 
-Fieldkit should feel like **a well-made workbook**: warm paper, ink, one vermilion accent, and numbered "figure plates" that show honestly what each resource is.
+Fieldkitt should feel like **a well-made workbook**: warm paper, ink, one vermilion accent, and numbered "figure plates" that show honestly what each resource is.
 
 ## Colour
 

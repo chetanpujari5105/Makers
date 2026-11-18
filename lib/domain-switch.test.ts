@@ -15,7 +15,7 @@ vi.mock("@/db", () => ({
   getDb: () => ({ insert: () => ({ values: async () => undefined }) }),
 }));
 
-const FAKE = "https://fieldkit.example";
+const FAKE = "https://fieldkitt.example";
 
 describe("absolute URLs follow NEXT_PUBLIC_SITE_URL", () => {
   beforeAll(() => {

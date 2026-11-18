@@ -1,4 +1,4 @@
-# Data map — personal data in Fieldkit
+# Data map — personal data in Fieldkitt
 
 **Draft: owner/lawyer review required.** This describes what the code does today (2026-11-18, branch `pre-domain-audit`). It is not a statement of legal compliance.
 
