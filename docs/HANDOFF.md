@@ -181,11 +181,11 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 
 **To remove before launch:** sign in at `/admin`, open each sample under **Products**, scroll to **Delete this sample**, tick **Yes, delete it**, press **Delete sample**. Two clicks per product; this also deletes the PDF from the bucket. Then check `/free` and `/explore` show no products.
 
-## 13. UI polish — direction A "Field Notes" (branch `phase-ui-polish`, not merged)
+## 13. UI polish — direction A "Field Notes" (merged into `main` 2026-11-18, `67f7a86`)
 
 - **What:** new palette and fonts, figure-plate covers for all 9 types, a new Home hero and section rhythm, the product page (facts line, first-win block, numbered steps, 65ch text), Explore goal chips and `next/form`, My Library cards, one designed empty state (`CatalogueEmpty`), the claim dialog cover, and motion (see `docs/DESIGN.md`).
 - **Fixed:** layout shift (Home 0.616 → 0, product 0.36 → 0) and font weight (398 → about 97 KB on every page, with a 1 KB ₹-only font). Before and after numbers are in `docs/UI_AUDIT.md` §5.
 - **Checked before merge (2026-11-18):** `npm run check` (99 tests), `/security-review` (no findings), a Razorpay test purchase and a cancel, a free claim and My Library on localhost + development DB (test rows deleted), dialogs at 390 px. The unused `cn` package was removed.
 - **Not touched:** payments, auth, database and secrets. In `claim-dialog.tsx` only the markup changed (a cover at the top, an icon on errors); the submit, order, Razorpay and verify logic is unchanged.
-- **Where:** git worktree `.claude/worktrees/ui-polish` (local `npm run dev -- -p 3100`).
-- **Still to check after merge:** Lighthouse on production Home (CLS must stay under 0.1); `/design-preview/directions/a` returns 404 on production.
+- **Production check after merge (read-only):** `/`, `/explore`, `/free`, `/library` and the sample product return 200; `/admin` sends a signed-out visitor to `/admin/login` (a 307 inside the streamed page, so `curl` sees 200); an unknown path, `/design-preview/directions/a` and `/design-preview/home` return 404. Layout shift (CLS) is 0 on Home, Explore and the product page, phone and desktop. Fonts are 95–96 KB, and the ₹ comes from the 1 KB file. Numbers: `docs/UI_AUDIT.md` §5.
+- **Known weak spots:** the product page on a phone scored anywhere from 55 to 99 on production. The difference is server wait time (the free Neon database and functions waking up after the deploy), not the page itself. With one real product, the Home hero fills empty spots with type-only plates and can repeat that product's type (two "FIG. 1 PDF workbook" plates).

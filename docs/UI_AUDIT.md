@@ -197,4 +197,17 @@ Accessibility stays at 100 and Best practices at 100 everywhere. SEO is 91 on th
 - **Dialogs at 390 px:** both fit (16 px side margins), inputs are 16 px (no zoom on iPhone), buttons 48 px, focus starts in the name field. The paid dialog scrolls about 17 px inside itself.
 - **Security review** (`/security-review` on the branch diff): no findings.
 
-**Screenshots:** before and after, at 390, 768 and 1440, are in [`ui-audit/`](ui-audit/). Each file name is the label (`before-` or `after-`), the page (`home`, `product`, `explore`, `library`) and the width, for example `after-home-390.jpg`. Also: `after-library-signed-in-1440.jpg` (My Library with two items) and `after-dialog-paid-390.jpg` / `after-dialog-free-390.jpg`.
+**Production after the merge** (`67f7a86`, Lighthouse 12, median of 3, 2026-11-18; production has one published sample product):
+
+| Page    | Form factor | Performance | LCP   | CLS | Fonts |
+| ------- | ----------- | ----------- | ----- | --- | ----- |
+| Home    | Mobile      | 100         | 1.3 s | 0   | 95 KB |
+| Home    | Desktop     | 99          | 0.7 s | 0   | 95 KB |
+| Explore | Mobile      | 100         | 1.7 s | 0   | 96 KB |
+| Explore | Desktop     | 100         | 0.6 s | 0   | 95 KB |
+| Product | Mobile      | 67\*        | 4.8 s | 0   | 95 KB |
+| Product | Desktop     | 98          | 0.6 s | 0   | 95 KB |
+
+\* Runs ranged from 55 to 99. The slow ones waited 4–8 s for the server's first byte, right after the deploy, while the free database and functions woke up. Warm requests take 1.3–2 s in total. Accessibility is 100 and Best practices 100 everywhere; SEO is 91 on the sample product (no meta description).
+
+**Screenshots:** before and after, at 390, 768 and 1440, are in [`ui-audit/`](ui-audit/). Each file name is the label (`before-` or `after-`), the page (`home`, `product`, `explore`, `library`) and the width, for example `after-home-390.jpg`. Also: `after-library-signed-in-1440.jpg` (My Library with two items) and `after-dialog-paid-390.jpg` / `after-dialog-free-390.jpg`. Production after the merge: `production-after-{home,product,explore}-{390,1440}.jpg`; production before: `before-production-home-1440.jpg`.
