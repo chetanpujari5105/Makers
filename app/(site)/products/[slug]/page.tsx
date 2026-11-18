@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
 import { ProductPage } from "@/components/product/product-page";
+import { brand } from "@/lib/brand";
 import { getProduct, getRelated } from "@/lib/catalogue/catalogue";
 import { productTypeLabel } from "@/lib/catalogue/labels";
 import { productJsonLd } from "@/lib/catalogue/json-ld";
@@ -37,10 +38,12 @@ export async function generateMetadata({
     robots: product.isSample ? { index: false } : undefined,
     openGraph: {
       type: "website",
+      siteName: brand.name,
       title: product.title,
       description,
       url: `/products/${product.slug}`,
-      images: product.coverImage ? [{ url: product.coverImage }] : undefined,
+      // This openGraph replaces the root one, so restate the brand image as the fallback.
+      images: [product.coverImage ?? "/opengraph-image.png"],
     },
   };
 }

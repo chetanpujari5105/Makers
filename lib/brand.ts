@@ -23,13 +23,15 @@ export type Goal = {
 export type NavLink = { label: string; href: string };
 
 export const brand = {
-  /** Working name — temporary until the owner decides the final brand. */
-  name: "MAKERS",
-  tagline: "Learn something. Create something. Make progress.",
+  /** Brand locked 2026-11-18 (docs/DECISIONS.md). Logo files: public/brand/. */
+  name: "Fieldkit",
+  tagline: "Practical kits by Chetan",
+  ownerName: "Chetan",
   description:
-    "Practical digital resources — guides, templates, courses and project files — with clear, step-by-step help to get you started.",
+    "Ready-to-use digital kits, practical guides and creative resources. Clear steps to help you learn, create and get things done.",
 
   /** Owner decisions pending. Keep null until real values exist. */
+  domain: null as string | null,
   supportEmail: null as string | null,
   socialLinks: [] as NavLink[],
 } as const;

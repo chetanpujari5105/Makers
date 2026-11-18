@@ -1,4 +1,4 @@
-# Handoff — MAKERS
+# Handoff — Fieldkit
 
 Last updated: 2026-11-17. Phases 0–1 are in `main`; Phase 2 is built on `phase-2-free-flow` (waiting for owner review and service setup). Read with `CLAUDE.md`, `docs/DECISIONS.md` and `docs/SKILLS_AND_TOOLS.md`.
 
@@ -199,7 +199,7 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
   - `PasswordInput` on `/admin/login`. The login form, field name and POST are unchanged.
   - `FluidOrb` in the Home finder panel. It has a 2 KB still image underneath, and the live orb runs only on capable devices.
   - A footer credit, "Some interface pieces from Rare UI". **Keep it:** the licence requires it.
-- **Licence rule (Commons Clause):** never sell or bundle these components inside a MAKERS product. Details: `components/rare-ui/README.md`.
+- **Licence rule (Commons Clause):** never sell or bundle these components inside a Fieldkit product. Details: `components/rare-ui/README.md`.
 - **Motion clean-up:** every animation now uses only transforms and opacity, one curve, 150 ms for feedback and 250 ms for panels. Measured before and after (CPU slowed 4×) in `docs/MOTION_AUDIT.md`.
   - **Scrolling a product page on a phone:** 183 → 3 layouts and 359 → 15 paints. The cause was the progress ring.
   - **Card hover:** 52 → 6 paints.
@@ -214,3 +214,34 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
   - Lighthouse is unchanged within noise: Home 92, Explore 91, Product 91 on phones; 99–100 on desktop; CLS 0 everywhere.
 - **Production after merge:** status codes as before (pages 200, unknown page and design previews 404, `/admin` lands on `/admin/login`). Orb device cases, scroll and hover traces match localhost. Lighthouse: Home desktop median 97 (5 runs), phones 91–97, CLS 0. Details: `docs/MOTION_AUDIT.md`.
 - **Known, not new:** the product page's SEO score is 91. Next 16 streams the page description into the body, and Lighthouse looks for it in the head. Google reads it after rendering, but this is worth a look before launch.
+
+## 15. Brand — Fieldkit (merged into `main` 2026-11-18)
+
+- **One place for the brand:** `lib/brand.ts` holds the name, tagline, owner name, a `domain` placeholder (`null`) and `supportEmail` (`null`). Titles, Open Graph, the product JSON-LD `brand`, the manifest, the footer, the Razorpay modal name and the email sender name all read from it.
+- **Email sender:** `lib/email/send.tsx` sends as `Fieldkit <address>`. The address still comes from `EMAIL_FROM` (any display name in it is replaced), so no Vercel setting had to change.
+- **Logo files** (built from the owner's kit; originals in `docs/brand/originals/`, all under 100 KB, all in git):
+
+| File                                     | What it is                                                                             |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| `components/layout/wordmark.tsx`         | Header/footer logo, inline SVG (plate + wordmark, no tagline, no "FIG. 01"), 32px tall |
+| `public/brand/fieldkit-header.svg`       | Same header lockup as a file                                                           |
+| `public/brand/fieldkit-logo.svg`         | Full lockup with "Practical kits by Chetan" and the hand-drawn circle (owner's file)   |
+| `public/brand/fieldkit-logo-dark.svg`    | Full lockup for dark backgrounds (owner's file)                                        |
+| `public/brand/fieldkit-logo-ink.svg`     | One-colour ink version (vermilion swapped for ink)                                     |
+| `public/brand/fieldkit-mark.svg`         | Mark only (owner's `favicon.svg`)                                                      |
+| `app/icon.svg`, `app/favicon.ico`        | Browser tab icon (SVG + 16/32/48 ICO)                                                  |
+| `app/apple-icon.png`, `public/icons/*`   | Home-screen icons (180, 192, 512, maskable 512 on paper) — used by `app/manifest.ts`   |
+| `app/opengraph-image.png` (+ `.alt.txt`) | 1200×630 share image; product pages without a cover fall back to it                    |
+
+- **To regenerate** after the owner changes a logo: replace the file in `public/brand/` (and, for the header, the path strings in `wordmark.tsx`). PNG icons were rendered from `fieldkit-mark.svg` with `sharp` (already installed).
+- **Not changed on purpose:** code comments that say "MAKERS restyle" (not visible to customers), dated history in `docs/DECISIONS.md`, `docs/UI_AUDIT.md` and `docs/DESIGN_DIRECTIONS.md`.
+- **Rename later (owner, when ready):**
+  1. GitHub repo `chetanpujari5105/Makers` (GitHub redirects the old URL; update the Vercel Git link if asked).
+  2. Vercel project `makers` and the `makers-alpha.vercel.app` address → add the real domain (`docs/DOMAIN_AND_EMAIL.md`).
+  3. Resend: verify the domain, then set `EMAIL_FROM` to an address on it (the name "Fieldkit" is added automatically).
+  4. Razorpay dashboard business/display name and logo (the checkout modal title already says Fieldkit).
+  5. Backblaze B2 bucket `makers-files` and its CORS origins (only when the domain changes — add the new origin, don't remove the old until switched).
+  6. Neon `makers-db`, Upstash `makers-ratelimit`, `package.json` name, the local folder `~/Documents/MAKERS` — optional, cosmetic.
+  7. Cookies `makers_session` / `makers_admin` — **leave alone** unless needed: renaming signs every buyer and the owner out.
+- **Still open:** trademark search for "Fieldkit" and domain availability. Legal pages remain placeholders that say they need owner review.
+- **Footer line:** "© Fieldkit — Practical kits by Chetan. Some interface pieces from Rare UI." — keep the Rare UI credit (licence).

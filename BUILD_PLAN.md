@@ -1,4 +1,4 @@
-# MAKERS — Claude Code Build Plan
+# Fieldkit (formerly MAKERS) — Claude Code Build Plan
 
 This plan breaks the project into small, reviewable phases. **Do not ask Claude Code to build all phases at once.** Complete one phase, test it, review it, then explicitly ask Claude Code to continue.
 

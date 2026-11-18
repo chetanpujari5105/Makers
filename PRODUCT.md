@@ -36,7 +36,7 @@ Visitors browse by goal, read the full product page, then click `Get this` (paid
 
 ## Brand Commitments
 
-- Working name **MAKERS** (temporary). Headline concept: "Learn something. Create something. Make progress."
+- Brand **Fieldkit — Practical kits by Chetan** (locked 2026-11-18; formerly the working name MAKERS). Headline concept: "Learn something. Create something. Make progress."
 - Premium editorial storefront: light, bright, calm; generous whitespace; one strong accent; neutral surfaces; restrained motion; no generic SaaS-dashboard look, no excessive gradients.
 - Plain English at about a grade-six reading level.
 

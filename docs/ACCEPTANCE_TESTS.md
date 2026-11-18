@@ -1,4 +1,4 @@
-# MAKERS — Acceptance Test Checklist
+# Fieldkit — Acceptance Test Checklist
 
 Use this checklist throughout development. Claude Code should automate these checks where practical and tell the owner which ones require manual dashboard setup.
 

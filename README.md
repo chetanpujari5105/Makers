@@ -1,6 +1,6 @@
-# MAKERS
+# Fieldkit
 
-A single-owner store for practical digital resources — guides, templates, courses and project files — where every product comes with clear, step-by-step help. **MAKERS is a working name.**
+A single-owner store for practical digital resources — guides, templates, courses and project files — where every product comes with clear, step-by-step help. **Brand: Fieldkit — Practical kits by Chetan** (set in `lib/brand.ts`). The repo, package and Vercel project are still named `makers`.
 
 > **Where things stand:** Phase 0 (the foundation) is built. The site runs and looks like a store, but there is **no database, no products, no payments and no downloads yet**. Those arrive in Phases 1–4. See `BUILD_PLAN.md`.
 
@@ -153,7 +153,7 @@ _Alternative, Cloudflare R2:_ turning on R2 requires an "R2 subscription" with a
 **Resend (email)**
 
 1. Sign up on the free plan and create an API key with "Sending access" → `RESEND_API_KEY`.
-2. Until you verify a domain, use `EMAIL_FROM="MAKERS <onboarding@resend.dev>"`. It only delivers to your own Resend email.
+2. Until you verify a domain, use `EMAIL_FROM="onboarding@resend.dev"` (emails show the sender name "Fieldkit" from `lib/brand.ts`). It only delivers to your own Resend email.
 3. To email real buyers: Domains → add your domain → add the DNS records it shows → use an address on that domain.
 
 **Upstash Redis (rate limits).** Vercel → Storage → Create → Upstash for Redis → Free plan → connect to the `makers` project. It adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically; the code reads either name.

@@ -2,6 +2,7 @@ import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import { MAGIC_LINK_MINUTES } from "@/lib/auth/magic-link";
+import { brand } from "@/lib/brand";
 
 import { LinkEmail, type LinkEmailProps } from "@/emails/link-email";
 
@@ -15,6 +16,12 @@ type Mail = { to: string; subject: string } & Omit<LinkEmailProps, "minutes" | "
 
 export function isEmailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+}
+
+/** Sender shown as "Fieldkit <address>": the name comes from lib/brand.ts, the address from EMAIL_FROM. */
+export function senderFrom(emailFrom: string) {
+  const address = emailFrom.match(/<([^>]+)>/)?.[1] ?? emailFrom;
+  return `${brand.name} <${address.trim()}>`;
 }
 
 export async function renderLinkEmail(mail: Mail) {
@@ -32,7 +39,7 @@ export async function sendLinkEmail(mail: Mail) {
   }
   const { html, text } = await renderLinkEmail(mail);
   const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
-    from: process.env.EMAIL_FROM!,
+    from: senderFrom(process.env.EMAIL_FROM!),
     to: mail.to,
     subject: mail.subject,
     html,

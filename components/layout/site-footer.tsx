@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
-import { Wordmark } from "@/components/layout/wordmark";
 import { brand, footerNav } from "@/lib/brand";
 
 /*
@@ -13,7 +12,18 @@ function SiteFooter() {
     <footer className="mt-auto border-t border-border bg-card">
       <Container className="grid gap-12 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)] md:gap-8">
         <div className="flex max-w-xs flex-col gap-3">
-          <Wordmark />
+          {/* The logo file, not the inline header copy: below the fold and cached, so pages stay small. */}
+          <Link href="/" translate="no" className="inline-flex min-h-11 items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG; next/image would add ~14 KB of JavaScript */}
+            <img
+              src="/brand/fieldkit-header.svg"
+              alt={`${brand.name}, go to the home page`}
+              width={136}
+              height={32}
+              loading="lazy"
+              decoding="async"
+            />
+          </Link>
           <p className="text-base text-muted-foreground">{brand.description}</p>
           {brand.supportEmail ? (
             <a href={`mailto:${brand.supportEmail}`} className="text-base text-foreground">
@@ -43,7 +53,7 @@ function SiteFooter() {
 
       <Container className="flex flex-col gap-2 border-t border-border py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
         <p>
-          © {brand.name}. {brand.name} is a working name. Some interface pieces from{" "}
+          © {brand.name} — {brand.tagline}. Some interface pieces from{" "}
           <a href="https://rareui.com" rel="noopener">
             Rare UI
           </a>

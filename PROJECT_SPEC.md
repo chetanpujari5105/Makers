@@ -1,4 +1,4 @@
-# PROJECT SPECIFICATION — MAKERS Digital Resource Store
+# PROJECT SPECIFICATION — Fieldkit Digital Resource Store (working name was MAKERS)
 
 > **Instruction to Claude Code:** Read this entire document before writing application code. Follow `CLAUDE.md` and `BUILD_PLAN.md`. Build one phase at a time, run the checks, and stop for owner review after each phase.
 >
@@ -76,7 +76,7 @@ Neon is the database, not the file-download service.
 
 ### 0.5 Working brand
 
-Use **MAKERS** as a temporary name in code and sample UI. Keep the site name, logo, accent colour, support email and footer details in a central brand/config file or database settings so the owner can change them later. Do not make brand name changes require editing many components.
+**Update 2026-11-18: the brand is Fieldkit ("Practical kits by Chetan"), see `docs/DECISIONS.md`.** Originally: use **MAKERS** as a temporary name in code and sample UI. Keep the site name, logo, accent colour, support email and footer details in a central brand/config file or database settings so the owner can change them later. Do not make brand name changes require editing many components.
 
 Brand decisions still needed before public launch:
 

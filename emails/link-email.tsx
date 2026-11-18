@@ -23,9 +23,9 @@ export function LinkEmail({
       <body
         style={{
           margin: 0,
-          background: "#f6f7f9",
+          background: "#f7f3ec",
           fontFamily: "-apple-system,Segoe UI,Helvetica,Arial,sans-serif",
-          color: "#111",
+          color: "#1d1b17",
         }}
       >
         <div style={{ maxWidth: 520, margin: "0 auto", padding: "32px 24px" }}>
@@ -36,7 +36,7 @@ export function LinkEmail({
             <a
               href={link}
               style={{
-                background: "#1f4fb5",
+                background: "#b5381f",
                 color: "#fff",
                 padding: "14px 22px",
                 borderRadius: 999,
