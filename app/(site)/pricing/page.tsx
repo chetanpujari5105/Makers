@@ -46,11 +46,8 @@ export default async function PricingPage() {
           </li>
           <li>Kits are digital. You download them; nothing is shipped.</li>
           <li>
-            Payments go through Razorpay (cards, UPI, net banking, wallets).{" "}
-            <OwnerField
-              value={null}
-              label="confirm in Razorpay that the buyer is NOT charged a convenience fee, then remove this marker"
-            />
+            Payments go through Razorpay (cards, UPI, net banking, wallets). You pay the price
+            shown; there’s no extra convenience fee.
           </li>
           <li>
             All sales are final — see{" "}

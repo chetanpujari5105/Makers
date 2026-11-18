@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { LegalPage, OwnerField } from "@/components/legal/legal-page";
+import { LegalPage } from "@/components/legal/legal-page";
 import { brand } from "@/lib/brand";
 
 // Draft until the owner reviews it; not indexed.
@@ -26,12 +26,6 @@ export default function RefundPolicyPage() {
       </section>
       <section>
         <h2>When we will put things right</h2>
-        <p>
-          <OwnerField
-            value={null}
-            label="owner/lawyer to confirm this exception, then remove this marker"
-          />
-        </p>
         <ul>
           <li>
             <strong>You paid but never got access</strong>, and we can’t fix it — we return the
