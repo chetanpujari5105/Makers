@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 
-import { renderLinkEmail } from "@/lib/email/send";
+import { renderLinkEmail, senderFrom } from "@/lib/email/send";
 import { hashPassword, verifyPassword } from "@/lib/security/crypto";
 import { safeNextPath } from "@/lib/validators";
 
@@ -75,5 +75,10 @@ describe("access email", () => {
     expect(html).toContain("https://makers.test/library/continue?token=abc");
     expect(html).not.toContain("<b>Guide</b>");
     expect(text).toContain("expires in 15 minutes");
+  });
+
+  it("sends under the brand name, keeping the configured address", () => {
+    expect(senderFrom("MAKERS <onboarding@resend.dev>")).toBe("Fieldkit <onboarding@resend.dev>");
+    expect(senderFrom(" hello@mail.example ")).toBe("Fieldkit <hello@mail.example>");
   });
 });

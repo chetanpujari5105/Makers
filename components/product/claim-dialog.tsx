@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { brand } from "@/lib/brand";
 import { formatInr } from "@/lib/money";
 
 type RazorpayResponse = {
@@ -161,7 +162,7 @@ export function ClaimDialog({
     new window.Razorpay!({
       key: order.keyId,
       order_id: order.razorpayOrderId,
-      name: "MAKERS",
+      name: brand.name,
       description: title,
       prefill: { name: String(form.get("name") ?? ""), email },
       handler: (result: RazorpayResponse) => void confirmPayment(result, order.orderId!),

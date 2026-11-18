@@ -1,3 +1,4 @@
+import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site-url";
 
 import { productTypeLabel } from "./labels";
@@ -13,6 +14,7 @@ export function productJsonLd(product: ProductDetail) {
     description: product.tagline,
     url: `${siteUrl()}/products/${product.slug}`,
     category: productTypeLabel[product.productType],
+    brand: { "@type": "Brand", name: brand.name },
     ...(product.coverImage ? { image: product.coverImage } : {}),
     ...(price == null
       ? {}

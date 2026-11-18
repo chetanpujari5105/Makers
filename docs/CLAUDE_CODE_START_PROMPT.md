@@ -2,7 +2,7 @@
 
 Read `CLAUDE.md`, `PROJECT_SPEC.md`, `BUILD_PLAN.md` and `docs/ACCEPTANCE_TESTS.md` completely before doing anything.
 
-We are building **MAKERS**, a single-owner digital product store. This is not a multi-vendor marketplace. The approved stack is Next.js App Router + TypeScript, Tailwind + shadcn/ui, Vercel, Neon Postgres, Drizzle, Razorpay, Cloudflare R2, Resend and Upstash. The owner deploys through GitHub to Vercel. Use Neon for the database and R2 for private downloadable files.
+We are building **Fieldkit** (working name was MAKERS), a single-owner digital product store. This is not a multi-vendor marketplace. The approved stack is Next.js App Router + TypeScript, Tailwind + shadcn/ui, Vercel, Neon Postgres, Drizzle, Razorpay, Cloudflare R2, Resend and Upstash. The owner deploys through GitHub to Vercel. Use Neon for the database and R2 for private downloadable files.
 
 The buyer flow is important and must be implemented exactly:
 1. Visitor opens the home page or a product page.
