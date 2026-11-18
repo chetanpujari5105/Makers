@@ -11,16 +11,21 @@ import type { PaymentProvider, ProviderPayment } from "./provider";
 const API = "https://api.razorpay.com/v1";
 
 /**
- * Checkout is open only with complete TEST-mode settings, and never on the
- * public production site. Live keys stay refused until the owner approves the
- * live-mode checklist (CLAUDE.md §8); that change happens deliberately here.
+ * Checkout opens only with complete settings that match the site:
+ * LIVE keys on Vercel Production (owner approved 2026-11-18), TEST keys
+ * locally. Vercel previews never take payments: they share the production
+ * database, so a test-card purchase there would grant real access.
  */
 export function isCheckoutOpen() {
   const e = process.env;
   if (!e.RAZORPAY_KEY_ID || !e.RAZORPAY_KEY_SECRET || !e.RAZORPAY_WEBHOOK_SECRET) return false;
-  if (!e.RAZORPAY_KEY_ID.startsWith("rzp_test_")) return false;
-  return e.VERCEL_ENV !== "production";
+  if (e.VERCEL_ENV === "preview") return false;
+  return e.RAZORPAY_KEY_ID.startsWith(e.VERCEL_ENV === "production" ? "rzp_live_" : "rzp_test_");
 }
+
+/** True when checkout is open with test keys (no real money): buyers are told so. */
+export const isTestCheckout = () =>
+  isCheckoutOpen() && process.env.RAZORPAY_KEY_ID!.startsWith("rzp_test_");
 
 const hex = (secret: string, value: string) =>
   createHmac("sha256", secret).update(value).digest("hex");
