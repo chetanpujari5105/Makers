@@ -159,3 +159,39 @@ Web Interface Guidelines (code review of `components/{home,product,catalogue,lay
 - The 16px body floor, 44–48px tap targets, the visible focus ring, the skip link, `inert` handling and reduced-motion rules.
 - Server-rendered GET filters and URL state.
 - The section order fixed by `PROJECT_SPEC.md` §3.1 and §4.1.
+
+## 5. After direction A (2026-11-18)
+
+Same method as the baseline: local production build (`next start`) on the development database, merge commit `b2889ff` for "before". Lighthouse 12 runs three times per page and form factor, and the table shows the **median**. "Mobile" is Lighthouse's simulated slow 4G phone.
+
+| Page    | Form factor | Performance  | LCP (before → after) | CLS (layout shift) | JS transferred | Fonts transferred |
+| ------- | ----------- | ------------ | -------------------- | ------------------ | -------------- | ----------------- |
+| Home    | Mobile      | 57 → **92**  | 5.4 s → **3.4 s**    | 0.616 → **0**      | 187 → 212 KB   | 398 → **111 KB**  |
+| Home    | Desktop     | 99 → 100     | 0.9 s → 0.7 s        | 0 → 0              | 187 → 212 KB   | 398 → 111 KB      |
+| Explore | Mobile      | 88 → **91**  | 3.9 s → 3.5 s        | 0 → 0              | 181 → 219 KB   | 414 → 132 KB\*    |
+| Explore | Desktop     | 100 → 100    | 0.8 s → 0.7 s        | 0 → 0              | 187 → 219 KB   | 398 → 111 KB      |
+| Product | Mobile      | 81 → **90**  | 5.3 s → **3.6 s**    | 0 → 0              | 199 → 224 KB   | 398 → 111 KB      |
+| Product | Desktop     | 81 → **100** | 1.0 s → 0.7 s        | 0.360 → **0**      | 199 → 224 KB   | 398 → 111 KB      |
+
+Accessibility stays at 100 and Best practices at 100 everywhere. SEO is 91 on the product page, because the sample product has no meta description, as before.
+
+\* On a phone, Chrome draws the Price filter's options ("Under ₹500"…) in the reading font, which pulls in one extra 20 KB file. Every other page stays under the 120 KB budget.
+
+**What changed the numbers:**
+
+- **Layout shift (P1, P2):** fixed. Loading placeholders now match the page and are at least one screen tall, so the footer never shows and then jumps.
+- **Fonts (P3):** fell from 398 KB to 111 KB. That's two families, one headline weight, and the ₹ file only for the headline font.
+- **JavaScript:** +25–38 KB, from framer-motion (scroll entrances, loaded with `LazyMotion`) and `next/form` (Explore filters without a full page reload).
+
+**Other checks:**
+
+- **`impeccable detect`:** the "overused font" finding is gone. Remaining:
+  - "Cream palette": a style warning about the chosen paper colour.
+  - Text hidden behind other text, on Explore and the Home plates: false positive. It's the transparent full-card link layer, as before.
+  - The "Goal" label covered, on Explore: false positive, because the Filters box is closed.
+  - Small cramped-padding notes on section rules.
+- **Contrast:** every pair is AA (script in the session notes; values in `docs/DESIGN.md`).
+- **Keyboard only:** Home and the product page at 390 and 1440. The order is logical, every link and button shows a focus ring, and the hidden buy bar is skipped.
+- **Reduced motion:** scroll entrances end fully visible and don't move.
+
+**Screenshots:** before and after, at 390, 768 and 1440, are in [`ui-audit/`](ui-audit/). Each file name is the label (`before-` or `after-`), the page (`home`, `product`, `explore`, `library`) and the width, for example `after-home-390.jpg`.
