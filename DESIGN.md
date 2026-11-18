@@ -1,17 +1,35 @@
 # Design system — MAKERS
 
-Recorded from the built Phase 0 foundation (2026-11-17). Source of truth for values is `app/globals.css`; live reference at `/design-preview`. Details and usage rules: `docs/HANDOFF.md` §5.
+Direction A "Field Notes", chosen by the owner on 2026-11-18. Source of truth for values: `app/globals.css`. Full guide (colour, type, covers, motion, empty states, checks): [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## World
 
-A bright, calm editorial storefront — part modern magazine, part learning platform. Near-white cool paper (`#f9fbfe`), white card surfaces, near-black ink text (`#11161f`) and one deep ink-blue accent (`#2049a1`, **temporary** until the brand colour is decided). Fraunces (variable, optical sizing) carries headlines with an italic accent moment ("_Make progress._"); Geist carries everything you read.
+A well-made workbook: warm paper (`#f7f3ec`), ink text (`#1d1b17`) and one vermilion accent (`#b5381f`).
+
+- **Headlines:** Newsreader 500, with one short italic moment per screen ("_this week._").
+- **Reading text:** Schibsted Grotesk.
+- **Covers:** numbered "figure plates" that show what each resource is.
 
 ## Rules
 
-- **Colour strategy:** restrained — neutrals plus one accent. Accent is for primary actions, links, key emphasis and focus rings. Status colours (success/warning/destructive) appear as soft tints with dark text and always with words.
-- **Type:** fluid scale `display / h1 / h2 / h3 / lead / body / sm`; body ≥16px; `text-sm` (15px) is the floor; headings balanced, tracking ≥ -0.03em.
-- **Surfaces:** cards are white with a soft offset shadow (`shadow-card`), radius 16px; no border + shadow together; hover lift only on pointer devices.
-- **Controls:** pill buttons (44px default, 48px for the product CTA), 48px inputs with 16px text and a 2px ink focus ring, pill badges ≥14px.
-- **Motion:** few, purposeful; ease-out `cubic-bezier(0.23,1,0.32,1)`, 150–300ms; dialogs fade + scale from 0.95; reduced motion keeps fades only.
-- **Layout:** 76rem page width, fluid gutters, generous section rhythm (`py-section`), mobile-first.
-- **Never:** gradient text, decorative glass/blur, eyebrow labels above headings, fake badges (discounts, popularity, scarcity), stock images as product covers.
+- **Colour:**
+  - Neutrals plus one accent. Vermilion marks actions, prices, numbers, links and focus.
+  - Errors use a cooler crimson, always with an icon and words.
+- **Type:**
+  - Body text at least 16px; 15px is the floor.
+  - Long text at most 65 characters per line.
+  - Capital-letter labels only for short labels.
+- **Rhythm:**
+  - An ink rule on top marks each new thing; hairlines separate items within it.
+  - `01 / 02 / 03` numbering instead of icons.
+- **Controls:** pill buttons (44px; 48px for the product CTA), 48px inputs, a 2px vermilion focus ring.
+- **Motion:**
+  - At or under 300ms, strong ease-out, no bounce.
+  - Scroll entrances once, never above the fold.
+  - The cover morphs from card to product page.
+  - Reduced motion keeps fades only.
+- **Never:**
+  - gradients, glass or blur
+  - fake badges, ratings, sales counts or scarcity
+  - stock images as covers
+  - layout shift from loading states

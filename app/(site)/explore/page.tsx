@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 
 import { CatalogueEmpty } from "@/components/catalogue/catalogue-empty";
 import { ExploreFilters } from "@/components/catalogue/explore-filters";
@@ -41,47 +41,56 @@ async function ExploreResults({ searchParams }: Pick<PageProps<"/explore">, "sea
     <>
       {/* key: re-mount so the form's values follow client-side navigation (e.g. “Clear all”). */}
       <ExploreFilters key={exploreHref(filters)} filters={filters} />
-      <section aria-labelledby="results-title" className="flex flex-col gap-8">
-        <h2 id="results-title" className="text-h3" aria-live="polite">
-          {total === 1 ? "1 resource" : `${total} resources`}
-          {filters.q ? ` for “${filters.q}”` : null}
-        </h2>
-        {items.length > 0 ? (
-          <ProductGrid products={items} />
-        ) : narrowed ? (
-          <CatalogueEmpty
-            title="Nothing matches these filters"
-            body="Try fewer filters or a shorter search word."
-            action={{ href: "/explore", label: "Clear all filters" }}
-          />
-        ) : total > 0 ? (
-          <CatalogueEmpty
-            title="This page is empty"
-            body="There are fewer resources than this page number."
-            action={{ href: "/explore", label: "Go to the first page" }}
-          />
-        ) : (
-          <CatalogueEmpty
-            title="The first resources are on their way"
-            body="Nothing has been published yet. Check back soon."
-          />
-        )}
-        <Pagination filters={filters} page={page} pageCount={pageCount} />
-      </section>
+      <ViewTransition update="crossfade" default="none">
+        <section aria-labelledby="results-title" className="flex flex-col gap-8">
+          <h2 id="results-title" className="text-h3" aria-live="polite">
+            {total === 1 ? "1 resource" : `${total} resources`}
+            {filters.q ? ` for “${filters.q}”` : null}
+          </h2>
+          {items.length > 0 ? (
+            <ProductGrid products={items} />
+          ) : narrowed ? (
+            <CatalogueEmpty
+              title="Nothing matches these filters"
+              body="Try fewer filters or a shorter search word."
+              action={{ href: "/explore", label: "Clear all filters" }}
+            />
+          ) : total > 0 ? (
+            <CatalogueEmpty
+              title="This page is empty"
+              body="There are fewer resources than this page number."
+              action={{ href: "/explore", label: "Go to the first page" }}
+            />
+          ) : (
+            <CatalogueEmpty
+              title="The first resources are on their way"
+              body="Nothing has been published yet. Check back soon."
+            />
+          )}
+          <Pagination filters={filters} page={page} pageCount={pageCount} />
+        </section>
+      </ViewTransition>
     </>
   );
 }
 
+/* Matches the filters form and the card grid, and fills the screen, so nothing jumps. */
 function ResultsSkeleton() {
   return (
-    <div role="status" aria-live="polite" className="flex flex-col gap-8">
+    <div role="status" aria-live="polite" className="min-h-[100svh]">
       <span className="sr-only">Loading resources…</span>
       <div aria-hidden="true" className="flex flex-col gap-4 motion-safe:animate-pulse">
-        <div className="h-12 w-full rounded-lg bg-muted" />
+        <div className="mt-7 h-12 w-full rounded-lg bg-muted" />
         <div className="h-12 w-full rounded-xl bg-muted" />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="h-11 w-36 rounded-full bg-muted" />
+        <div className="mt-4 mb-4 h-8 w-40 bg-muted" />
+        <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[4/5] rounded-xl bg-muted" />
+            <div key={i} className="flex flex-col gap-4 border-t border-border pt-4">
+              <div className="aspect-[4/3] bg-muted" />
+              <div className="h-7 w-3/4 bg-muted" />
+              <div className="h-5 w-full bg-muted" />
+            </div>
           ))}
         </div>
       </div>

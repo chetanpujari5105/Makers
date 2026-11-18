@@ -20,7 +20,7 @@ A runnable Next.js storefront shell with a finished design foundation and real q
 
 ```text
 app/
-  layout.tsx            Root layout: fonts (Geist + Fraunces), metadata, skip link
+  layout.tsx            Root layout: fonts (Schibsted Grotesk + Newsreader), metadata, skip link
   globals.css           ALL design tokens (see §5)
   icon.svg              Placeholder favicon ("M" on accent) — replace with real logo
   not-found.tsx         Site-wide 404 (renders header/footer itself)
@@ -90,16 +90,16 @@ PRODUCT.md, DESIGN.md   Product truth + design system summary (used by the impec
 2. **Semantic** (`--background`, `--foreground`, `--primary`, `--muted-foreground`, `--border`, `--input`, `--ring`, `--success`, `--warning`, `--destructive`, `*-soft`, `--overlay`, `--elevation-*`, `--motion-*`): shadcn names + MAKERS additions. Note shadcn naming: **`--primary` is the brand accent**, `--accent` is only a subtle hover tint.
 3. **Tailwind `@theme inline`**: generates utilities.
 
-| Token family | Utilities                                                                                                       | Values                                                                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Colour       | `bg-primary`, `text-muted-foreground`, `bg-primary-soft`, `bg-success-soft`…                                    | Accent `#2049a1` (**temporary**), ink `#11161f`, paper `#f9fbfe`. All text pairs ≥ WCAG AA (checked) |
-| Fonts        | `font-sans` (Geist), `font-display` (Fraunces, opsz+SOFT axes)                                                  | Headings h1–h4 default to `font-display`                                                             |
-| Type scale   | `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-lead`, `text-body`, `text-base` (16), `text-sm` (15)     | Fluid `clamp()`; body never < 16px; `text-sm` is the smallest allowed size                           |
-| Spacing      | Tailwind 4px base (`p-4` = 16px) + `px-gutter`, `py-section`                                                    | Fluid gutters/sections                                                                               |
-| Widths       | `max-w-page` (76rem), `max-w-prose` (42rem)                                                                     | `Container` component uses these                                                                     |
-| Radius       | `rounded-lg` 12 (inputs), `rounded-xl` 16 (cards), `rounded-2xl` 20 (dialogs), `rounded-full` (buttons, badges) |                                                                                                      |
-| Shadow       | `shadow-card`, `shadow-raised`, `shadow-dialog`                                                                 | Elevation = shadow **or** border, never both                                                         |
-| Motion       | `ease-out` (cubic-bezier(0.23,1,0.32,1)), 150/200/300ms                                                         | Reduced motion removes scale/translate, keeps fades (bottom of globals.css)                          |
+| Token family | Utilities                                                                                                       | Values                                                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Colour       | `bg-primary`, `text-muted-foreground`, `bg-primary-soft`, `bg-success-soft`…                                    | Accent vermilion `#b5381f`, ink `#1d1b17`, paper `#f7f3ec` (direction A, `docs/DESIGN.md`). All pairs ≥ WCAG AA (checked) |
+| Fonts        | `font-sans` (Schibsted Grotesk), `font-display` (Newsreader 500 + italic)                                       | Headings h1–h4 default to `font-display`                                                                                  |
+| Type scale   | `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-lead`, `text-body`, `text-base` (16), `text-sm` (15)     | Fluid `clamp()`; body never < 16px; `text-sm` is the smallest allowed size                                                |
+| Spacing      | Tailwind 4px base (`p-4` = 16px) + `px-gutter`, `py-section`                                                    | Fluid gutters/sections                                                                                                    |
+| Widths       | `max-w-page` (76rem), `max-w-prose` (42rem)                                                                     | `Container` component uses these                                                                                          |
+| Radius       | `rounded-lg` 12 (inputs), `rounded-xl` 16 (cards), `rounded-2xl` 20 (dialogs), `rounded-full` (buttons, badges) |                                                                                                                           |
+| Shadow       | `shadow-card`, `shadow-raised`, `shadow-dialog`                                                                 | Elevation = shadow **or** border, never both                                                                              |
+| Motion       | `ease-out` (cubic-bezier(0.23,1,0.32,1)), 150/200/300ms                                                         | Reduced motion removes scale/translate, keeps fades (bottom of globals.css)                                               |
 
 **Component rules:** Button default 44px (`lg` 48px for the product CTA), `loading` prop for submit states. Input 48px/16px text (no iOS zoom), pair with `<Label htmlFor>`, errors via `aria-invalid` + `aria-describedby` + `role="alert"`. Badge ≥14px; status colours always with words. Card: `interactive` prop for link cards (whole-card link via `after:absolute after:inset-0` on the title link). Dialog: always include `DialogTitle`; content scrolls inside on small screens. Hover styles use `pointer-fine:` so touch devices don't get sticky hovers.
 
@@ -180,3 +180,12 @@ Added 2026-11-18 at the owner's request, to see the shop working. Everything is 
 - **Claim test (done, cleaned up):** free claim → email → Continue → My Library → Start Here → download (file identical to the upload); signed-out visitor and a second signed-in buyer without access were both refused. The test buyers' customers, lead, entitlement, download log and sign-in links were deleted; nobody has access to the samples now. Left behind and harmless: 4 test emails in the Resend log, and short-lived rate-limit counters in Upstash that expire on their own.
 
 **To remove before launch:** sign in at `/admin`, open each sample under **Products**, scroll to **Delete this sample**, tick **Yes, delete it**, press **Delete sample**. Two clicks per product; this also deletes the PDF from the bucket. Then check `/free` and `/explore` show no products.
+
+## 13. UI polish — direction A "Field Notes" (branch `phase-ui-polish`, not merged)
+
+- **What:** new palette and fonts, figure-plate covers for all 9 types, a new Home hero and section rhythm, the product page (facts line, first-win block, numbered steps, 65ch text), Explore goal chips and `next/form`, My Library cards, one designed empty state (`CatalogueEmpty`), the claim dialog cover, and motion (see `docs/DESIGN.md`).
+- **Fixed:** layout shift (Home 0.616 → 0, product 0.36 → 0) and font weight (398 → about 97 KB on every page, with a 1 KB ₹-only font). Before and after numbers are in `docs/UI_AUDIT.md` §5.
+- **Checked before merge (2026-11-18):** `npm run check` (99 tests), `/security-review` (no findings), a Razorpay test purchase and a cancel, a free claim and My Library on localhost + development DB (test rows deleted), dialogs at 390 px. The unused `cn` package was removed.
+- **Not touched:** payments, auth, database and secrets. In `claim-dialog.tsx` only the markup changed (a cover at the top, an icon on errors); the submit, order, Razorpay and verify logic is unchanged.
+- **Where:** git worktree `.claude/worktrees/ui-polish` (local `npm run dev -- -p 3100`).
+- **Still to check after merge:** Lighthouse on production Home (CLS must stay under 0.1); `/design-preview/directions/a` returns 404 on production.

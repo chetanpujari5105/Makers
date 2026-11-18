@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
+import { CircleAlertIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -59,12 +60,15 @@ export function ClaimDialog({
   ctaLabel,
   describedBy,
   priceInr = null,
+  cover,
 }: {
   slug: string;
   title: string;
   ctaLabel: string;
   describedBy?: string;
   priceInr?: number | null;
+  /** Small cover shown at the top, so the buyer sees what they're getting. */
+  cover?: React.ReactNode;
 }) {
   const id = useId();
   const router = useRouter();
@@ -198,6 +202,18 @@ export function ClaimDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
+          {cover ? (
+            <div
+              aria-hidden="true"
+              className={
+                status === "done"
+                  ? "w-20 animate-in duration-300 ease-out fade-in-0 zoom-in-90"
+                  : "w-20"
+              }
+            >
+              {cover}
+            </div>
+          ) : null}
           <DialogTitle>{status === "done" ? "Check your email" : `Get ${title}`}</DialogTitle>
           <DialogDescription>
             {status === "done"
@@ -282,7 +298,13 @@ export function ClaimDialog({
               <Link href="/privacy">privacy policy</Link>.
             </p>
             {error ? (
-              <p ref={errorRef} tabIndex={-1} role="alert" className="text-base text-destructive">
+              <p
+                ref={errorRef}
+                tabIndex={-1}
+                role="alert"
+                className="flex items-start gap-2 text-base text-destructive"
+              >
+                <CircleAlertIcon aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
                 {error}
               </p>
             ) : null}

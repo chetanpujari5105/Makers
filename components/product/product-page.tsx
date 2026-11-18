@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ChevronRightIcon, ClockIcon, FileIcon, LinkIcon, SparklesIcon } from "lucide-react";
+import { ViewTransition } from "react";
+import { ChevronRightIcon, FileIcon, LinkIcon } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
@@ -89,14 +90,17 @@ export function ProductPage({
             </ol>
           </nav>
 
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center lg:gap-14">
-            <ProductCover
-              size="hero"
-              title={product.title}
-              productType={product.productType}
-              goalSlug={product.goalSlug}
-              coverImage={product.coverImage}
-            />
+          <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14">
+            <ViewTransition name={`cover-${product.slug}`} share="morph" default="none">
+              <ProductCover
+                size="hero"
+                title={product.title}
+                productType={product.productType}
+                goalSlug={product.goalSlug}
+                coverImage={product.coverImage}
+                className="shadow-raised"
+              />
+            </ViewTransition>
 
             <div className="flex flex-col items-start gap-6">
               {product.isSample ? (
@@ -106,44 +110,50 @@ export function ProductPage({
                 </p>
               ) : null}
               <div className="flex flex-col gap-4">
+                <dl className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                  <dt className="sr-only">Type</dt>
+                  <dd className="basis-full font-semibold tracking-[0.08em] text-foreground uppercase">
+                    {productTypeLabel[product.productType]}
+                  </dd>
+                  <dt className="sr-only">Level</dt>
+                  <dd>{levelLabel[product.level]}</dd>
+                  {product.setupTimeMinutes != null ? (
+                    <>
+                      <dt className="sr-only">Setup time</dt>
+                      <dd className="before:mr-2 before:content-['·']">
+                        {formatMinutes(product.setupTimeMinutes)} to set up
+                      </dd>
+                    </>
+                  ) : null}
+                </dl>
                 <h1 id="product-title" className="text-h1">
                   {product.title}
                 </h1>
                 <p className="text-lead text-foreground/85">{product.tagline}</p>
               </div>
 
-              <dl className="flex flex-wrap gap-2">
-                <dt className="sr-only">Type</dt>
-                <dd>
-                  <Badge variant="outline">{productTypeLabel[product.productType]}</Badge>
-                </dd>
-                <dt className="sr-only">Level</dt>
-                <dd>
-                  <Badge variant="outline">{levelLabel[product.level]}</Badge>
-                </dd>
-                {product.setupTimeMinutes != null ? (
-                  <>
-                    <dt className="sr-only">Setup time</dt>
-                    <dd>
-                      <Badge variant="outline">
-                        <ClockIcon aria-hidden="true" />
-                        {formatMinutes(product.setupTimeMinutes)} to set up
-                      </Badge>
-                    </dd>
-                  </>
-                ) : null}
-              </dl>
-
-              <BuyBlock product={product} ctaLabel={ctaLabel} />
-              <p className="text-base text-muted-foreground">{product.shortDescription}</p>
+              <div className="w-full border-t border-foreground pt-5">
+                <BuyBlock product={product} ctaLabel={ctaLabel} />
+              </div>
+              <p className="max-w-[65ch] text-base text-muted-foreground">
+                {product.shortDescription}
+              </p>
             </div>
           </div>
         </Container>
       </section>
 
       <StickyBuyBar watchId="product-hero">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
+        <div className="flex items-center gap-3">
+          <ProductCover
+            size="thumb"
+            title={product.title}
+            productType={product.productType}
+            goalSlug={product.goalSlug}
+            coverImage={product.coverImage}
+            className="w-14 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{product.title}</p>
             <PriceTag isFree={product.isFree} priceInr={product.priceInr} className="text-lg" />
           </div>
@@ -172,7 +182,7 @@ export function ProductPage({
             </nav>
           </aside>
 
-          <div className="flex max-w-prose flex-col gap-16">
+          <div className="flex max-w-[65ch] flex-col gap-16">
             <Section id="benefit" title="What this does for you">
               {content.benefit.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -190,9 +200,12 @@ export function ProductPage({
             </Section>
 
             <Section id="included" title="What you’ll get">
-              <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
+              <ul className="flex flex-col divide-y divide-border border-y border-foreground">
                 {product.files.map((file) => (
-                  <li key={file.label} className="flex items-center gap-4 px-5 py-4">
+                  <li
+                    key={file.label}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4"
+                  >
                     {file.fileName ? (
                       <FileIcon aria-hidden="true" className="size-5 shrink-0 text-primary" />
                     ) : (
@@ -229,14 +242,16 @@ export function ProductPage({
             <section
               id="first-win"
               aria-labelledby="first-win-title"
-              className="flex scroll-mt-24 flex-col gap-3 rounded-xl bg-primary-soft p-6 sm:p-8"
+              className="flex scroll-mt-24 flex-col gap-3 border-t-2 border-primary bg-background p-6 sm:p-8"
             >
-              <p className="flex items-center gap-2 text-sm font-medium text-primary-soft-foreground">
-                <SparklesIcon aria-hidden="true" className="size-4" />
-                About {content.firstWin.minutes} minutes
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold tracking-[0.08em] text-primary uppercase">
+                  First win
+                </span>{" "}
+                · about {content.firstWin.minutes} minutes
               </p>
               <h2 id="first-win-title" className="text-h3">
-                Your first win: {lowerFirst(content.firstWin.title)}
+                {content.firstWin.title}
               </h2>
               <p>{content.firstWin.description}</p>
             </section>
@@ -244,14 +259,17 @@ export function ProductPage({
             <Section id="setup" title="How to set it up">
               <ol className="flex flex-col gap-6">
                 {content.steps.map((step, index) => (
-                  <li key={step.title} className="grid grid-cols-[2.5rem_1fr] gap-4">
+                  <li
+                    key={step.title}
+                    className="grid grid-cols-[3rem_1fr] gap-4 border-t border-border pt-4"
+                  >
                     <span
                       aria-hidden="true"
-                      className="tabular flex size-10 items-center justify-center rounded-full border border-primary/30 font-display text-lg text-primary"
+                      className="tabular font-display text-h3 leading-none text-primary italic"
                     >
-                      {index + 1}
+                      {String(index + 1).padStart(2, "0")}
                     </span>
-                    <div className="flex flex-col gap-1 pt-1.5">
+                    <div className="flex flex-col gap-1">
                       <h3 className="font-sans text-body font-semibold">
                         <span className="sr-only">Step {index + 1}: </span>
                         {step.title}
@@ -354,7 +372,7 @@ export function ProductPage({
 
             <section
               aria-labelledby="final-cta-title"
-              className="flex flex-col gap-5 rounded-xl bg-background p-6 sm:p-8"
+              className="flex flex-col gap-5 border-t border-foreground bg-background p-6 sm:p-8"
             >
               <h2 id="final-cta-title" className="text-h3">
                 Ready to start?
@@ -371,7 +389,7 @@ export function ProductPage({
             <h2 id="next-steps-title" className="text-h2">
               Where to go next
             </h2>
-            <ProductGrid products={related} />
+            <ProductGrid products={related} reveal />
           </Container>
         </section>
       ) : null}
@@ -389,7 +407,10 @@ function BuyBlock({
   noteId = "buy-note",
 }: {
   id?: string;
-  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
+  product: Pick<
+    ProductDetail,
+    "slug" | "title" | "isFree" | "priceInr" | "productType" | "goalSlug" | "coverImage"
+  >;
   ctaLabel: string;
   noteId?: string;
 }) {
@@ -416,7 +437,10 @@ function ProductCta({
   ctaLabel,
   noteId,
 }: {
-  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
+  product: Pick<
+    ProductDetail,
+    "slug" | "title" | "isFree" | "priceInr" | "productType" | "goalSlug" | "coverImage"
+  >;
   ctaLabel: string;
   noteId: string;
 }) {
@@ -428,6 +452,15 @@ function ProductCta({
         priceInr={product.isFree ? null : product.priceInr}
         ctaLabel={ctaLabel}
         describedBy={noteId}
+        cover={
+          <ProductCover
+            size="thumb"
+            title={product.title}
+            productType={product.productType}
+            goalSlug={product.goalSlug}
+            coverImage={product.coverImage}
+          />
+        }
       />
     );
   }
@@ -455,8 +488,4 @@ function insideLabel(product: ProductDetail) {
     default:
       return "What’s inside";
   }
-}
-
-function lowerFirst(text: string) {
-  return text.charAt(0).toLowerCase() + text.slice(1);
 }

@@ -72,21 +72,26 @@ async function ProductContent({ params }: Pick<PageProps<"/products/[slug]">, "p
   );
 }
 
+/* Same shape and sizes as the product hero, and a screen tall, so nothing jumps. */
 function ProductSkeleton() {
   return (
-    <Container className="py-12" role="status" aria-live="polite">
+    <Container className="min-h-[100svh] pt-8 sm:pt-12" role="status" aria-live="polite">
       <span className="sr-only">Loading resource…</span>
-      <div
-        aria-hidden="true"
-        className="grid gap-10 motion-safe:animate-pulse lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]"
-      >
-        <div className="aspect-[4/3] rounded-xl bg-muted" />
-        <div className="flex flex-col gap-4">
-          <div className="h-5 w-32 rounded-md bg-muted" />
-          <div className="h-12 w-4/5 rounded-lg bg-muted" />
-          <div className="h-5 w-full rounded-md bg-muted" />
-          <div className="h-5 w-2/3 rounded-md bg-muted" />
-          <div className="mt-4 h-12 w-40 rounded-full bg-muted" />
+      <div aria-hidden="true" className="flex flex-col gap-8 motion-safe:animate-pulse">
+        <div className="h-5 w-40 bg-muted" />
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14">
+          <div className="aspect-[3/2] bg-muted lg:aspect-[4/3]" />
+          <div className="flex flex-col gap-4">
+            <div className="h-5 w-48 bg-muted" />
+            <div className="h-12 w-4/5 bg-muted" />
+            <div className="h-6 w-full bg-muted" />
+            <div className="mt-2 border-t border-border pt-5">
+              <div className="flex items-center gap-6">
+                <div className="h-8 w-20 bg-muted" />
+                <div className="h-12 w-36 rounded-full bg-muted" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Container>

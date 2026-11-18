@@ -1,0 +1,112 @@
+/*
+ * Preview-only themes for the three proposed directions (A, B, C).
+ * Not used by the live store. Each theme sets the palette tier and then
+ * re-maps the semantic aliases on the wrapper, because the aliases in
+ * app/globals.css are resolved on :root and would not see wrapper values.
+ */
+@layer base {
+  .dir {
+    --background: var(--palette-paper);
+    --foreground: var(--palette-ink);
+    --card: var(--palette-white);
+    --card-foreground: var(--palette-ink);
+    --popover: var(--palette-white);
+    --popover-foreground: var(--palette-ink);
+    --primary: var(--palette-accent-600);
+    --primary-hover: var(--palette-accent-700);
+    --primary-foreground: #ffffff;
+    --primary-soft: var(--palette-accent-50);
+    --primary-soft-foreground: var(--palette-accent-700);
+    --secondary: var(--palette-neutral-100);
+    --secondary-foreground: var(--palette-ink);
+    --muted: var(--palette-neutral-100);
+    --muted-foreground: var(--palette-neutral-600);
+    --accent: var(--palette-neutral-100);
+    --accent-foreground: var(--palette-ink);
+    --border: var(--palette-neutral-200);
+    --input: var(--palette-neutral-400);
+    --ring: var(--palette-accent-600);
+    --cover-create: var(--palette-cover-create);
+    --cover-learn: var(--palette-cover-learn);
+    --cover-work: var(--palette-cover-work);
+    --cover-build: var(--palette-cover-build);
+    /* Headings and .font-display / .font-sans read these */
+    --font-display-face: var(--dir-display);
+    --font-body-face: var(--dir-sans);
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--dir-sans), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* A — Field Notes: warm paper, vermilion, Newsreader + Schibsted Grotesk */
+  .dir-a {
+    --palette-paper: #f7f3ec;
+    --palette-white: #fffdf9;
+    --palette-neutral-100: #efe9de;
+    --palette-neutral-200: #e2dacb;
+    --palette-neutral-400: #8e8677;
+    --palette-neutral-600: #5d574c;
+    --palette-ink: #1d1b17;
+    --palette-accent-50: #fbe9e3;
+    --palette-accent-600: #b5381f;
+    --palette-accent-700: #932c17;
+    --palette-cover-create: #efc9b4;
+    --palette-cover-learn: #c9d8e6;
+    --palette-cover-work: #cfddc0;
+    --palette-cover-build: #edd39a;
+    --dir-display: var(--font-newsreader);
+    --dir-sans: var(--font-schibsted);
+  }
+  .dir-a :is(h1, h2, h3, h4) {
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  /* B — Bright Workshop: white, ultramarine, Bricolage Grotesque + Atkinson Hyperlegible Next */
+  .dir-b {
+    --palette-paper: #fbfaf7;
+    --palette-white: #ffffff;
+    --palette-neutral-100: #f1efea;
+    --palette-neutral-200: #e4e1da;
+    --palette-neutral-400: #8a877f;
+    --palette-neutral-600: #57544e;
+    --palette-ink: #151412;
+    --palette-accent-50: #ece8ff;
+    --palette-accent-600: #4b32d6;
+    --palette-accent-700: #3a25b0;
+    --palette-cover-create: #ff9f80;
+    --palette-cover-learn: #8cc4ff;
+    --palette-cover-work: #7eddb0;
+    --palette-cover-build: #ffd25e;
+    --dir-display: var(--font-bricolage);
+    --dir-sans: var(--font-atkinson);
+  }
+  .dir-b :is(h1, h2, h3, h4) {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* C — Clear Shelf: cool white, deep teal, Hanken Grotesk only */
+  .dir-c {
+    --palette-paper: #fafaf8;
+    --palette-white: #ffffff;
+    --palette-neutral-100: #f0f0ec;
+    --palette-neutral-200: #e1e1dc;
+    --palette-neutral-400: #898a85;
+    --palette-neutral-600: #595b57;
+    --palette-ink: #111312;
+    --palette-accent-50: #e0f1ed;
+    --palette-accent-600: #0b6b5e;
+    --palette-accent-700: #08564c;
+    --palette-cover-create: #f3e6e1;
+    --palette-cover-learn: #e3eaf2;
+    --palette-cover-work: #e2eee8;
+    --palette-cover-build: #f2ece0;
+    --dir-display: var(--font-hanken);
+    --dir-sans: var(--font-hanken);
+  }
+  .dir-c :is(h1, h2, h3, h4) {
+    font-weight: 650;
+    letter-spacing: -0.025em;
+  }
+}

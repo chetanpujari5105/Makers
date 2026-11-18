@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CatalogueEmpty } from "@/components/catalogue/catalogue-empty";
 import { Container } from "@/components/layout/container";
 import { LinkRequestForm } from "@/components/library/link-request-form";
 import { ProductCover } from "@/components/product/product-cover";
@@ -23,7 +24,13 @@ export default function LibraryPage({ searchParams }: PageProps<"/library">) {
   return (
     <Container className="flex flex-col gap-10 py-section">
       <h1 className="text-h1">My Library</h1>
-      <Suspense fallback={<p className="text-lead text-muted-foreground">Loading your library…</p>}>
+      <Suspense
+        fallback={
+          <p role="status" className="min-h-[60svh] text-lead text-muted-foreground">
+            Loading your library…
+          </p>
+        }
+      >
         <LibraryContent searchParams={searchParams} />
       </Suspense>
     </Container>
@@ -68,17 +75,15 @@ async function LibraryContent({ searchParams }: Pick<PageProps<"/library">, "sea
         </form>
       </div>
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-8">
-          <p className="text-lead">Your library is empty.</p>
-          <p className="mt-2 text-base text-muted-foreground">
-            Resources you claim or buy will appear here.{" "}
-            <Link href="/free">Browse free resources</Link>.
-          </p>
-        </div>
+        <CatalogueEmpty
+          title="Your library is empty"
+          body="Resources you claim or buy will appear here, each with its setup guide."
+          action={{ href: "/free", label: "Browse free resources" }}
+        />
       ) : (
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <li key={item.slug} className="flex flex-col gap-3">
+            <li key={item.slug} className="flex flex-col gap-3 border-t border-foreground pt-4">
               <ProductCover
                 size="card"
                 title={item.title}

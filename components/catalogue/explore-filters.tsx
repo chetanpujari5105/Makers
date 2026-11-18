@@ -1,3 +1,4 @@
+import Form from "next/form";
 import Link from "next/link";
 import { ChevronDownIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 
@@ -8,6 +9,7 @@ import { goals } from "@/lib/brand";
 import { productTypeLabel, levelLabel } from "@/lib/catalogue/labels";
 import {
   activeFilterCount,
+  exploreHref,
   priceRanges,
   setupTimes,
   sortOptions,
@@ -15,16 +17,35 @@ import {
 } from "@/lib/catalogue/filters";
 
 /*
- * A plain GET form: submitting it writes the filters into the URL, so results
- * can be shared, refreshed and reached with Back — and it works without
- * JavaScript. Filters sit in a native <details> (keyboard and screen-reader
+ * A GET form (next/form): submitting it writes the filters into the URL, so
+ * results can be shared, refreshed and reached with Back. With JavaScript it
+ * navigates in place (results crossfade); without it, it's a normal form. Filters sit in a native <details> (keyboard and screen-reader
  * support for free) that starts open whenever a filter is in use.
  */
 export function ExploreFilters({ filters }: { filters: CatalogueFilters }) {
   const active = activeFilterCount(filters);
 
   return (
-    <form action="/explore" method="get" role="search" className="flex flex-col gap-4">
+    <Form action="/explore" role="search" className="flex flex-col gap-4">
+      {/* Goal chips: the main choice at a glance. Links, so they work without JS. */}
+      <nav aria-label="Goals" className="-mx-gutter overflow-x-auto px-gutter">
+        <ul className="flex w-max gap-2 pb-1">
+          {[{ slug: undefined, label: "Everything" }, ...goals].map((goal) => {
+            const current = filters.goal === goal.slug;
+            return (
+              <li key={goal.label}>
+                <Link
+                  href={exploreHref(filters, { goal: goal.slug, page: undefined })}
+                  aria-current={current ? "page" : undefined}
+                  className="motion-press inline-flex min-h-11 items-center rounded-full border border-input bg-card px-4 text-base text-foreground no-underline transition-[background-color,border-color,color,scale] duration-150 ease-out active:scale-[0.97] aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background pointer-fine:hover:border-foreground"
+                >
+                  {goal.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex flex-1 flex-col gap-2">
           <Label htmlFor="explore-q">Search resources</Label>
@@ -41,7 +62,7 @@ export function ExploreFilters({ filters }: { filters: CatalogueFilters }) {
               autoComplete="off"
               maxLength={80}
               defaultValue={filters.q ?? ""}
-              placeholder="Try “budget”, “Notion” or “poster”"
+              placeholder="Try “budget”, “Notion” or “poster”…"
               className="pl-12"
             />
           </div>
@@ -120,7 +141,7 @@ export function ExploreFilters({ filters }: { filters: CatalogueFilters }) {
           </Link>
         ) : null}
       </div>
-    </form>
+    </Form>
   );
 }
 

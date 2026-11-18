@@ -7,9 +7,10 @@
  *   2. Semantic aliases --background etc.  what components and Tailwind use
  *   3. Tailwind @theme  bg-primary, text-h1 utilities generated from tier 2
  *
- * To change the brand accent, edit the --palette-accent-* values only.
- * The accent is TEMPORARY (owner decision pending — see docs/DECISIONS.md).
- * Every text/background pair below was checked for WCAG AA contrast.
+ * Direction A "Field Notes" (owner pick, 2026-11-18): warm paper, ink and one
+ * vermilion accent. To change the accent, edit the --palette-accent-* values.
+ * Every text/background pair below was checked for WCAG AA contrast
+ * (docs/DESIGN.md lists the measured ratios).
  */
 
 @import "tailwindcss";
@@ -20,36 +21,35 @@
  * Tier 1 — global palette (light theme only; the spec asks for light/bright)
  * ------------------------------------------------------------------------- */
 :root {
-  /* Neutrals: very slightly cool, so white surfaces feel bright, not grey */
-  --palette-paper: oklch(
-    0.988 0.004 250
-  ); /* #f9fbfe page background — also themeColor in app/layout.tsx */
-  --palette-white: oklch(1 0 0);
-  --palette-neutral-100: oklch(0.965 0.006 255); /* #f1f4f7 */
-  --palette-neutral-200: oklch(0.915 0.008 255); /* #dfe3e8 hairlines */
-  --palette-neutral-400: oklch(0.64 0.012 255); /* #878d94 input borders 3.4:1 */
-  --palette-neutral-600: oklch(0.5 0.015 258); /* #5e646c secondary text 5.8:1 */
-  --palette-ink: oklch(0.2 0.02 262); /* #11161f body text 17.5:1 */
+  /* Neutrals: warm paper and ink, like a printed workbook */
+  --palette-paper: #f7f3ec; /* page background — also themeColor in app/layout.tsx */
+  --palette-white: #fffdf9; /* cards and dialogs: warm white */
+  --palette-neutral-100: #efe9de;
+  --palette-neutral-200: #e2dacb; /* hairlines */
+  --palette-neutral-400: #8e8677; /* input borders */
+  --palette-neutral-600: #5d574c; /* secondary text */
+  --palette-ink: #1d1b17; /* body text */
+  --palette-shadow: 29 27 23; /* ink as R G B, for shadows */
 
-  /* Accent: temporary deep ink-blue */
-  --palette-accent-50: oklch(0.955 0.025 263); /* #e7f1ff */
-  --palette-accent-600: oklch(0.43 0.15 263); /* #2049a1 white text 8.3:1 */
-  --palette-accent-700: oklch(0.37 0.14 263); /* #143888 */
+  /* Accent: vermilion */
+  --palette-accent-50: #fbe9e3;
+  --palette-accent-600: #b5381f; /* white text on it */
+  --palette-accent-700: #932c17;
 
-  /* Product cover fields — quiet, low-chroma tints (one per goal). They are
-     surfaces, not accents: the accent stays the only strong colour. */
-  --palette-cover-create: oklch(0.935 0.03 40);
-  --palette-cover-learn: oklch(0.935 0.028 250);
-  --palette-cover-work: oklch(0.935 0.03 165);
-  --palette-cover-build: oklch(0.94 0.035 85);
+  /* Product cover plates — one muted tint per goal. Surfaces, not accents. */
+  --palette-cover-create: #efc9b4;
+  --palette-cover-learn: #c9d8e6;
+  --palette-cover-work: #cfddc0;
+  --palette-cover-build: #edd39a;
 
-  /* Status (always paired with a text label — never colour alone) */
-  --palette-success-50: oklch(0.955 0.035 155);
-  --palette-success-700: oklch(0.44 0.1 155);
-  --palette-warning-50: oklch(0.96 0.05 85);
-  --palette-warning-700: oklch(0.47 0.1 65);
-  --palette-danger-50: oklch(0.96 0.025 27);
-  --palette-danger-600: oklch(0.5 0.19 27);
+  /* Status (always paired with a text label or icon — never colour alone).
+     Danger is a cooler crimson so errors never look like the vermilion CTA. */
+  --palette-success-50: #e3f0e2;
+  --palette-success-700: #2f6a3a;
+  --palette-warning-50: #fbedc9;
+  --palette-warning-700: #7a5310;
+  --palette-danger-50: #f9e4ea;
+  --palette-danger-600: #a3173f;
 }
 
 /* ---------------------------------------------------------------------------
@@ -85,7 +85,7 @@
   --border: var(--palette-neutral-200);
   --input: var(--palette-neutral-400);
   --ring: var(--palette-accent-600);
-  --overlay: oklch(0.2 0.02 262 / 0.45);
+  --overlay: rgb(var(--palette-shadow) / 0.45);
   --cover-create: var(--palette-cover-create);
   --cover-learn: var(--palette-cover-learn);
   --cover-work: var(--palette-cover-work);
@@ -96,10 +96,10 @@
 
   /* Elevation — each surface uses a shadow OR a border, never both */
   --elevation-card:
-    0 1px 2px oklch(0.2 0.02 262 / 0.05), 0 8px 24px -12px oklch(0.2 0.02 262 / 0.14);
+    0 1px 2px rgb(var(--palette-shadow) / 0.06), 0 10px 24px -14px rgb(var(--palette-shadow) / 0.2);
   --elevation-raised:
-    0 2px 4px oklch(0.2 0.02 262 / 0.06), 0 18px 40px -16px oklch(0.2 0.02 262 / 0.22);
-  --elevation-dialog: 0 24px 64px -16px oklch(0.2 0.03 262 / 0.32);
+    0 1px 2px rgb(var(--palette-shadow) / 0.08), 0 18px 40px -18px rgb(var(--palette-shadow) / 0.35);
+  --elevation-dialog: 0 24px 64px -16px rgb(var(--palette-shadow) / 0.35);
 
   /* Motion — strong ease-out; UI motion stays at or under 300ms */
   --motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -113,10 +113,28 @@
  * Tier 3 — Tailwind theme (generates utilities such as bg-primary,
  * text-h1, font-display, py-section, max-w-page, shadow-card)
  * ------------------------------------------------------------------------- */
+/* The ₹ sign alone, cut from the same two fonts (SIL OFL 1.1, under 1 KB each).
+ * Without these, one ₹ on a page downloads a 15–20 KB "latin-ext" font file. */
+@font-face {
+  font-family: "Schibsted Grotesk rupee";
+  src: url("./fonts/schibsted-grotesk-rupee.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+  unicode-range: U+20B9;
+}
+@font-face {
+  font-family: "Newsreader rupee";
+  src: url("./fonts/newsreader-rupee.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+20B9;
+}
+
 @theme inline {
   /* Fonts — loaded with next/font in app/layout.tsx */
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans:
+    "Schibsted Grotesk rupee", var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader rupee", var(--font-display-face), ui-serif, Georgia, serif;
   --font-heading: var(--font-display);
 
   /* Colours */
@@ -222,7 +240,6 @@
 
   body {
     @apply text-body;
-    font-feature-settings: "ss01", "cv11";
   }
 
   h1,
@@ -230,8 +247,8 @@
   h3,
   h4 {
     @apply font-display text-balance;
-    font-optical-sizing: auto;
-    font-weight: 420;
+    font-weight: 500;
+    letter-spacing: -0.015em;
   }
 
   p {
@@ -303,6 +320,27 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * View transitions (React <ViewTransition>, browsers that support them).
+ * .morph: a card's cover plate grows into the product page cover.
+ * .crossfade: Explore results swap when filters change.
+ * ------------------------------------------------------------------------- */
+::view-transition-group(*) {
+  animation-duration: 260ms;
+  animation-timing-function: var(--motion-ease-out);
+}
+::view-transition-old(.crossfade) {
+  animation: 120ms var(--motion-ease-out) both vt-fade reverse;
+}
+::view-transition-new(.crossfade) {
+  animation: 200ms var(--motion-ease-out) 60ms both vt-fade;
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
  * Reduced motion: keep gentle fades (they aid comprehension), remove movement.
  * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -320,6 +358,13 @@
 
   .disclosure::details-content {
     transition: none;
+  }
+
+  /* Page and cover transitions become an instant swap. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 
   /* Tailwind v4 scale-* and translate-* utilities use the separate
