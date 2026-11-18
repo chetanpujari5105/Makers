@@ -178,7 +178,12 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
   }
   const verify = (body: unknown) => verifyRoute.POST(post("/api/payments/verify", body));
   function webhook(event: string, entity: Record<string, unknown>, eventId = randomUUID()) {
-    const raw = JSON.stringify({ event, payload: { [event.split(".")[0]!]: { entity } } });
+    // Like Razorpay: order.paid carries the payment AND the order; other events carry one entity.
+    const payload =
+      event === "order.paid"
+        ? { payment: { entity }, order: { entity: { id: entity.order_id, status: "paid" } } }
+        : { [event.split(".")[0]!]: { entity } };
+    const raw = JSON.stringify({ event, payload });
     return webhookRoute.POST(
       post("/api/webhooks/razorpay", raw, {
         "x-razorpay-signature": sign(WEBHOOK_SECRET, raw),
@@ -199,24 +204,73 @@ describe.skipIf(!hasDb)("Phase 3 payments (development database, fake Razorpay)"
   const receipts = () =>
     warn.mock.calls.filter((c) => String(c[0]).includes("Your receipt")).length;
 
-  it("opens checkout with test keys locally, live keys only on production, never on previews", async () => {
-    const { isCheckoutOpen, isTestCheckout } = await import("./razorpay");
-    expect(isCheckoutOpen()).toBe(true);
-    expect(isTestCheckout()).toBe(true);
+  it("the checkout switch: test keys locally; live keys + CHECKOUT_ENABLED on production; never previews", async () => {
+    const { isCheckoutOpen, isTestCheckout, paymentsConfigured } = await import("./razorpay");
+    const site = (env: string, key: string, enabled?: string) => {
+      vi.stubEnv("VERCEL_ENV", env);
+      vi.stubEnv("RAZORPAY_KEY_ID", key);
+      vi.stubEnv("CHECKOUT_ENABLED", enabled ?? "");
+      return isCheckoutOpen();
+    };
+    try {
+      // Localhost: test keys only (the switch isn't needed for test mode).
+      expect(site("", "rzp_test_fake123")).toBe(true);
+      expect(isTestCheckout()).toBe(true);
+      expect(site("", "rzp_live_abc", "true")).toBe(false);
+      // Production: live keys AND the switch; test keys never.
+      expect(site("production", "rzp_live_abc")).toBe(false); // switch OFF by default
+      expect((await startOrder(buyer("prod-off"))).res.status).toBe(503);
+      expect(site("production", "rzp_live_abc", "false")).toBe(false);
+      expect(site("production", "rzp_live_abc", "1")).toBe(false); // only the exact word "true"
+      expect(site("production", "rzp_live_abc", "true")).toBe(true);
+      expect(isTestCheckout()).toBe(false);
+      expect(site("production", "rzp_test_fake123", "true")).toBe(false);
+      // Previews share the production database: never, whatever the keys or switch.
+      expect(site("preview", "rzp_live_abc", "true")).toBe(false);
+      expect(site("preview", "rzp_test_fake123", "true")).toBe(false);
+      // Switch OFF on production still lets confirmations finish (keys are right).
+      site("production", "rzp_live_abc");
+      expect(paymentsConfigured()).toBe(true);
+    } finally {
+      site("", "rzp_test_fake123");
+    }
+  });
+
+  it("emergency OFF: no new checkouts, but a payment already made still grants access", async () => {
+    const email = buyer("switch-off");
+    const { body } = await startOrder(email);
+    const result = pay(body.razorpayOrderId!);
     vi.stubEnv("VERCEL_ENV", "production");
-    expect(isCheckoutOpen()).toBe(false); // test keys on the public site
-    expect((await startOrder(buyer("prod"))).res.status).toBe(503);
     vi.stubEnv("RAZORPAY_KEY_ID", "rzp_live_abc");
-    expect(isCheckoutOpen()).toBe(true);
-    expect(isTestCheckout()).toBe(false);
-    vi.stubEnv("VERCEL_ENV", "preview");
-    expect(isCheckoutOpen()).toBe(false); // previews share the production database
-    vi.stubEnv("RAZORPAY_KEY_ID", "rzp_test_fake123");
-    expect(isCheckoutOpen()).toBe(false);
-    vi.stubEnv("VERCEL_ENV", "");
-    vi.stubEnv("RAZORPAY_KEY_ID", "rzp_live_abc");
-    expect(isCheckoutOpen()).toBe(false); // live keys never run locally
-    vi.stubEnv("RAZORPAY_KEY_ID", "rzp_test_fake123");
+    vi.stubEnv("CHECKOUT_ENABLED", "");
+    try {
+      expect((await startOrder(buyer("switch-off-new"))).res.status).toBe(503);
+      expect((await verify(result)).status).toBe(200);
+      expect(await entitlementCount(email)).toBe(1);
+    } finally {
+      vi.stubEnv("VERCEL_ENV", "");
+      vi.stubEnv("RAZORPAY_KEY_ID", "rzp_test_fake123");
+    }
+  });
+
+  it("buyer closes the tab after paying: order.paid alone grants access and sends one receipt", async () => {
+    const email = buyer("closed-tab");
+    const { body } = await startOrder(email);
+    const result = pay(body.razorpayOrderId!);
+    const entity = {
+      id: result.razorpay_payment_id,
+      ...rzpPayments.get(result.razorpay_payment_id),
+    };
+    const before = receipts();
+    // No browser /verify call at all — only Razorpay's server-to-server notice.
+    expect((await webhook("order.paid", entity)).status).toBe(200);
+    expect((await orderRow(body.orderId!)).status).toBe("paid");
+    expect(await entitlementCount(email)).toBe(1);
+    expect(receipts()).toBe(before + 1);
+    // Razorpay also sends payment.captured for the same payment: still one entitlement, one receipt.
+    expect((await webhook("payment.captured", entity)).status).toBe(200);
+    expect(await entitlementCount(email)).toBe(1);
+    expect(receipts()).toBe(before + 1);
   });
 
   it("charges the database price, ignoring any amount the browser sends", async () => {

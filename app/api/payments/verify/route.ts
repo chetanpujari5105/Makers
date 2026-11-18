@@ -1,5 +1,5 @@
 import { findOrderByProviderId, fulfilPaidOrder, sendReceipt } from "@/lib/payments/orders";
-import { isCheckoutOpen, razorpay } from "@/lib/payments/razorpay";
+import { paymentsConfigured, razorpay } from "@/lib/payments/razorpay";
 import { guardPublicPost, jsonError } from "@/lib/security/request";
 import { paymentVerifySchema } from "@/lib/validators";
 
@@ -12,7 +12,7 @@ import { paymentVerifySchema } from "@/lib/validators";
  * work independently, so either may arrive first.
  */
 export async function POST(request: Request) {
-  if (!isCheckoutOpen()) return jsonError(503, "Paid checkout isn’t open yet.");
+  if (!paymentsConfigured()) return jsonError(503, "Paid checkout isn’t open yet.");
   const guard = await guardPublicPost(request, "order");
   if ("error" in guard) return guard.error;
 

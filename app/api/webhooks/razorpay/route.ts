@@ -5,7 +5,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/db";
 import { webhookEvents } from "@/db/schema";
 import { fulfilPaidOrder, markOrderFailed, refundOrder, sendReceipt } from "@/lib/payments/orders";
-import { isCheckoutOpen, razorpay } from "@/lib/payments/razorpay";
+import { paymentsConfigured, razorpay } from "@/lib/payments/razorpay";
 import { jsonError } from "@/lib/security/request";
 
 type Entity = Record<string, unknown>;
@@ -19,7 +19,7 @@ type Entity = Record<string, unknown>;
  * Only IDs, amounts and statuses are stored — not emails, phones or card data.
  */
 export async function POST(request: Request) {
-  if (!isCheckoutOpen()) return jsonError(503, "Payments aren’t configured.");
+  if (!paymentsConfigured()) return jsonError(503, "Payments aren’t configured.");
   const raw = await request.text();
   const provider = razorpay();
   if (!provider.verifyWebhookSignature(raw, request.headers.get("x-razorpay-signature"))) {
