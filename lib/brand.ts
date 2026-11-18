@@ -32,7 +32,8 @@ export const brand = {
 
   /** Owner decisions pending. Keep null until real values exist. */
   domain: null as string | null,
-  supportEmail: null as string | null,
+  /** Owner provided 2026-11-18. */
+  supportEmail: "chetanpujari92@gmail.com" as string | null,
   socialLinks: [] as NavLink[],
 } as const;
 
@@ -41,30 +42,32 @@ type OwnerValue = string | null;
 /**
  * Business and legal details shown on the policy pages, contact page and
  * invoices. ALL are owner decisions: keep null until real values exist.
+ * Owner provided name, address, phone, email, GST status and courts on 2026-11-18.
  * Pages render a null as a visible "[Owner to fill: …]" marker, never a guess.
  */
 export const legal = {
   /** Full legal name of the person or business that sells (as on PAN/GST). */
-  legalName: null as OwnerValue,
+  legalName: "Chetan Kantu Pujari" as OwnerValue,
   /** Full postal address, as it should appear on invoices. */
-  address: null as OwnerValue,
-  phone: null as OwnerValue,
+  address:
+    "344, Near Water Tank, Ghadgewasti, Baramati MIDC, Baramati, Maharashtra 413133" as OwnerValue,
+  phone: "+91 98341 06594" as OwnerValue,
   /** e.g. "Individual, not registered under GST" or "Sole proprietorship". */
-  registration: null as OwnerValue,
+  registration: "Individual, not registered under GST" as OwnerValue,
   /** GSTIN if registered; leave null if not registered. */
   gstin: null as OwnerValue,
   /** UDYAM (MSME) number if registered. */
   udyam: null as OwnerValue,
   /** City whose courts handle disputes (Terms). */
-  jurisdictionCity: null as OwnerValue,
+  jurisdictionCity: "Baramati, Maharashtra" as OwnerValue,
   /** Date the owner (or a lawyer) last reviewed the policies. */
   policiesReviewedOn: null as OwnerValue,
   /** Required by the Consumer Protection (E-Commerce) Rules 2020 and IT Rules 2021. */
   grievanceOfficer: {
-    name: null as OwnerValue,
-    designation: null as OwnerValue,
-    email: null as OwnerValue,
-    phone: null as OwnerValue,
+    name: "Chetan Kantu Pujari" as OwnerValue,
+    designation: "Owner" as OwnerValue,
+    email: "chetanpujari92@gmail.com" as OwnerValue,
+    phone: "+91 98341 06594" as OwnerValue,
   },
 };
 

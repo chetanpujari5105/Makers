@@ -34,7 +34,13 @@ export default async function PricingPage() {
           <li>
             Tax:{" "}
             <OwnerField
-              value={legal.gstin ? "Prices include GST." : null}
+              value={
+                legal.gstin
+                  ? "Prices include GST."
+                  : legal.registration?.includes("not registered under GST")
+                    ? "GST is not charged — the seller is not registered under GST."
+                    : null
+              }
               label="tax line, e.g. “Prices include GST” (registered) or “GST is not charged — the seller is not registered under GST” (not registered)"
             />
           </li>
