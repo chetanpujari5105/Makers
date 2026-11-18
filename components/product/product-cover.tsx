@@ -111,7 +111,11 @@ export function ProductCover({
         mode="line"
         className={cn(
           "absolute top-1/2 left-1/2 -translate-x-1/2 text-foreground",
-          thumb ? "w-[66%] -translate-y-1/2" : hero ? "w-[42%] -translate-y-[44%]" : "w-[50%] -translate-y-[42%]",
+          thumb
+            ? "w-[66%] -translate-y-1/2"
+            : hero
+              ? "w-[42%] -translate-y-[44%]"
+              : "w-[50%] -translate-y-[42%]",
         )}
       />
     </div>

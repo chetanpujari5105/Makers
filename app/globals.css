@@ -302,6 +302,27 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * View transitions (React <ViewTransition>, browsers that support them).
+ * .morph: a card's cover plate grows into the product page cover.
+ * .crossfade: Explore results swap when filters change.
+ * ------------------------------------------------------------------------- */
+::view-transition-group(*) {
+  animation-duration: 260ms;
+  animation-timing-function: var(--motion-ease-out);
+}
+::view-transition-old(.crossfade) {
+  animation: 120ms var(--motion-ease-out) both vt-fade reverse;
+}
+::view-transition-new(.crossfade) {
+  animation: 200ms var(--motion-ease-out) 60ms both vt-fade;
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
  * Reduced motion: keep gentle fades (they aid comprehension), remove movement.
  * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -319,6 +340,13 @@
 
   .disclosure::details-content {
     transition: none;
+  }
+
+  /* Page and cover transitions become an instant swap. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 
   /* Tailwind v4 scale-* and translate-* utilities use the separate

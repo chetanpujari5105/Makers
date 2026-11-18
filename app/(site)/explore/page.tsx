@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 
 import { CatalogueEmpty } from "@/components/catalogue/catalogue-empty";
 import { ExploreFilters } from "@/components/catalogue/explore-filters";
@@ -41,33 +41,35 @@ async function ExploreResults({ searchParams }: Pick<PageProps<"/explore">, "sea
     <>
       {/* key: re-mount so the form's values follow client-side navigation (e.g. “Clear all”). */}
       <ExploreFilters key={exploreHref(filters)} filters={filters} />
-      <section aria-labelledby="results-title" className="flex flex-col gap-8">
-        <h2 id="results-title" className="text-h3" aria-live="polite">
-          {total === 1 ? "1 resource" : `${total} resources`}
-          {filters.q ? ` for “${filters.q}”` : null}
-        </h2>
-        {items.length > 0 ? (
-          <ProductGrid products={items} />
-        ) : narrowed ? (
-          <CatalogueEmpty
-            title="Nothing matches these filters"
-            body="Try fewer filters or a shorter search word."
-            action={{ href: "/explore", label: "Clear all filters" }}
-          />
-        ) : total > 0 ? (
-          <CatalogueEmpty
-            title="This page is empty"
-            body="There are fewer resources than this page number."
-            action={{ href: "/explore", label: "Go to the first page" }}
-          />
-        ) : (
-          <CatalogueEmpty
-            title="The first resources are on their way"
-            body="Nothing has been published yet. Check back soon."
-          />
-        )}
-        <Pagination filters={filters} page={page} pageCount={pageCount} />
-      </section>
+      <ViewTransition update="crossfade" default="none">
+        <section aria-labelledby="results-title" className="flex flex-col gap-8">
+          <h2 id="results-title" className="text-h3" aria-live="polite">
+            {total === 1 ? "1 resource" : `${total} resources`}
+            {filters.q ? ` for “${filters.q}”` : null}
+          </h2>
+          {items.length > 0 ? (
+            <ProductGrid products={items} />
+          ) : narrowed ? (
+            <CatalogueEmpty
+              title="Nothing matches these filters"
+              body="Try fewer filters or a shorter search word."
+              action={{ href: "/explore", label: "Clear all filters" }}
+            />
+          ) : total > 0 ? (
+            <CatalogueEmpty
+              title="This page is empty"
+              body="There are fewer resources than this page number."
+              action={{ href: "/explore", label: "Go to the first page" }}
+            />
+          ) : (
+            <CatalogueEmpty
+              title="The first resources are on their way"
+              body="Nothing has been published yet. Check back soon."
+            />
+          )}
+          <Pagination filters={filters} page={page} pageCount={pageCount} />
+        </section>
+      </ViewTransition>
     </>
   );
 }

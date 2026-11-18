@@ -25,7 +25,10 @@ export function CatalogueEmpty({
         <p className="font-display text-h3">{title}</p>
         <p className="max-w-prose text-muted-foreground">{body}</p>
         {action ? (
-          <Link href={action.href} className="inline-flex min-h-11 items-center gap-1.5 font-medium">
+          <Link
+            href={action.href}
+            className="inline-flex min-h-11 items-center gap-1.5 font-medium"
+          >
             {action.label}
             <ArrowRightIcon aria-hidden="true" className="size-4" />
           </Link>

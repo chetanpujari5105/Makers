@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 
+import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { levelLabel, productTypeLabel } from "@/lib/catalogue/labels";
 import type { ProductSummary } from "@/lib/catalogue/types";
@@ -79,9 +80,12 @@ export function ProductCard({
 export function ProductGrid({
   products,
   className,
+  reveal = false,
 }: {
   products: ProductSummary[];
   className?: string;
+  /** Fade cards in on scroll. Only for grids that start below the fold. */
+  reveal?: boolean;
 }) {
   return (
     <ul
@@ -91,12 +95,18 @@ export function ProductGrid({
         className,
       )}
     >
-      {products.map((product) => (
+      {products.map((product, index) => (
         <li
           key={product.slug}
           className={cn(products.length === 1 && "sm:col-span-2 lg:col-span-2")}
         >
-          <ProductCard product={product} wide={products.length === 1} />
+          {reveal ? (
+            <Reveal index={index} className="h-full">
+              <ProductCard product={product} wide={products.length === 1} />
+            </Reveal>
+          ) : (
+            <ProductCard product={product} wide={products.length === 1} />
+          )}
         </li>
       ))}
     </ul>

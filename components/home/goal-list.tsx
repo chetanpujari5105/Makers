@@ -10,7 +10,7 @@ export function GoalList() {
       {goals.map((goal, index) => (
         <li
           key={goal.slug}
-          className="group/goal relative flex flex-col gap-2 border-b border-border py-8 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:-outline-offset-2 has-[a:focus-visible]:outline-ring sm:px-6 sm:odd:border-r sm:odd:pl-0 lg:border-r lg:border-b-0 lg:odd:pl-6 lg:first:pl-0! lg:last:border-r-0"
+          className="group/goal relative flex flex-col gap-2 border-b border-border py-8 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:-outline-offset-2 has-[a:focus-visible]:outline-ring sm:px-6 sm:odd:border-r sm:odd:pl-0 lg:border-r lg:border-b-0 lg:first:pl-0! lg:last:border-r-0 lg:odd:pl-6"
         >
           <span aria-hidden="true" className="font-display text-h3 text-primary italic">
             0{index + 1}

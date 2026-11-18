@@ -44,6 +44,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${body.variable} ${display.variable}`}>
       <body className="flex min-h-dvh flex-col">
+        <noscript>
+          {/* Scroll entrances start hidden; without JavaScript, show them at once. */}
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
         <a
           href="#main"
           className="sr-only z-[60] rounded-full bg-primary px-5 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"

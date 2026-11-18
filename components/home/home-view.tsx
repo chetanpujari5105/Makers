@@ -3,6 +3,7 @@ import { ArrowRightIcon, SearchIcon } from "lucide-react";
 
 import { CatalogueEmpty } from "@/components/catalogue/catalogue-empty";
 import { Container } from "@/components/layout/container";
+import { Reveal } from "@/components/motion/reveal";
 import { PriceTag } from "@/components/product/price-tag";
 import { ProductGrid } from "@/components/product/product-card";
 import { ProductCover } from "@/components/product/product-cover";
@@ -128,7 +129,9 @@ export function HomeView({
           <h2 id="goals-title" className="sr-only">
             Start with a goal
           </h2>
-          <GoalList />
+          <Reveal>
+            <GoalList />
+          </Reveal>
         </Container>
       </section>
 
@@ -142,7 +145,7 @@ export function HomeView({
             linkLabel="Explore everything"
           />
           {featured.length > 0 ? (
-            <ProductGrid products={featured} />
+            <ProductGrid products={featured} reveal />
           ) : (
             <CatalogueEmpty
               title="The first resources are on their way"
@@ -164,9 +167,11 @@ export function HomeView({
               linkLabel="All free resources"
             />
             <ul className="grid gap-x-8 gap-y-6 md:grid-cols-2">
-              {free.map((product) => (
-                <li
+              {free.map((product, index) => (
+                <Reveal
+                  as="li"
                   key={product.slug}
+                  index={index}
                   className="group/free relative grid grid-cols-[7rem_1fr] items-center gap-5 border-t border-foreground pt-4 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring sm:grid-cols-[9rem_1fr]"
                 >
                   <ProductCover
@@ -188,7 +193,7 @@ export function HomeView({
                     <p className="text-base text-muted-foreground">{product.tagline}</p>
                     <PriceTag isFree priceInr={null} className="text-primary" />
                   </div>
-                </li>
+                </Reveal>
               ))}
             </ul>
           </Container>
@@ -198,7 +203,7 @@ export function HomeView({
       {/* 8. Finder CTA */}
       <section aria-labelledby="finder-title" className="py-section">
         <Container>
-          <div className="flex flex-col items-start gap-6 bg-foreground p-8 text-background sm:p-12 lg:flex-row lg:items-center lg:justify-between">
+          <Reveal className="flex flex-col items-start gap-6 bg-foreground p-8 text-background sm:p-12 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex max-w-xl flex-col gap-3">
               <h2 id="finder-title" className="text-h2 text-background">
                 Not sure where to start?
@@ -207,13 +212,13 @@ export function HomeView({
                 Answer three quick questions and we’ll suggest a resource that fits.
               </p>
             </div>
-            <Button asChild size="lg">
+            <Button asChild size="lg" variant="secondary">
               <Link href="/find">
                 Find the right resource
                 <ArrowRightIcon aria-hidden="true" />
               </Link>
             </Button>
-          </div>
+          </Reveal>
         </Container>
       </section>
 
@@ -258,7 +263,7 @@ function HeroPlates({ products }: { products: ProductSummary[] }) {
         <li
           key={plate.key}
           className={cn(
-            "group/plate relative bg-card p-2 shadow-raised transition-[translate] duration-200 ease-out motion-lift has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring pointer-fine:hover:-translate-y-1",
+            "group/plate motion-lift relative bg-card p-2 shadow-raised transition-[translate] duration-200 ease-out has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring pointer-fine:hover:-translate-y-1",
             i === 0 && "-rotate-[1.5deg]",
             i === 1 && "row-span-2 mt-[45%] rotate-1",
             i === 2 && "-rotate-[0.5deg]",
@@ -269,7 +274,7 @@ function HeroPlates({ products }: { products: ProductSummary[] }) {
             productType={plate.productType}
             goalSlug={plate.goalSlug}
             coverImage={plate.product?.coverImage ?? null}
-            className="max-sm:[&>div:nth-child(2)]:hidden"
+            className="max-lg:[&>div:nth-child(2)]:hidden"
           />
           <p className="px-1 pt-2 pb-0.5 text-sm text-muted-foreground">
             {plate.product ? (

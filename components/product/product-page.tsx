@@ -112,11 +112,11 @@ export function ProductPage({
               <div className="flex flex-col gap-4">
                 <dl className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
                   <dt className="sr-only">Type</dt>
-                  <dd className="font-semibold tracking-[0.08em] text-foreground uppercase">
+                  <dd className="basis-full font-semibold tracking-[0.08em] text-foreground uppercase">
                     {productTypeLabel[product.productType]}
                   </dd>
                   <dt className="sr-only">Level</dt>
-                  <dd className="before:mr-2 before:content-['·']">{levelLabel[product.level]}</dd>
+                  <dd>{levelLabel[product.level]}</dd>
                   {product.setupTimeMinutes != null ? (
                     <>
                       <dt className="sr-only">Setup time</dt>
@@ -202,7 +202,10 @@ export function ProductPage({
             <Section id="included" title="What you’ll get">
               <ul className="flex flex-col divide-y divide-border border-y border-foreground">
                 {product.files.map((file) => (
-                  <li key={file.label} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4">
+                  <li
+                    key={file.label}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4"
+                  >
                     {file.fileName ? (
                       <FileIcon aria-hidden="true" className="size-5 shrink-0 text-primary" />
                     ) : (
@@ -386,7 +389,7 @@ export function ProductPage({
             <h2 id="next-steps-title" className="text-h2">
               Where to go next
             </h2>
-            <ProductGrid products={related} />
+            <ProductGrid products={related} reveal />
           </Container>
         </section>
       ) : null}
@@ -404,7 +407,10 @@ function BuyBlock({
   noteId = "buy-note",
 }: {
   id?: string;
-  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
+  product: Pick<
+    ProductDetail,
+    "slug" | "title" | "isFree" | "priceInr" | "productType" | "goalSlug" | "coverImage"
+  >;
   ctaLabel: string;
   noteId?: string;
 }) {
@@ -431,7 +437,10 @@ function ProductCta({
   ctaLabel,
   noteId,
 }: {
-  product: Pick<ProductDetail, "slug" | "title" | "isFree" | "priceInr">;
+  product: Pick<
+    ProductDetail,
+    "slug" | "title" | "isFree" | "priceInr" | "productType" | "goalSlug" | "coverImage"
+  >;
   ctaLabel: string;
   noteId: string;
 }) {
@@ -443,6 +452,15 @@ function ProductCta({
         priceInr={product.isFree ? null : product.priceInr}
         ctaLabel={ctaLabel}
         describedBy={noteId}
+        cover={
+          <ProductCover
+            size="thumb"
+            title={product.title}
+            productType={product.productType}
+            goalSlug={product.goalSlug}
+            coverImage={product.coverImage}
+          />
+        }
       />
     );
   }
@@ -470,8 +488,4 @@ function insideLabel(product: ProductDetail) {
     default:
       return "What’s inside";
   }
-}
-
-function lowerFirst(text: string) {
-  return text.charAt(0).toLowerCase() + text.slice(1);
 }
