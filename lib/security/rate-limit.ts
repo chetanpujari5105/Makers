@@ -1,6 +1,8 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+import { hmac, requireSecret } from "@/lib/security/crypto";
+
 /*
  * Rate limits for public endpoints (Upstash Redis, free plan). Works with the
  * variable names from Upstash directly or from the Vercel Marketplace.
@@ -25,7 +27,12 @@ const redis = url && token ? new Redis({ url, token }) : null;
 
 const limiters = new Map<LimitName, Ratelimit>();
 
-export async function rateLimit(name: LimitName, key: string) {
+/** Keys are IPs or emails: only a salted hash ever reaches Upstash (no raw personal data stored). */
+export const limitKey = (key: string) =>
+  hmac(requireSecret("SESSION_SECRET"), `rl:${key}`).slice(0, 32);
+
+export async function rateLimit(name: LimitName, rawKey: string) {
+  const key = limitKey(rawKey);
   if (!redis) return localLimit(name, key);
   let limiter = limiters.get(name);
   if (!limiter) {

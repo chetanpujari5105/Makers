@@ -36,6 +36,38 @@ export const brand = {
   socialLinks: [] as NavLink[],
 } as const;
 
+type OwnerValue = string | null;
+
+/**
+ * Business and legal details shown on the policy pages, contact page and
+ * invoices. ALL are owner decisions: keep null until real values exist.
+ * Pages render a null as a visible "[Owner to fill: …]" marker, never a guess.
+ */
+export const legal = {
+  /** Full legal name of the person or business that sells (as on PAN/GST). */
+  legalName: null as OwnerValue,
+  /** Full postal address, as it should appear on invoices. */
+  address: null as OwnerValue,
+  phone: null as OwnerValue,
+  /** e.g. "Individual, not registered under GST" or "Sole proprietorship". */
+  registration: null as OwnerValue,
+  /** GSTIN if registered; leave null if not registered. */
+  gstin: null as OwnerValue,
+  /** UDYAM (MSME) number if registered. */
+  udyam: null as OwnerValue,
+  /** City whose courts handle disputes (Terms). */
+  jurisdictionCity: null as OwnerValue,
+  /** Date the owner (or a lawyer) last reviewed the policies. */
+  policiesReviewedOn: null as OwnerValue,
+  /** Required by the Consumer Protection (E-Commerce) Rules 2020 and IT Rules 2021. */
+  grievanceOfficer: {
+    name: null as OwnerValue,
+    designation: null as OwnerValue,
+    email: null as OwnerValue,
+    phone: null as OwnerValue,
+  },
+};
+
 /** The four customer goals (PROJECT_SPEC.md §2.1). Order matters. */
 export const goals: readonly Goal[] = [
   {
@@ -100,12 +132,14 @@ export const footerNav: readonly { heading: string; links: readonly NavLink[] }[
       { label: "Help centre", href: "/help" },
       { label: "Contact", href: "/contact" },
       { label: "About", href: "/about" },
+      { label: "Grievance officer", href: "/contact#grievance" },
     ],
   },
   {
     heading: "Policies",
     links: [
-      { label: "Refund policy", href: "/refund-policy" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Refunds and delivery", href: "/refund-policy" },
       { label: "Terms", href: "/terms" },
       { label: "Privacy", href: "/privacy" },
       { label: "License", href: "/license" },

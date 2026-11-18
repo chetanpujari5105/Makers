@@ -24,15 +24,18 @@ export default function LibraryPage({ searchParams }: PageProps<"/library">) {
   return (
     <Container className="flex flex-col gap-10 py-section">
       <h1 className="text-h1">My Library</h1>
-      <Suspense
-        fallback={
-          <p role="status" className="min-h-[60svh] text-lead text-muted-foreground">
-            Loading your library…
-          </p>
-        }
-      >
-        <LibraryContent searchParams={searchParams} />
-      </Suspense>
+      {/* Same minimum height while loading and after, so the footer doesn't jump (CLS). */}
+      <div className="min-h-[60svh]">
+        <Suspense
+          fallback={
+            <p role="status" className="text-lead text-muted-foreground">
+              Loading your library…
+            </p>
+          }
+        >
+          <LibraryContent searchParams={searchParams} />
+        </Suspense>
+      </div>
     </Container>
   );
 }

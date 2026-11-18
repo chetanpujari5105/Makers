@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { isStorageConfigured } from "./files";
+import { DOWNLOAD_LINK_SECONDS, downloadUrl, isStorageConfigured } from "./files";
 
 const names = [
   "STORAGE_ENDPOINT",
@@ -26,5 +26,24 @@ describe("storage settings", () => {
     const example = readFileSync(".env.example", "utf8");
     for (const name of [...names, "STORAGE_REGION"])
       expect(example).toMatch(new RegExp(`^${name}=`, "m"));
+  });
+});
+
+describe("download links", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("are signed and expire after 60 seconds (made offline with dummy keys)", async () => {
+    vi.stubEnv("STORAGE_ENDPOINT", "https://s3.example.test");
+    vi.stubEnv("STORAGE_REGION", "auto");
+    vi.stubEnv("STORAGE_ACCESS_KEY_ID", "dummy-key-id");
+    vi.stubEnv("STORAGE_SECRET_ACCESS_KEY", "dummy-secret");
+    vi.stubEnv("STORAGE_BUCKET", "bucket");
+    const url = new URL(await downloadUrl("products/a/guide.pdf", "Guide <1>.pdf"));
+    expect(DOWNLOAD_LINK_SECONDS).toBe(60);
+    expect(url.searchParams.get("X-Amz-Expires")).toBe("60");
+    expect(url.searchParams.get("X-Amz-Signature")).toMatch(/^[0-9a-f]{64}$/);
+    expect(url.searchParams.get("response-content-disposition")).toBe(
+      'attachment; filename="Guide _1_.pdf"',
+    );
   });
 });
