@@ -9,7 +9,7 @@ import { goalSlugSchema, productSlugSchema } from "@/lib/validators";
  */
 const exactPaths = new Set(["/", "/explore", "/free"]);
 
-export function isCountedPath(pathname: string): boolean {
+function isCountedPath(pathname: string): boolean {
   if (exactPaths.has(pathname)) return true;
   const match = /^\/(category|products)\/([^/]+)$/.exec(pathname);
   if (!match) return false;
