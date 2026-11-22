@@ -35,7 +35,7 @@ The source of truth is `lib/legal/data-map.ts`. The privacy page (`/privacy`) re
 
 - **Card, UPI and bank details**: entered only on Razorpay's own checkout form.
 - **Full IP addresses**: the server hashes them with a secret salt (`hashIp`, `limitKey` in `lib/security/`). The database and Upstash get only the hash. Vercel's request logs see the raw IP briefly, as every web host does.
-- **Advertising trackers**: none are installed. **Vercel Web Analytics** (`<Analytics />` in `app/layout.tsx`) counts visits and page views without cookies; it sees page URL, referrer, browser/device type and country, and identifies a visitor only by a hash that resets daily (no IP address is stored).
+- **Advertising trackers**: none are installed. **Vercel Web Analytics** (`components/analytics/site-analytics.tsx`) counts visits and page views without cookies, **only** on Home, Explore, Free, category pages and product pages (`lib/analytics.ts` allowlist; every other page sends nothing, and query strings and `#fragments` are stripped). It sees that page address, referrer, browser/device type and country, and identifies a visitor only by a hash that resets daily (no IP address is stored).
 
 ## Things to know
 
