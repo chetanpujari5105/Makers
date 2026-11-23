@@ -21,8 +21,9 @@ export default function PrivacyPage() {
       <section>
         <h2>What we collect and why</h2>
         <p>
-          We collect only what we need to give you your kits. There are no advertising or tracking
-          cookies and no analytics that follow you around the web.
+          We collect only what we need to give you your kits, plus anonymous visit counts (see Visit
+          counts below). There are no advertising or tracking cookies and no analytics that follow
+          you around the web.
         </p>
         <div className="flex flex-col gap-4">
           {dataItems.map((item) => (
@@ -60,6 +61,18 @@ export default function PrivacyPage() {
         <p>
           One cookie keeps you signed in to My Library for 30 days. It is needed for the library to
           work, so there is nothing to opt in to. Signing out removes it.
+        </p>
+      </section>
+      <section>
+        <h2>Visit counts</h2>
+        <p>
+          On our home, browse, free-kits and product pages, we use Vercel Web Analytics to count
+          visits and page views. It sets no cookies and doesn’t follow you to other websites. It
+          records the page address (without anything after a “?” or “#”), the website you came from,
+          your browser and device type, and your country. Visitors are told apart only by a code
+          that changes every day, and your IP address is not stored. We don’t count visits to My
+          Library, checkout, downloads or sign-in pages. We use these numbers only to see how many
+          people visit, never for advertising.
         </p>
       </section>
       <section>
