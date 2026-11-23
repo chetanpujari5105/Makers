@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 
+import { SiteAnalytics } from "@/components/analytics/site-analytics";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site-url";
 
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         {children}
+        <SiteAnalytics />
       </body>
     </html>
   );
